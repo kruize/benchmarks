@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: PETCLINIC_DEPLOYMENT_NAME
+  labels:
+    app: PETCLINIC_APP
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: petclinic-deployment
+  template:
+    metadata:
+      labels:
+        name: petclinic-deployment
+        app: petclinic-deployment
+        app.kubernetes.io/name: "spring-petclinic"
+        version: v1
+    spec:
+      volumes:
+      - name: test-volume
+      containers:
+      - name: petclinic-tomcat
+        image: kruize/spring-petclinic:2.2.0
+        imagePullPolicy: Always
+        env:
+        - name: "JVM_ARGS"
+          value: "-Xshareclasses:none"
+        ports:
+          - containerPort: 8080
+        resources:
+          requests:
+            memory: 343.9M
+            cpu: 0.5
+        volumeMounts:
+          - name: "test-volume"
+            mountPath: "/opt/jLogs"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: PETCLINIC_SERVICE_NAME
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/manage/prometheus'
+  labels:
+    app: PETCLINIC_APP
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      nodePort: NODE_PORT
+      targetPort: 8080
+      name: PETCLINIC_PORT
+  selector:
+    name: petclinic-deployment

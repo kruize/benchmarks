@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: PETCLINIC_NAME
+  labels:
+    team: petclinic-frontend
+spec:
+  selector:
+    matchLabels:
+        app: PETCLINIC_APP
+  endpoints:
+    - port: PETCLINIC_PORT
+      path: '/manage/prometheus'
