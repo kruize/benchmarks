@@ -9,6 +9,9 @@ docker stop petclinic-app
 
 docker network rm ${NETWORK}
 
-docker rmi spring-petclinic:latest
+if [[ "$(docker images -q spring-petclinic:latest 2> /dev/null)" != "" ]]; then
+        docker rmi spring-petclinic:latest
+fi
+
 
 

@@ -3,7 +3,7 @@
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
 export NETWORK="petclinic-net"
-
+export JMETER_IMAGE
 
 LOGFILE="${ROOT_DIR}/setup.log"
 
@@ -36,7 +36,7 @@ function get_ip() {
 # Build the petclinic application
 function build_petclinic() {
 	# Build petclinic application 
-	pushd Spring-petclinic >>${LOGFILE}
+	pushd spring-petclinic >>${LOGFILE}
 
 	# Build the application from git clone. Requires git , JAVA compiler on your machine to work.
 	# Commenting this for now and using the built-in jar
@@ -58,13 +58,23 @@ function build_petclinic() {
 
 # Build the jmeter application along with the petclinic
 function build_jmeter() {
-	pushd Spring-petclinic >>${LOGFILE}
+	pushd spring-petclinic >>${LOGFILE}
 	#./mvnw package 2>>${LOGFILE} >>${LOGFILE}
 	docker build --pull -t jmeter_petclinic:3.1 -f Dockerfile_jmeter . 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Building of jmeter image."
 	popd >>${LOGFILE}
        
 }
+
+
+# Pull the jmeter image
+function pull_image() {
+	JMETER_IMAGE=$1
+	
+	docker pull ${JMETER_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
+	err_exit "Error: Unable to pull the docker image ${JMETER_IMAGE}."
+}
+
 
 # Run the petclinic application 
 function run_petclinic() {
@@ -75,11 +85,11 @@ function run_petclinic() {
 	err_exit "Error: Unable to create docker bridge network ${NETWORK}."
 
 	# Run the petclinic app container on "petclinic-net"
-	docker run --rm -d --name=petclinic-app -p ${PETCLINIC_PORT}:8080 --network=${NETWORK} ${IMAGE} 2>>${LOGFILE} >>${LOGFILE}
+	docker run --rm -d --name=petclinic-app --cpus="2.0" --memory="1024M" -p ${PETCLINIC_PORT}:8080 --network=${NETWORK} ${IMAGE} 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to start petclinic container."
 	#export USEDIMAGE="$IMAGE"
 }
-
+ 
 # Parse the Throughput Results
 function parse_petclinic_results() {
 	RESULTS_DIR=$1

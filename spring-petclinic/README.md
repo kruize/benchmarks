@@ -18,19 +18,23 @@ Building jmeter with petclinic driver...done
 Running petclinic with inbuilt db...done
 ```
 use_image : Use the image to create the setup
-`use_image imagename`
+`use_image petclinic_imagename jmeter_imagename`
 
 
 ```
-$./scripts/petclinic-setup.sh use_image kruize/spring-petclinic:2.2.0
+$./scripts/petclinic-setup.sh use_image kruize/spring-petclinic:2.2.0 kruize/jmeter_petclinic:3.1
 Checking prereqs...done
+Pulling the jmeter image...done
 Running petclinic with inbuilt db...done
+
 ```
 
-If the image name is not specified then the default image `kruize/spring-petclinic:2.2.0` will be considered
+both `petclinic_imagename` and `jmeter_imagename` are optional, If the image names are not specified then the default image `kruize/spring-petclinic:2.2.0` will be considered for petclinic and `kruize/jmeter_petclinic:3.1` will be considered for jmeter.
+
 ```
-$./scripts/petclinic-setup.sh use_image 
+$ ./scripts/petclinic-setup.sh use_image 
 Checking prereqs...done
+Pulling the jmeter image...done
 Running petclinic with inbuilt db...done
 ```
 

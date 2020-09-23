@@ -16,6 +16,15 @@ if [ "$#" -lt 1 ]; then
 	usage
 fi
 
+function err_exit() {
+	if [ $? != 0 ]; then
+		printf "$*"
+		echo
+		echo "See ${LOGFILE} for more details"
+		exit -1
+	fi
+}
+
 LOAD_TYPE=$1
 MAX_LOOP=$2
 IP_ADDR=$3
@@ -36,22 +45,34 @@ docker)
 	if [ -z "${IP_ADDR}" ]; then
 		get_ip
 	fi
-	JMETER_FOR_LOAD="jmeter_petclinic:3.1"
+	if [[ "$(docker images -q */jmeter*:* 2> /dev/null)" != "" ]]; then
+        JMETER_FOR_LOAD=$(docker images -q */jmeter*:*) 
+        elif [[ "$(docker images -q jmeter_petclinic:3.1 2> /dev/null)" != "" ]]; then
+        JMETER_FOR_LOAD="jmeter_petclinic:3.1"
+        else
+	JMETER_FOR_LOAD=docker.io/kruize/jmeter_petclinic:3.1
+	fi
+	
+	err_exit "Error: Unable to load the jmeter image"
+	
 	;;
 icp|minikube)
 	if [ -z "${IP_ADDR}" ]; then
 		echo " IP_ADDR not set.Cannot run ICP load"
 		exit -1
 	fi
-
+	if [[ "$(docker images -q jmeter_petclinic:3.1 2> /dev/null)" == "" ]]; then
+        JMETER_FOR_LOAD=docker.io/kruize/jmeter_petclinic:3.1
+        else
 	JMETER_FOR_LOAD="jmeter_petclinic:3.1"
+	fi
 	;;
 openshift)
 	if [ -z "${IP_ADDR}" ]; then
 		NAMESPACE="openshift-monitoring"
 		IP_ADDR=($(oc status --namespace=$NAMESPACE | grep "petclinic" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 	fi
-	JMETER_FOR_LOAD="kusumach/petclinic_jmeter_noport:0423"
+	JMETER_FOR_LOAD=" kruize/jmeter_petclinic:noport"
 	PORT=8888
 	;;
 *)

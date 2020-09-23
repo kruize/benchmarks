@@ -15,16 +15,22 @@ fi
 
 if [ "$1" == "do_setup" ]; then
          SETUP=true
-         #FLAG=1
+         
 else
-         IMAGE=$2
-        # FLAG=2
+         PETCLINIC_IMAGE=$2
+         JMETER_IMAGE=$3
+        
 fi
 
-if [ -z "${IMAGE}" ]; then
-       IMAGE=docker.io/kruize/spring-petclinic:2.2.0
+if [ -z "${PETCLINIC_IMAGE}" ]; then
+       PETCLINIC_IMAGE=docker.io/kruize/spring-petclinic:2.2.0
+       
 fi
 
+if [ -z "${JMETER_IMAGE}" ]; then
+            JMETER_IMAGE=docker.io/kruize/jmeter_petclinic:3.1
+fi
+	
 ROOT_DIR=".."
 source ./scripts/petclinic-common.sh
 cd ${ROOT_DIR}
@@ -41,19 +47,26 @@ if [ $SETUP  ]; then
 	# Build the petclinic application sources and create the docker image
 	echo -n "Building petclinic application..."
 	build_petclinic
-	IMAGE="spring-petclinic"
+	PETCLINIC_IMAGE="spring-petclinic"
 	echo "done"
-
-fi
 
 # Build the jmeter docker image with the petclinic driver
 	echo -n "Building jmeter with petclinic driver..."
 	build_jmeter
 	echo "done"
+	
+else
+	echo -n "Pulling the jmeter image..."
+	pull_image ${JMETER_IMAGE}
+	echo "done"
+
+fi
+
+
 
 # Run the application and mongo db
 echo -n "Running petclinic with inbuilt db..."
-run_petclinic ${IMAGE} 
+run_petclinic ${PETCLINIC_IMAGE} 
 echo "done"
 
 
