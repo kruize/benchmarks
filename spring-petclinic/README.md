@@ -82,3 +82,6 @@ Above image shows the logs of the load run, and it processes and displays the ou
 
 # Note for RHEL 8.0 users
 podman docker should have the latest network version to work.
+
+# Openshift
+To deploy the benchmark use `petclinic-deploy-openshift.sh`
