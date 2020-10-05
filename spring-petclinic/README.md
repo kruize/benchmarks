@@ -138,7 +138,36 @@ RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
 
 ```
 
-To run the load for multiple instances and for multiple iterations
+To run the load for multiple instances and for multiple iterations `./scripts/perf/run_petclinic_openshift.sh load_info perf_info`
+
+load_info : BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES 
+
+BENCHMARK_SERVER_NAME : Name of the cluster you are using
+
+NAMESPACE : openshift-monitoring
+
+RESULTS_DIR_PATH : Location where you want to store the results
+
+JMETER_LOAD_USERS : Number of users
+
+JMETER_LOAD_DURATION : Load duration
+
+WARMUPS : Number of warmups
+
+MEASURES : Number of measures
+
+perf_info is optional , it can be used in case of multiple instances
+
+perf_info: TOTAL_INST TOTAL_ITR RE_DEPLOY MANIFESTS_DIR
+
+TOTAL_INST: Number of instances
+
+TOTAL_ITR: Number of times you want to run the load
+
+RE_DEPLOY: true
+
+MANIFESTS_DIR: Path where the manifest directory exists
+
 
 ```
 $./scripts/perf/run_petclinic_openshift.sh rouging.os.fyre.ibm.com openshift-monitoring result/ 300 60 5 3
