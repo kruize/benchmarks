@@ -29,7 +29,11 @@ spec:
         ports:
           - containerPort: 8080
 <<<<<<< HEAD
+<<<<<<< HEAD
         resources: 
+=======
+        resources:
+>>>>>>> 4e590080412269b774902ee9b65f914e4fb3a9ce
 =======
         resources:
 >>>>>>> 4e590080412269b774902ee9b65f914e4fb3a9ce

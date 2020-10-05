@@ -25,8 +25,11 @@ function err_exit() {
 	fi
 }
 
+<<<<<<< HEAD
  
 
+=======
+>>>>>>> 4e590080412269b774902ee9b65f914e4fb3a9ce
 LOAD_TYPE=$1
 MAX_LOOP=$2
 IP_ADDR=$3
@@ -110,6 +113,7 @@ echo "				Displaying the results					       "
 echo "#########################################################################################"
 cat ${LOG_DIR}/Throughput.log
 
+<<<<<<< HEAD
 function kruize_recommendation() {
 
 	curl -H 'Accept: application/json' http://localhost:31313/recommendations?application_name=petclinic-app 
@@ -131,3 +135,5 @@ else
 	echo
 
 fi
+=======
+>>>>>>> 4e590080412269b774902ee9b65f914e4fb3a9ce
