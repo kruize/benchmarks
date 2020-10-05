@@ -86,7 +86,19 @@ podman docker should have the latest network version to work.
 # Openshift
 To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
-<<<<<<< HEAD
+
+`./scripts/petclinic-deploy-openshift.sh deploy_info`
+
+deploy_info: Benchmark server , Namespace , Manifests directory and Results directory path
+
+Benchmark server: Name of the cluster you are using
+
+Namespace: openshift-monitoring
+
+Manifests directory: Path where the manifest directory exists
+
+Results directory path: Location where you want to store the results
+
 ```
 $./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/ result/
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
@@ -179,19 +191,8 @@ Parsing results for 1 instances
 
 ```
 
-=======
-`./scripts/petclinic-deploy-openshift.sh deploy_info`
-
-deploy_info: Benchmark server , Namespace , Manifests directory and Results directory path
-
-Benchmark server: Name of the cluster you are using
-
-Namespace: openshift-monitoring
-
-Manifests directory: Path where the manifest directory exists
-
-Results directory path: Location where you want to store the results
 
 
 
->>>>>>> 4e590080412269b774902ee9b65f914e4fb3a9ce
+
+
