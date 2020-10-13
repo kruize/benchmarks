@@ -179,7 +179,7 @@ RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
 
 ```
 
-To run the load for multiple instances and for multiple iterations follow [README.md] (/perf/README.md)
+To run the load for multiple instances and for multiple iterations follow [README.md](/spring-petclinic/scripts/perf/README.md)
 
 
 
