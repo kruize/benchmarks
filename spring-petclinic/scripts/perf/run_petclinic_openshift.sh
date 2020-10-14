@@ -11,7 +11,7 @@ function usage() {
 	echo "Usage: BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES "
 	echo " For perf runs: TOTAL_INST TOTAL_ITR RE_DEPLOY MANIFESTS_DIR"
 	echo " RE_DEPLOY should be set to true for perf runs"
-        exit -1
+	exit -1
 }
 
 BENCHMARK_SERVER=$1
