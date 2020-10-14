@@ -216,7 +216,7 @@ function parseClusterLog() {
 	echo "$run , $cluster_cpumem" >> $RESULTS_DIR_J/$CLUSTER_RESULTS_LOG
 }
 
-parseResults() {
+function parseResults() {
 	TOTAL_ITR=$1
 	RESULTS_DIR_J=$2
 	sca=$3
