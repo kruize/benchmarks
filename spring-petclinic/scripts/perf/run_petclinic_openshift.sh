@@ -232,21 +232,20 @@ function parseResults() {
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f2 >> $RESULTS_DIR_J/throughput-measure-temp.log
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/weberror-measure-temp.log
 		
-                for podcpulog in "${podcpulogs[@]}"
-                do
-                        cat $RESULTS_DIR_J/${podcpulog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${podcpulog}-measure-temp.log
-                done
-                for podmemlog in "${podmemlogs[@]}"
-                do
-                        cat $RESULTS_DIR_J/${podmemlog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${podmemlog}-measure-temp.log
-                done
-                for clusterlog in "${clusterlogs[@]}"
-                do
+		for podcpulog in "${podcpulogs[@]}"
+		do
+			cat $RESULTS_DIR_J/${podcpulog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${podcpulog}-measure-temp.log
+		done
+		for podmemlog in "${podmemlogs[@]}"
+		do
+			cat $RESULTS_DIR_J/${podmemlog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${podmemlog}-measure-temp.log
+		done
+		for clusterlog in "${clusterlogs[@]}"
+		do
 			cat $RESULTS_DIR_J/${clusterlog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${clusterlog}-measure-temp.log
-                done
-
+		done
 	done
-
+	
 	for metric in "${total_logs[@]}"
 	do
 		val=$(echo `calcAvg $RESULTS_DIR_J/${metric}-measure-temp.log | cut -d "=" -f2`)
