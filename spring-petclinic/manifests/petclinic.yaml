@@ -21,7 +21,7 @@ spec:
       - name: test-volume
       containers:
       - name: petclinic-tomcat
-        image: kusumach/spring-petclinic:jdk11-Oj9-0423
+        image: kruize/spring-petclinic:2.2.0
         imagePullPolicy: Always
         env:
         - name: "JVM_ARGS"
