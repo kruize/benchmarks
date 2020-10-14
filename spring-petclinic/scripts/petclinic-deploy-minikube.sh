@@ -45,8 +45,7 @@ function stopAllInstances() {
 	for se in "${petclinic_services[@]}"
 	do
 		kubectl delete service $se 
-	done
-	
+	done	
 }
 
 # Stop all petclinic related instances if there are any
