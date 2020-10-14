@@ -1,6 +1,6 @@
-# Dockerfile to build a jmeter container able to drive acmeair
+# Dockerfile to build a jmeter container able to drive petclinic
 # Results appear on /output in the container
-# Must specify the hostname for the acmeair application (or localhost will be assumed)
+# Must specify the hostname for the petclinic application (or localhost will be assumed)
 
 FROM ibmjava:8-jre
 
