@@ -2,7 +2,7 @@
 
 ROOT_DIR=".."
 source ./scripts/petclinic-common.sh
-cd ${ROOT_DIR}
+pushd ${ROOT_DIR}
 
 # stop the petclinic container
 docker stop petclinic-app
