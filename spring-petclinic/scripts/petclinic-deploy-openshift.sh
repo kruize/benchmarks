@@ -38,7 +38,6 @@ function createInstances() {
 	# #Create the deployments and services
 	#Using inmem DB so no DB specific pods	
 
-
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
         do
                 sed 's/petclinic/petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
@@ -56,9 +55,6 @@ function createInstances() {
                 err_exit "Error: Issue in deploying."
         done
 
-	# Server instances on different worker node
-	# Hard coded the node name for now
-	# TODO for automation
 	#Wait till petclinic starts
 	sleep 40
 	#Expose the services
