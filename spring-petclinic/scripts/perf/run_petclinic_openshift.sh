@@ -146,13 +146,13 @@ function parseCpuMem()  {
 			parsePodCpuLog $podcpulog $TYPE $run $ITR
 		done
 		for podmemlog in "${podmemlogs[@]}"
-                do
-                        parsePodMemLog $podmemlog $TYPE $run $ITR
-                done
+		do        
+			parsePodMemLog $podmemlog $TYPE $run $ITR
+		done
 		for clusterlog in "${clusterlogs[@]}"
-                do
-                        parseClusterLog $clusterlog $RESULTS_DIR_P/${clusterlog}-${TYPE}-${run}.json ${clusterlog}-${TYPE}-${itr}.log
-                done
+		do
+			parseClusterLog $clusterlog $RESULTS_DIR_P/${clusterlog}-${TYPE}-${run}.json ${clusterlog}-${TYPE}-${itr}.log
+		done
 	done
 }
 
@@ -256,7 +256,7 @@ function parseResults() {
 	echo "$sca ,  $total_throughput_avg , $total_mem_avg , $total_cpu_avg , $total_c_mem_avg , $total_c_cpu_avg , $total_weberror_avg" >> $RESULTS_DIR_J/../Metrics.log
 	echo "$sca ,  $total_mem_avg , $total_memusage_avg , $total_memrequests_avg , $total_memlimits_avg , $total_memreq_in_p_avg , $total_memlimit_in_p_avg " >> $RESULTS_DIR_J/../Metrics-mem.log
 	echo "$sca ,  $total_cpu_avg , $total_cpurequests_avg , $total_cpulimits_avg , $total_cpureq_in_p_avg , $total_cpulimits_in_p_avg " >> $RESULTS_DIR_J/../Metrics-cpu.log
-	echo "$sca , $total_c_cpu_avg , $total_c_cpurequests_avg , $total_c_cpulimits_avg , $total_c_mem_avg , $total_c_memrequests_avg , $total_c_memlimits_avg " >> $RESULTS_DIR_J/../Metrics-cluster.log
+	echo "$sca ,  $total_c_cpu_avg , $total_c_cpurequests_avg , $total_c_cpulimits_avg , $total_c_mem_avg , $total_c_memrequests_avg , $total_c_memlimits_avg " >> $RESULTS_DIR_J/../Metrics-cluster.log
 }
 
 function calcAvg_inMB()
