@@ -38,12 +38,11 @@ function createInstances() {
 	# #Create the deployments and services
 	#Using inmem DB so no DB specific pods	
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
-        do
+	do
                 sed 's/petclinic/petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
                 sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
                 sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
-
-        done
+	done
         for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
         do
                 sed 's/petclinic-sample/petclinic-sample-'$inst'/g' $MANIFESTS_DIR/petclinic.yaml > $MANIFESTS_DIR/petclinic-$inst.yaml
