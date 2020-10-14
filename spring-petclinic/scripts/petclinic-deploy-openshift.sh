@@ -37,7 +37,6 @@ function createInstances() {
 	# Create multiple yamls based on instances and Update the template yamls with names and create multiple files
 	# #Create the deployments and services
 	#Using inmem DB so no DB specific pods	
-
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
         do
                 sed 's/petclinic/petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
