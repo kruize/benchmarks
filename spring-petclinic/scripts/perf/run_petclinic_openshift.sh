@@ -229,8 +229,7 @@ function parseResults() {
 		parseCpuMem measure $MEASURES $itr
 
 		#Calculte Average and Median of Throughput, Memory and CPU  scores
- 
-                cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f2 >> $RESULTS_DIR_J/throughput-measure-temp.log
+		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f2 >> $RESULTS_DIR_J/throughput-measure-temp.log
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/weberror-measure-temp.log
 		
                 for podcpulog in "${podcpulogs[@]}"
