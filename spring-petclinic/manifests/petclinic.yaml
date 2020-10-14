@@ -28,10 +28,6 @@ spec:
           value: "-Xshareclasses:none -Xgcpolicy:optavgpause"
         ports:
           - containerPort: 8080
-        resources:
-          requests:
-            memory: 343.9M
-            cpu: 0.5
         volumeMounts:
           - name: "test-volume"
             mountPath: "/opt/jLogs"
