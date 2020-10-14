@@ -12,14 +12,14 @@ RESULTS_DIR_PATH=$4
 SERVER_INSTANCES=$5
 
 if [[ -z $BENCHMARK_SERVER || -z $NAMESPACE || -z $RESULTS_DIR_PATH || -z $MANIFESTS_DIR ]]; then
-  echo "Do set all the variables - BENCHMARK_SERVER , NAMESPACE , MANIFESTS_DIR and RESULTS_DIR_PATH"
-  exit 1
+	echo "Do set all the variables - BENCHMARK_SERVER , NAMESPACE , MANIFESTS_DIR and RESULTS_DIR_PATH"
+	exit 1
 fi
 
 if [ -z "${SERVER_INSTANCES}" ]; then
-    SERVER_INSTANCES=1
+	SERVER_INSTANCES=1
 else
-    SERVER_INSTANCES=$5
+	SERVER_INSTANCES=$5
 fi
 
 RESULTS_DIR_ROOT=$RESULTS_DIR_PATH/petclinic-$(date +%Y%m%d%H%M)
@@ -39,18 +39,18 @@ function createInstances() {
 	#Using inmem DB so no DB specific pods	
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 	do
-                sed 's/petclinic/petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
-                sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
-                sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
+		sed 's/petclinic/petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
+		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
+		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
 	done
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 	do
-                sed 's/petclinic-sample/petclinic-sample-'$inst'/g' $MANIFESTS_DIR/petclinic.yaml > $MANIFESTS_DIR/petclinic-$inst.yaml
-                sed -i 's/petclinic-service/petclinic-service-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-                sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-                sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-                oc create -f $MANIFESTS_DIR/petclinic-$inst.yaml -n $NAMESPACE
-                err_exit "Error: Issue in deploying."
+		sed 's/petclinic-sample/petclinic-sample-'$inst'/g' $MANIFESTS_DIR/petclinic.yaml > $MANIFESTS_DIR/petclinic-$inst.yaml
+		sed -i 's/petclinic-service/petclinic-service-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
+		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
+		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
+		oc create -f $MANIFESTS_DIR/petclinic-$inst.yaml -n $NAMESPACE
+		err_exit "Error: Issue in deploying."
 	done
 
 	#Wait till petclinic starts
