@@ -4,6 +4,8 @@
 export PETCLINIC_PORT="32334"
 export NETWORK="petclinic-net"
 export JMETER_IMAGE
+CPU="2.5"
+MEMORY="1024M"
 ROOT_DIR=${PWD}
 LOGFILE="${ROOT_DIR}/setup.log"
 
@@ -33,7 +35,6 @@ function get_ip() {
 # Build the petclinic application
 function build_petclinic() {
 	IMAGE=$1
-	VERSION=$2
 	# Build the application from git clone. Requires git , JAVA compiler on your machine to work.
 	git clone https://github.com/spring-projects/spring-petclinic.git 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to clone the git repo"
@@ -64,13 +65,15 @@ function pull_image() {
 
 # Run the petclinic application 
 function run_petclinic() {
-	IMAGE=$1      
+	PETCLINIC_IMAGE=$1  
+	IMAGE=$2 
+	ARGS=$3      
 	# Create docker network bridge "petclinic-net"
 	docker network create --driver bridge ${NETWORK} 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to create docker bridge network ${NETWORK}."
 
 	# Run the petclinic app container on "petclinic-net"
-	docker run --rm -d --name=petclinic-app --cpus="2.5" --memory="1024M" -p ${PETCLINIC_PORT}:8080 --network=${NETWORK} ${IMAGE} 2>>${LOGFILE} >>${LOGFILE}
+	docker run -d --name=petclinic-app --cpus=${CPU} --memory=${MEMORY} -p ${PETCLINIC_PORT}:8080 --network=${NETWORK} -e JVM_ARGS=${ARGS} ${PETCLINIC_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to start petclinic container."
 }
  
