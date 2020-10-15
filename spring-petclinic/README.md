@@ -7,7 +7,7 @@ Create the required setup
 **setup_info**: (do_setup/use_image)
 
 - **do_setup**: Builds the petclinic application from the scratch by cloning the spring-petclinic repository and creates the images required for the setup.
-- **use_image**: Uses already built petclinic image present in https://hub.docker.com/r/kruize/spring-petclinic
+- **use_image**: Uses already built petclinic image 
 
 Pre-requisites for do_setup: javac and git 
 
