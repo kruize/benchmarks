@@ -49,6 +49,7 @@ function createInstances() {
 		sed -i 's/petclinic-service/petclinic-service-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
+		sed -i 's/32334/3233'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		oc create -f $MANIFESTS_DIR/petclinic-$inst.yaml -n $NAMESPACE
 		err_exit "Error: Issue in deploying."
 	done
