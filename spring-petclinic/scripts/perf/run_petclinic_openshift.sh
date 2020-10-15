@@ -295,7 +295,7 @@ function runItr()
 	do
 		echo "##### $TYPE $run"
 		# Get CPU and MEM info through prometheus queries
-		./scripts/getstats-openshift.sh $TYPE-$run $CPU_MEM_DURATION $RESULTS_runItr $BENCHMARK_SERVER petclinic &
+		./scripts/perf/getstats-openshift.sh $TYPE-$run $CPU_MEM_DURATION $RESULTS_runItr $BENCHMARK_SERVER petclinic &
 		# Run the jmeter workload
 		run_jmeter_with_scaling $RESULTS_runItr $TYPE $run
 		# Sleep till the jmeter load completes
