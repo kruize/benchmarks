@@ -306,12 +306,12 @@ function runItr()
 
 get_recommendations_from_kruize()
 {
-        TOKEN=`oc whoami --show-token`
-        app_list=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
-        for app in "${app_list[@]}"
-        do
-                curl --silent -k -H "Authorization: Bearer $TOKEN" http://kruize-openshift-monitoring.apps.${BENCHMARK_SERVER}/recommendations?application_name=$app > $RESULTS_DIR_I/${app}-recommendations.log
-        done
+	TOKEN=`oc whoami --show-token`
+	app_list=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	for app in "${app_list[@]}"
+	do
+		curl --silent -k -H "Authorization: Bearer $TOKEN" http://kruize-openshift-monitoring.apps.${BENCHMARK_SERVER}/recommendations?application_name=$app > $RESULTS_DIR_I/${app}-recommendations.log
+	done
 }
 function runIterations() {
 	SCALING=$1
