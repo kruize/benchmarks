@@ -19,6 +19,7 @@ if [ "$1" == "do_setup" ]; then
 	IMAGE=$2
 	if [ -z "${IMAGE}" ]; then
 		IMAGE=adoptopenjdk/openjdk11-openj9:latest
+		JVM_ARGS=-Xshareclasses:none
 	fi
 else
 	PETCLINIC_IMAGE=$2
@@ -26,7 +27,7 @@ else
 fi
 
 if [ -z "${PETCLINIC_IMAGE}" ]; then
-	PETCLINIC_IMAGE=docker.io/kruize/spring-petclinic:2.2.0
+	PETCLINIC_IMAGE=docker.io/kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.20.0
 fi
 
 if [ -z "${JMETER_IMAGE}" ]; then
@@ -48,7 +49,7 @@ get_ip
 if [ $SETUP  ]; then
 	# Build the petclinic application sources and create the docker image
 	echo -n "Building petclinic application..."
-	build_petclinic ${IMAGE} ${VERSION}
+	build_petclinic ${IMAGE} 
 	PETCLINIC_IMAGE="spring-petclinic"
 	echo "done"
 # Build the jmeter docker image with the petclinic driver
@@ -63,6 +64,6 @@ fi
 
 # Run the application and mongo db
 echo -n "Running petclinic with inbuilt db..."
-run_petclinic ${PETCLINIC_IMAGE} 
+run_petclinic ${PETCLINIC_IMAGE} ${JVM_ARGS}
 echo "done"
 
