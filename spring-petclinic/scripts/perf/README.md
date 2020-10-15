@@ -1,59 +1,34 @@
-# To run the load for multiple instances and for multiple iterations 
+# Test with multiple instances 
 
 `./scripts/perf/run_petclinic_openshift.sh load_info perf_info` 
 
-load_info : BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
+**load_info** : BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
 
-BENCHMARK_SERVER_NAME : Name of the cluster you are using
+- **BENCHMARK_SERVER_NAME** : Name of the cluster you are using
+- **NAMESPACE** : openshift-monitoring
+- **RESULTS_DIR_PATH** : Location where you want to store the results
+- **JMETER_LOAD_USERS** : Number of users
+- **JMETER_LOAD_DURATION** : Load duration
+- **WARMUPS** : Number of warmups
+- **MEASURES** : Number of measures
 
-NAMESPACE : openshift-monitoring
+**perf_info**: Redeploying the instances for different iterations for performance test
 
-RESULTS_DIR_PATH : Location where you want to store the results
+**perf_info**: TOTAL_INST TOTAL_ITR RE_DEPLOY MANIFESTS_DIR
 
-JMETER_LOAD_USERS : Number of users
+- **TOTAL_INST**: Number of instances
+- **TOTAL_ITR**: Number of iterations you want to do the benchmarking
+- **RE_DEPLOY**: true
+- **MANIFESTS_DIR**: Path where the manifest directory exists
 
-JMETER_LOAD_DURATION : Load duration
+Example to test with multiple instances
+**`$./scripts/perf/run_petclinic_openshift.sh rouging.os.fyre.ibm.com openshift-monitoring result/ 300 60 5 3`**
 
-WARMUPS : Number of warmups
-
-MEASURES : Number of measures
-
-perf_info is optional , it can be used in case of multiple instances
-
-erf_info: TOTAL_INST TOTAL_ITR RE_DEPLOY MANIFESTS_DIR
-
-TOTAL_INST: Number of instances
-
-TOTAL_ITR: Number of times you want to run the load
-
-RE_DEPLOY: true
-
-MANIFESTS_DIR: Path where the manifest directory exists
-
-
+Refer Metrics.log to get the output data generated during the run i.e, throghput, total memory used by the pod, total cpu used by the pod, cluster memory usage in percentage,cluster cpu in percentage and web errors if any.
+**`$ cat Metrics.log`**
+``` 
+Instances , Throughput , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS 
+1 ,  118.417 , 520.336 , 0.452839 , 39.8044 , 29.3174 , 0
+2 ,  233.683 , 1293.21 , 0.974918 , 43.2881 , 29.8591 , 0
 ```
-$./scripts/perf/run_petclinic_openshift.sh rouging.os.fyre.ibm.com openshift-monitoring result/ 300 60 5 3
-~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-RESULTS DIRECTORY is  result//petclinic-202010051904
-Running the benchmark with 1  instances with 1 iterations having 5 warmups and 3 measurements
-Running 5 warmups for 300 users
-##### warmup 0
-Collecting CPU & MEM details of nodes worker0.rouging.os.fyre.ibm.com  and cluster
-APP_NAME is ... petclinic
-Running jmeter load with the following parameters
-CMD = docker run  --rm -e JHOST=petclinic-service-0-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=60 -e JUSERS=300 kusumach/petclinic_jmeter_noport:0423
-
-...
-...
-...
-
-
-##### measure 2
-Collecting CPU & MEM details of nodes worker0.rouging.os.fyre.ibm.com  and cluster
-APP_NAME is ... petclinic
-Running jmeter load with the following parameters
-CMD = docker run  --rm -e JHOST=petclinic-service-0-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=60 -e JUSERS=300 kusumach/petclinic_jmeter_noport:0423
-Parsing results for 1 instances
-
-```
-
+For CPU and Memory details refer Metrics-cpu.log and Metrics-mem.log . And for individual informations look into the logs generated during the run.
