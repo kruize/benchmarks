@@ -3,7 +3,6 @@
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
 export NETWORK="petclinic-net"
-export JMETER_IMAGE
 CPU="2.5"
 MEMORY="1024M"
 ROOT_DIR=${PWD}
@@ -65,9 +64,8 @@ function pull_image() {
 
 # Run the petclinic application 
 function run_petclinic() {
-	PETCLINIC_IMAGE=$1  
-	IMAGE=$2 
-	ARGS=$3      
+	PETCLINIC_IMAGE=$1   
+	ARGS=$2      
 	# Create docker network bridge "petclinic-net"
 	docker network create --driver bridge ${NETWORK} 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to create docker bridge network ${NETWORK}."
