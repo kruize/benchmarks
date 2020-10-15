@@ -13,8 +13,7 @@
 - **MEASURES** : Number of measures
 
 **perf_info**: Redeploying the instances for different iterations for performance test
-
-**perf_info**: TOTAL_INST TOTAL_ITR RE_DEPLOY MANIFESTS_DIR
+               TOTAL_INST TOTAL_ITR RE_DEPLOY MANIFESTS_DIR
 
 - **TOTAL_INST**: Number of instances
 - **TOTAL_ITR**: Number of iterations you want to do the benchmarking
