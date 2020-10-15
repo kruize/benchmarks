@@ -304,7 +304,7 @@ function runItr()
 	done
 }
 
-get_recommendations_from_kruize()
+function get_recommendations_from_kruize()
 {
 	TOKEN=`oc whoami --show-token`
 	app_list=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
