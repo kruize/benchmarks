@@ -27,11 +27,11 @@ Building jmeter with petclinic driver...done
 Running petclinic with inbuilt db...done
 ```
  
-In case of `use_image` by default it uses `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.20.0` for petclinic application and `kruize/jmeter_petclinic:3.1` for jmeter. If you want to use custom images then you need to mention it explicitly.
+In case of `use_image` by default it uses `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` for petclinic application and `kruize/jmeter_petclinic:3.1` for jmeter. If you want to use custom images then you need to mention it explicitly.
 
 Example to run the petclinic application using built in image
 
-**`$./scripts/petclinic-setup.sh use_image kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.20.0 kruize/jmeter_petclinic:3.1`**
+**`$./scripts/petclinic-setup.sh use_image kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 kruize/jmeter_petclinic:3.1`**
 ```
 Checking prereqs...done
 Pulling the jmeter image...done
