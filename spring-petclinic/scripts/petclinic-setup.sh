@@ -27,7 +27,7 @@ else
 fi
 
 if [ -z "${PETCLINIC_IMAGE}" ]; then
-	PETCLINIC_IMAGE=docker.io/kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.20.0
+	PETCLINIC_IMAGE=docker.io/kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
 fi
 
 if [ -z "${JMETER_IMAGE}" ]; then
