@@ -21,6 +21,7 @@
 - **MANIFESTS_DIR**: Path where the manifest directory exists
 
 Example to test with multiple instances
+
 **`$./scripts/perf/run_petclinic_openshift.sh rouging.os.fyre.ibm.com openshift-monitoring result/ 300 60 5 3`**
 
 Refer Metrics.log to get the output data generated during the run i.e, throghput, total memory used by the pod, total cpu used by the pod, cluster memory usage in percentage,cluster cpu in percentage and web errors if any.
