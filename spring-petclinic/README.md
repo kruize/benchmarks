@@ -125,15 +125,16 @@ To test with multiple instances follow [README.md](/spring-petclinic/scripts/per
 # Kruize
 If you want to quickly size the petclinic application container using a test load, run the Kruize container locally and point it to petclinic application container to get recommendation. Kruize monitors the app container using Prometheus and provides recommendations as a Grafana dashboard (Prometheus and Grafana containers are automatically downloaded when you run kruize).
 
-**Kruize Installation**
-
 **kruize supports**
-- [Docker](#Docker)
-- [Minikube](#Minikube)
-- [Openshift](#Openshift)
+- Docker
+- Minikube
+- Openshift
 
-`$ ./scripts/kruize-setup.sh [docker|minikube|openshift]`
-Creates the required setup for kruize  
+**Installation**
+
+Create required setup and deploy kruize on different environments(docker,minikube and openshift)
+
+`$ ./scripts/kruize-setup.sh [docker|minikube|openshift]` 
 
 ## Docker
 
