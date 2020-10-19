@@ -1,6 +1,10 @@
 # Instructions to run the petclinic application using scripts 
+**The scripts written supports**
+- [Docker](#Docker)
+- [Minikube](#Minikube)
+- [Openshift](#Openshift)
 
-# Docker
+## Docker
 Create the required setup
 `./scripts/petclinic-setup.sh setup_info`
 
@@ -31,19 +35,19 @@ In case of `use_image` by default it uses `kruize/spring_petclinic:2.2.0-jdk-11.
 
 Example to run the petclinic application using built in image
 
-**`$./scripts/petclinic-setup.sh use_image kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 kruize/jmeter_petclinic:3.1`**
+**`$./scripts/petclinic-setup.sh use_image kruize/spring_petclinic:2.2.0-jdk-11.0.8-hotspot kruize/jmeter_petclinic:3.1`**
 ```
 Checking prereqs...done
 Pulling the jmeter image...done
 Running petclinic with inbuilt db...done
 
 ```
-# Minikube
+## Minikube
 To deploy the benchmark use `petclinic-deploy-minikube.sh`
 
-`./scripts/petclinic-deploy-openshift.sh Manifest_dir`
+`./scripts/petclinic-deploy-openshift.sh manifest_dir`
 
-**Manifest_dir**: Path where the manifest directory exists
+**manifest_dir**: Path where the manifest directory exists
 
 **`$./scripts/petclinic-deploy-minikube.sh manifests/`** 
 ```
@@ -52,7 +56,7 @@ deployment.apps/petclinic-sample-0 created
 service/petclinic-service-0 created
 
 ```
-# Openshift
+## Openshift
 To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
 `./scripts/petclinic-deploy-openshift.sh deploy_info`
@@ -123,32 +127,19 @@ If you want to quickly size the petclinic application container using a test loa
 
 **Kruize Installation**
 
-# Docker
+**kruize supports**
+- [Docker](#Docker)
+- [Minikube](#Minikube)
+- [Openshift](#Openshift)
+
+`$ ./scripts/kruize-setup.sh [docker|minikube|openshift]`
+Creates the required setup for kruize  
+
+## Docker
 
 **`$ ./scripts/kruize-setup.sh docker`**
-```
-Creating kruize setup...~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-done
-Deploying kruize on docker ...~/benchmarks/spring-petclinic/kruize ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 
-###   Installing kruize for docker...
-
-
-Info: Checking pre requisites for Docker...
-...
-
-Waiting for kruize container to come up
-########################     Starting App Monitor loop    #########################
-Kruize recommendations available on the grafana dashboard at: http://localhost:3000
-Info: Press CTRL-C to exit
- cadvisor: found. Adding to list of containers to be monitored.
- grafana: found. Adding to list of containers to be monitored.
- kruize: found. Adding to list of containers to be monitored.
- prometheus: found. Adding to list of containers to be monitored.
-
-```
-
-Now edit `manifests/docker/kruize-docker.yaml` to add the petclinic container name that you need kruize to monitor.
+Edit `manifests/docker/kruize-docker.yaml` to add the petclinic container name that you need kruize to monitor.
 
 ```
 $ cat manifests/docker/kruize-docker.yaml 
@@ -171,95 +162,9 @@ In the above example, kruize is monitoring the petclinic application container `
  prometheus: found. Adding to list of containers to be monitored.
  petclinic-app: found. Adding to list of containers to be monitored.
 ```
-# Minikube
 
-**`$ ./scripts/kruize-setup.sh minikube`**
-```
-Creating kruize setup...~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-done
-Deploying kruize on minikube ...~/benchmarks/spring-petclinic/kruize ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-
-###   Installing kruize for minikube
-
-
-Info: Checking pre requisites for minikube...
-Info: kruize needs cadvisor/prometheus/grafana to be installed in minikube
-Download and install these software to minikube(y/n)? y                     <----- Say yes to install cadvisor/prometheus/grafana
-Info: Downloading cadvisor git
-...
-
-Info: Downloading prometheus git
-
-Info: Installing prometheus
-...
-
-Info: Waiting for all Prometheus Pods to get spawned......done
-Info: Waiting for prometheus-k8s-1 to come up...
-prometheus-k8s-1                      2/3     Running   0          5s
-Info: prometheus-k8s-1 deploy succeeded: Running
-prometheus-k8s-1                      2/3     Running   0          6s
-
-
-Info: One time setup - Create a service account to deploy kruize
-serviceaccount/kruize-sa created
-clusterrole.rbac.authorization.k8s.io/kruize-cr created
-clusterrolebinding.rbac.authorization.k8s.io/kruize-crb created
-servicemonitor.monitoring.coreos.com/kruize created
-prometheus.monitoring.coreos.com/prometheus created
-
-Info: Deploying kruize yaml to minikube cluster
-deployment.apps/kruize created
-service/kruize created
-Info: Waiting for kruize to come up...
-kruize-695c998775-vv4dn               0/1     ContainerCreating   0          4s
-kruize-695c998775-vv4dn               1/1     Running   0          9s
-Info: kruize deploy succeeded: Running
-kruize-695c998775-vv4dn               1/1     Running   0          9s
-
-Info: Access grafana dashboard to see kruize recommendations at http://localhost:3000 <--- Click on this link to access grafana dashboards
-Info: Run the following command first to access grafana port
-      $ kubectl port-forward -n monitoring grafana-58dc7468d7-rn7nx 3000:3000		<---- But run this command first
-
-```
-# Openshift
-
-**`$ ./scripts/kruize-setup.sh openshift`**
-```
-Creating kruize setup...~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-done
-Deploying kruize on openshift ...~/benchmarks/spring-petclinic/kruize ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-
-###   Installing kruize for OpenShift
-
-WARNING: This will create a Kruize ServiceMonitor object in the openshift-monitoring namespace
-WARNING: This is currently not recommended for production
-
-Create ServiceMonitor object and continue installation?(y/n)? y
-
-Info: Checking pre requisites for OpenShift...done
-Info: Logging in to OpenShift cluster...
-Authentication required for https://aaa.bbb.com:6443 (openshift)
-Username: kubeadmin
-Password: 
-Login successful.
-
-You have access to 52 projects, the list has been suppressed. You can list all projects with 'oc projects'
-
-Using project "kube-system".
-
-Info: Setting Prometheus URL as https://prometheus-k8s-openshift-monitoring.apps.kaftans.os.fyre.ibm.com
-Info: Deploying kruize yaml to OpenShift cluster
-Now using project "openshift-monitoring" on server "https://api.kaftans.os.fyre.ibm.com:6443".
-deployment.extensions/kruize configured
-service/kruize unchanged
-Info: Waiting for kruize to come up...
-kruize-5cd5967d97-tz2cb                        0/1     ContainerCreating   0          6s
-kruize-5cd5967d97-tz2cb                        0/1     ContainerCreating   0          13s
-kruize-5cd5967d97-tz2cb                        1/1     Running   0          20s
-Info: kruize deploy succeeded: Running
-kruize-5cd5967d97-tz2cb                        1/1     Running   0          24s
-```
 **Kruize Recommendation**
+`$./scripts/kruize-recommendation.sh [docker|minikube|openshift]`
 
 Example to get the kruize recommendation for petclinic application on docker 
 **`$./scripts/kruize-recommendation.sh docker`**
