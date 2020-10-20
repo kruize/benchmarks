@@ -195,8 +195,7 @@ function parsePodMemLog()
 		for mem_pod in "${mem_pods[@]}"
 		do
 			cat $MEM_LOG | grep $mem_pod | cut -d ";" -f3 | cut -d '"' -f1 > $RESULTS_DIR_P/temp-mem.log
-			if [ $MODE ==  "memreq_in_p" ]  || [ $MODE ==  "memlimit_in_p" ]
-			then
+			if [ $MODE ==  "memreq_in_p" ]  || [ $MODE ==  "memlimit_in_p" ]; then
 				each_pod_mem_avg=$( echo `calcAvg_in_p $RESULTS_DIR_P/temp-mem.log | cut -d "=" -f2`  )
 			else
 				each_pod_mem_avg=$( echo `calcAvg_inMB $RESULTS_DIR_P/temp-mem.log | cut -d "=" -f2`  )
