@@ -14,7 +14,7 @@ spec:
       labels:
         name: petclinic-deployment
         app: petclinic-deployment
-        app.kubernetes.io/name: "spring-petclinic"
+        app.kubernetes.io/name: "myapp"
         version: v1
     spec:
       volumes:
