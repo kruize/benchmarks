@@ -23,6 +23,7 @@ function openshift_recommendation() {
 	echo -n "Enter the cluster name   "
 	read cluster 
 	TOKEN=`oc whoami --show-token`
+	NAMESPACE="openshift-monitoring"
 	app_list=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
 	for app in "${app_list[@]}"
 	do
