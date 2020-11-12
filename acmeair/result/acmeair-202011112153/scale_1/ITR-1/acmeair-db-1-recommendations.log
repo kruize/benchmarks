@@ -1,0 +1,15 @@
+[
+  {
+    "application_name": "acmeair-db-1",
+    "resources": {
+      "requests": {
+        "memory": "75.3M",
+        "cpu": 0.5
+      },
+      "limits": {
+        "memory": "90.3M",
+        "cpu": 1.0
+      }
+    }
+  }
+]

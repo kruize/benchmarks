@@ -1,0 +1,768 @@
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Task :acmeair-services:compileJava
+Note: /home/gradle/project/acmeair-services/src/main/java/com/acmeair/util/Util.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :acmeair-services:processResources
+> Task :acmeair-services:classes
+> Task :acmeair-services:jar
+> Task :acmeair-loader:compileJava
+> Task :acmeair-loader:processResources
+> Task :acmeair-loader:classes
+> Task :acmeair-loader:jar
+> Task :acmeair-services-mongo:compileJava
+> Task :acmeair-services-mongo:processResources
+> Task :acmeair-services-mongo:classes
+> Task :acmeair-services-mongo:jar
+> Task :acmeair-as:compileJava
+> Task :acmeair-as:processResources NO-SOURCE
+> Task :acmeair-as:classes
+> Task :acmeair-as:war
+> Task :acmeair-as:assemble
+> Task :acmeair-as:compileTestJava NO-SOURCE
+> Task :acmeair-as:processTestResources NO-SOURCE
+> Task :acmeair-as:testClasses UP-TO-DATE
+> Task :acmeair-as:test NO-SOURCE
+> Task :acmeair-as:check UP-TO-DATE
+> Task :acmeair-as:build
+> Task :acmeair-bs:compileJava
+> Task :acmeair-bs:processResources NO-SOURCE
+> Task :acmeair-bs:classes
+> Task :acmeair-bs:war
+> Task :acmeair-bs:assemble
+> Task :acmeair-bs:compileTestJava NO-SOURCE
+> Task :acmeair-bs:processTestResources NO-SOURCE
+> Task :acmeair-bs:testClasses UP-TO-DATE
+> Task :acmeair-bs:test NO-SOURCE
+> Task :acmeair-bs:check UP-TO-DATE
+> Task :acmeair-bs:build
+> Task :acmeair-cs:compileJava
+> Task :acmeair-cs:processResources NO-SOURCE
+> Task :acmeair-cs:classes
+> Task :acmeair-cs:war
+> Task :acmeair-cs:assemble
+> Task :acmeair-cs:compileTestJava NO-SOURCE
+> Task :acmeair-cs:processTestResources NO-SOURCE
+> Task :acmeair-cs:testClasses UP-TO-DATE
+> Task :acmeair-cs:test NO-SOURCE
+> Task :acmeair-cs:check UP-TO-DATE
+> Task :acmeair-cs:build
+> Task :acmeair-fs:compileJava
+> Task :acmeair-fs:processResources NO-SOURCE
+> Task :acmeair-fs:classes
+> Task :acmeair-fs:war
+> Task :acmeair-fs:assemble
+> Task :acmeair-fs:compileTestJava NO-SOURCE
+> Task :acmeair-fs:processTestResources NO-SOURCE
+> Task :acmeair-fs:testClasses UP-TO-DATE
+> Task :acmeair-fs:test NO-SOURCE
+> Task :acmeair-fs:check UP-TO-DATE
+> Task :acmeair-fs:build
+> Task :acmeair-loader:assemble
+> Task :acmeair-loader:compileTestJava NO-SOURCE
+> Task :acmeair-loader:processTestResources NO-SOURCE
+> Task :acmeair-loader:testClasses UP-TO-DATE
+> Task :acmeair-loader:test NO-SOURCE
+> Task :acmeair-loader:check UP-TO-DATE
+> Task :acmeair-loader:build
+> Task :acmeair-mainapp:compileJava
+> Task :acmeair-mainapp:processResources NO-SOURCE
+> Task :acmeair-mainapp:classes
+> Task :acmeair-mainapp:war
+> Task :acmeair-mainapp:assemble
+> Task :acmeair-mainapp:compileTestJava NO-SOURCE
+> Task :acmeair-mainapp:processTestResources NO-SOURCE
+> Task :acmeair-mainapp:testClasses UP-TO-DATE
+> Task :acmeair-mainapp:test NO-SOURCE
+> Task :acmeair-mainapp:check UP-TO-DATE
+> Task :acmeair-mainapp:build
+> Task :acmeair-services:assemble
+> Task :acmeair-services:compileTestJava NO-SOURCE
+> Task :acmeair-services:processTestResources NO-SOURCE
+> Task :acmeair-services:testClasses UP-TO-DATE
+> Task :acmeair-services:test NO-SOURCE
+> Task :acmeair-services:check UP-TO-DATE
+> Task :acmeair-services:build
+> Task :acmeair-services-mongo:assemble
+> Task :acmeair-services-mongo:compileTestJava NO-SOURCE
+> Task :acmeair-services-mongo:processTestResources NO-SOURCE
+> Task :acmeair-services-mongo:testClasses UP-TO-DATE
+> Task :acmeair-services-mongo:test NO-SOURCE
+> Task :acmeair-services-mongo:check UP-TO-DATE
+> Task :acmeair-services-mongo:build
+> Task :acmeair-ss:compileJava
+> Task :acmeair-ss:processResources NO-SOURCE
+> Task :acmeair-ss:classes
+> Task :acmeair-ss:war
+> Task :acmeair-ss:assemble
+> Task :acmeair-ss:compileTestJava NO-SOURCE
+> Task :acmeair-ss:processTestResources NO-SOURCE
+> Task :acmeair-ss:testClasses UP-TO-DATE
+> Task :acmeair-ss:test NO-SOURCE
+> Task :acmeair-ss:check UP-TO-DATE
+> Task :acmeair-ss:build
+> Task :acmeair-webapp:compileJava
+> Task :acmeair-webapp:processResources NO-SOURCE
+> Task :acmeair-webapp:classes
+> Task :acmeair-webapp:war
+> Task :acmeair-webapp:assemble
+> Task :acmeair-webapp:compileTestJava NO-SOURCE
+> Task :acmeair-webapp:processTestResources NO-SOURCE
+> Task :acmeair-webapp:testClasses UP-TO-DATE
+> Task :acmeair-webapp:test NO-SOURCE
+> Task :acmeair-webapp:check UP-TO-DATE
+> Task :acmeair-webapp:build
+
+BUILD SUCCESSFUL in 23s
+23 actionable tasks: 23 executed
+acmeair_db uses an image, skipping
+Building mono_service_liberty1
+Step 1/11 : FROM websphere-liberty:kernel
+ ---> 49039c47c833
+Step 2/11 : ADD Dockerfile /root/Dockerfile
+ ---> Using cache
+ ---> 62fa44cef048
+Step 3/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 526b0a263def
+Step 4/11 : ADD server.xml /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 8061dadacf1e
+Step 5/11 : RUN installUtility install --acceptLicense defaultServer
+ ---> Using cache
+ ---> bf52529d2a9c
+Step 6/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/workarea
+ ---> Using cache
+ ---> 9d48a223ebc0
+Step 7/11 : ADD ./build/libs/*.war /opt/ibm/wlp/usr/servers/defaultServer/apps
+ ---> a1ccd8e5bbe7
+Step 8/11 : EXPOSE 8080
+ ---> Running in 543fa2a75670
+Removing intermediate container 543fa2a75670
+ ---> d344abfe14b0
+Step 9/11 : ENV MONGO_HOST=acmeair-db
+ ---> Running in 16b01e817948
+Removing intermediate container 16b01e817948
+ ---> ff7f8a65b979
+Step 10/11 : ENV MONGO_DBNAME=acmeair
+ ---> Running in d1007e5ed0ea
+Removing intermediate container d1007e5ed0ea
+ ---> a0a9ebb08346
+Step 11/11 : CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]
+ ---> Running in 04e5d9576388
+Removing intermediate container 04e5d9576388
+ ---> 40c7d1668150
+
+Successfully built 40c7d1668150
+Successfully tagged acmeair_mono_service_liberty1:latest
+~/benchmarks/acmeair
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :acmeair-jmeter:compileJava
+> Task :acmeair-jmeter:processResources NO-SOURCE
+> Task :acmeair-jmeter:classes
+> Task :acmeair-jmeter:jar
+> Task :acmeair-jmeter:assemble
+> Task :acmeair-jmeter:compileTestJava NO-SOURCE
+> Task :acmeair-jmeter:processTestResources NO-SOURCE
+> Task :acmeair-jmeter:testClasses UP-TO-DATE
+> Task :acmeair-jmeter:test NO-SOURCE
+> Task :acmeair-jmeter:check UP-TO-DATE
+> Task :acmeair-jmeter:build
+
+BUILD SUCCESSFUL in 45s
+2 actionable tasks: 2 executed
+~/benchmarks/acmeair
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :acmeair-services:compileJava UP-TO-DATE
+> Task :acmeair-services:processResources UP-TO-DATE
+> Task :acmeair-services:classes UP-TO-DATE
+> Task :acmeair-services:jar UP-TO-DATE
+> Task :acmeair-loader:compileJava UP-TO-DATE
+> Task :acmeair-loader:processResources UP-TO-DATE
+> Task :acmeair-loader:classes UP-TO-DATE
+> Task :acmeair-loader:jar UP-TO-DATE
+> Task :acmeair-services-mongo:compileJava UP-TO-DATE
+> Task :acmeair-services-mongo:processResources UP-TO-DATE
+> Task :acmeair-services-mongo:classes UP-TO-DATE
+> Task :acmeair-services-mongo:jar UP-TO-DATE
+> Task :acmeair-as:compileJava UP-TO-DATE
+> Task :acmeair-as:processResources NO-SOURCE
+> Task :acmeair-as:classes UP-TO-DATE
+> Task :acmeair-as:war UP-TO-DATE
+> Task :acmeair-as:assemble UP-TO-DATE
+> Task :acmeair-as:compileTestJava NO-SOURCE
+> Task :acmeair-as:processTestResources NO-SOURCE
+> Task :acmeair-as:testClasses UP-TO-DATE
+> Task :acmeair-as:test NO-SOURCE
+> Task :acmeair-as:check UP-TO-DATE
+> Task :acmeair-as:build UP-TO-DATE
+> Task :acmeair-bs:compileJava UP-TO-DATE
+> Task :acmeair-bs:processResources NO-SOURCE
+> Task :acmeair-bs:classes UP-TO-DATE
+> Task :acmeair-bs:war UP-TO-DATE
+> Task :acmeair-bs:assemble UP-TO-DATE
+> Task :acmeair-bs:compileTestJava NO-SOURCE
+> Task :acmeair-bs:processTestResources NO-SOURCE
+> Task :acmeair-bs:testClasses UP-TO-DATE
+> Task :acmeair-bs:test NO-SOURCE
+> Task :acmeair-bs:check UP-TO-DATE
+> Task :acmeair-bs:build UP-TO-DATE
+> Task :acmeair-cs:compileJava UP-TO-DATE
+> Task :acmeair-cs:processResources NO-SOURCE
+> Task :acmeair-cs:classes UP-TO-DATE
+> Task :acmeair-cs:war UP-TO-DATE
+> Task :acmeair-cs:assemble UP-TO-DATE
+> Task :acmeair-cs:compileTestJava NO-SOURCE
+> Task :acmeair-cs:processTestResources NO-SOURCE
+> Task :acmeair-cs:testClasses UP-TO-DATE
+> Task :acmeair-cs:test NO-SOURCE
+> Task :acmeair-cs:check UP-TO-DATE
+> Task :acmeair-cs:build UP-TO-DATE
+> Task :acmeair-fs:compileJava UP-TO-DATE
+> Task :acmeair-fs:processResources NO-SOURCE
+> Task :acmeair-fs:classes UP-TO-DATE
+> Task :acmeair-fs:war UP-TO-DATE
+> Task :acmeair-fs:assemble UP-TO-DATE
+> Task :acmeair-fs:compileTestJava NO-SOURCE
+> Task :acmeair-fs:processTestResources NO-SOURCE
+> Task :acmeair-fs:testClasses UP-TO-DATE
+> Task :acmeair-fs:test NO-SOURCE
+> Task :acmeair-fs:check UP-TO-DATE
+> Task :acmeair-fs:build UP-TO-DATE
+> Task :acmeair-loader:assemble UP-TO-DATE
+> Task :acmeair-loader:compileTestJava NO-SOURCE
+> Task :acmeair-loader:processTestResources NO-SOURCE
+> Task :acmeair-loader:testClasses UP-TO-DATE
+> Task :acmeair-loader:test NO-SOURCE
+> Task :acmeair-loader:check UP-TO-DATE
+> Task :acmeair-loader:build UP-TO-DATE
+> Task :acmeair-mainapp:compileJava UP-TO-DATE
+> Task :acmeair-mainapp:processResources NO-SOURCE
+> Task :acmeair-mainapp:classes UP-TO-DATE
+> Task :acmeair-mainapp:war UP-TO-DATE
+> Task :acmeair-mainapp:assemble UP-TO-DATE
+> Task :acmeair-mainapp:compileTestJava NO-SOURCE
+> Task :acmeair-mainapp:processTestResources NO-SOURCE
+> Task :acmeair-mainapp:testClasses UP-TO-DATE
+> Task :acmeair-mainapp:test NO-SOURCE
+> Task :acmeair-mainapp:check UP-TO-DATE
+> Task :acmeair-mainapp:build UP-TO-DATE
+> Task :acmeair-services:assemble UP-TO-DATE
+> Task :acmeair-services:compileTestJava NO-SOURCE
+> Task :acmeair-services:processTestResources NO-SOURCE
+> Task :acmeair-services:testClasses UP-TO-DATE
+> Task :acmeair-services:test NO-SOURCE
+> Task :acmeair-services:check UP-TO-DATE
+> Task :acmeair-services:build UP-TO-DATE
+> Task :acmeair-services-mongo:assemble UP-TO-DATE
+> Task :acmeair-services-mongo:compileTestJava NO-SOURCE
+> Task :acmeair-services-mongo:processTestResources NO-SOURCE
+> Task :acmeair-services-mongo:testClasses UP-TO-DATE
+> Task :acmeair-services-mongo:test NO-SOURCE
+> Task :acmeair-services-mongo:check UP-TO-DATE
+> Task :acmeair-services-mongo:build UP-TO-DATE
+> Task :acmeair-ss:compileJava UP-TO-DATE
+> Task :acmeair-ss:processResources NO-SOURCE
+> Task :acmeair-ss:classes UP-TO-DATE
+> Task :acmeair-ss:war UP-TO-DATE
+> Task :acmeair-ss:assemble UP-TO-DATE
+> Task :acmeair-ss:compileTestJava NO-SOURCE
+> Task :acmeair-ss:processTestResources NO-SOURCE
+> Task :acmeair-ss:testClasses UP-TO-DATE
+> Task :acmeair-ss:test NO-SOURCE
+> Task :acmeair-ss:check UP-TO-DATE
+> Task :acmeair-ss:build UP-TO-DATE
+> Task :acmeair-webapp:compileJava UP-TO-DATE
+> Task :acmeair-webapp:processResources NO-SOURCE
+> Task :acmeair-webapp:classes UP-TO-DATE
+> Task :acmeair-webapp:war UP-TO-DATE
+> Task :acmeair-webapp:assemble UP-TO-DATE
+> Task :acmeair-webapp:compileTestJava NO-SOURCE
+> Task :acmeair-webapp:processTestResources NO-SOURCE
+> Task :acmeair-webapp:testClasses UP-TO-DATE
+> Task :acmeair-webapp:test NO-SOURCE
+> Task :acmeair-webapp:check UP-TO-DATE
+> Task :acmeair-webapp:build UP-TO-DATE
+
+BUILD SUCCESSFUL in 23s
+23 actionable tasks: 23 up-to-date
+acmeair_db uses an image, skipping
+Building mono_service_liberty1
+Step 1/11 : FROM websphere-liberty:kernel
+ ---> 49039c47c833
+Step 2/11 : ADD Dockerfile /root/Dockerfile
+ ---> Using cache
+ ---> 62fa44cef048
+Step 3/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 526b0a263def
+Step 4/11 : ADD server.xml /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 8061dadacf1e
+Step 5/11 : RUN installUtility install --acceptLicense defaultServer
+ ---> Using cache
+ ---> bf52529d2a9c
+Step 6/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/workarea
+ ---> Using cache
+ ---> 9d48a223ebc0
+Step 7/11 : ADD ./build/libs/*.war /opt/ibm/wlp/usr/servers/defaultServer/apps
+ ---> Using cache
+ ---> a1ccd8e5bbe7
+Step 8/11 : EXPOSE 8080
+ ---> Using cache
+ ---> d344abfe14b0
+Step 9/11 : ENV MONGO_HOST=acmeair-db
+ ---> Using cache
+ ---> ff7f8a65b979
+Step 10/11 : ENV MONGO_DBNAME=acmeair
+ ---> Using cache
+ ---> a0a9ebb08346
+Step 11/11 : CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]
+ ---> Using cache
+ ---> 40c7d1668150
+
+Successfully built 40c7d1668150
+Successfully tagged acmeair_mono_service_liberty1:latest
+~/benchmarks/acmeair
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :acmeair-jmeter:compileJava
+> Task :acmeair-jmeter:compileJava UP-TO-DATE
+> Task :acmeair-jmeter:processResources NO-SOURCE
+> Task :acmeair-jmeter:classes UP-TO-DATE
+> Task :acmeair-jmeter:jar UP-TO-DATE
+> Task :acmeair-jmeter:assemble UP-TO-DATE
+> Task :acmeair-jmeter:compileTestJava NO-SOURCE
+> Task :acmeair-jmeter:processTestResources NO-SOURCE
+> Task :acmeair-jmeter:testClasses UP-TO-DATE
+> Task :acmeair-jmeter:test NO-SOURCE
+> Task :acmeair-jmeter:check UP-TO-DATE
+> Task :acmeair-jmeter:build UP-TO-DATE
+
+BUILD SUCCESSFUL in 48s
+2 actionable tasks: 2 up-to-date
+~/benchmarks/acmeair
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :acmeair-services:compileJava UP-TO-DATE
+> Task :acmeair-services:processResources UP-TO-DATE
+> Task :acmeair-services:classes UP-TO-DATE
+> Task :acmeair-services:jar UP-TO-DATE
+> Task :acmeair-loader:compileJava UP-TO-DATE
+> Task :acmeair-loader:processResources UP-TO-DATE
+> Task :acmeair-loader:classes UP-TO-DATE
+> Task :acmeair-loader:jar UP-TO-DATE
+> Task :acmeair-services-mongo:compileJava UP-TO-DATE
+> Task :acmeair-services-mongo:processResources UP-TO-DATE
+> Task :acmeair-services-mongo:classes UP-TO-DATE
+> Task :acmeair-services-mongo:jar UP-TO-DATE
+> Task :acmeair-as:compileJava UP-TO-DATE
+> Task :acmeair-as:processResources NO-SOURCE
+> Task :acmeair-as:classes UP-TO-DATE
+> Task :acmeair-as:war UP-TO-DATE
+> Task :acmeair-as:assemble UP-TO-DATE
+> Task :acmeair-as:compileTestJava NO-SOURCE
+> Task :acmeair-as:processTestResources NO-SOURCE
+> Task :acmeair-as:testClasses UP-TO-DATE
+> Task :acmeair-as:test NO-SOURCE
+> Task :acmeair-as:check UP-TO-DATE
+> Task :acmeair-as:build UP-TO-DATE
+> Task :acmeair-bs:compileJava UP-TO-DATE
+> Task :acmeair-bs:processResources NO-SOURCE
+> Task :acmeair-bs:classes UP-TO-DATE
+> Task :acmeair-bs:war UP-TO-DATE
+> Task :acmeair-bs:assemble UP-TO-DATE
+> Task :acmeair-bs:compileTestJava NO-SOURCE
+> Task :acmeair-bs:processTestResources NO-SOURCE
+> Task :acmeair-bs:testClasses UP-TO-DATE
+> Task :acmeair-bs:test NO-SOURCE
+> Task :acmeair-bs:check UP-TO-DATE
+> Task :acmeair-bs:build UP-TO-DATE
+> Task :acmeair-cs:compileJava UP-TO-DATE
+> Task :acmeair-cs:processResources NO-SOURCE
+> Task :acmeair-cs:classes UP-TO-DATE
+> Task :acmeair-cs:war UP-TO-DATE
+> Task :acmeair-cs:assemble UP-TO-DATE
+> Task :acmeair-cs:compileTestJava NO-SOURCE
+> Task :acmeair-cs:processTestResources NO-SOURCE
+> Task :acmeair-cs:testClasses UP-TO-DATE
+> Task :acmeair-cs:test NO-SOURCE
+> Task :acmeair-cs:check UP-TO-DATE
+> Task :acmeair-cs:build UP-TO-DATE
+> Task :acmeair-fs:compileJava UP-TO-DATE
+> Task :acmeair-fs:processResources NO-SOURCE
+> Task :acmeair-fs:classes UP-TO-DATE
+> Task :acmeair-fs:war UP-TO-DATE
+> Task :acmeair-fs:assemble UP-TO-DATE
+> Task :acmeair-fs:compileTestJava NO-SOURCE
+> Task :acmeair-fs:processTestResources NO-SOURCE
+> Task :acmeair-fs:testClasses UP-TO-DATE
+> Task :acmeair-fs:test NO-SOURCE
+> Task :acmeair-fs:check UP-TO-DATE
+> Task :acmeair-fs:build UP-TO-DATE
+> Task :acmeair-loader:assemble UP-TO-DATE
+> Task :acmeair-loader:compileTestJava NO-SOURCE
+> Task :acmeair-loader:processTestResources NO-SOURCE
+> Task :acmeair-loader:testClasses UP-TO-DATE
+> Task :acmeair-loader:test NO-SOURCE
+> Task :acmeair-loader:check UP-TO-DATE
+> Task :acmeair-loader:build UP-TO-DATE
+> Task :acmeair-mainapp:compileJava UP-TO-DATE
+> Task :acmeair-mainapp:processResources NO-SOURCE
+> Task :acmeair-mainapp:classes UP-TO-DATE
+> Task :acmeair-mainapp:war UP-TO-DATE
+> Task :acmeair-mainapp:assemble UP-TO-DATE
+> Task :acmeair-mainapp:compileTestJava NO-SOURCE
+> Task :acmeair-mainapp:processTestResources NO-SOURCE
+> Task :acmeair-mainapp:testClasses UP-TO-DATE
+> Task :acmeair-mainapp:test NO-SOURCE
+> Task :acmeair-mainapp:check UP-TO-DATE
+> Task :acmeair-mainapp:build UP-TO-DATE
+> Task :acmeair-services:assemble UP-TO-DATE
+> Task :acmeair-services:compileTestJava NO-SOURCE
+> Task :acmeair-services:processTestResources NO-SOURCE
+> Task :acmeair-services:testClasses UP-TO-DATE
+> Task :acmeair-services:test NO-SOURCE
+> Task :acmeair-services:check UP-TO-DATE
+> Task :acmeair-services:build UP-TO-DATE
+> Task :acmeair-services-mongo:assemble UP-TO-DATE
+> Task :acmeair-services-mongo:compileTestJava NO-SOURCE
+> Task :acmeair-services-mongo:processTestResources NO-SOURCE
+> Task :acmeair-services-mongo:testClasses UP-TO-DATE
+> Task :acmeair-services-mongo:test NO-SOURCE
+> Task :acmeair-services-mongo:check UP-TO-DATE
+> Task :acmeair-services-mongo:build UP-TO-DATE
+> Task :acmeair-ss:compileJava UP-TO-DATE
+> Task :acmeair-ss:processResources NO-SOURCE
+> Task :acmeair-ss:classes UP-TO-DATE
+> Task :acmeair-ss:war UP-TO-DATE
+> Task :acmeair-ss:assemble UP-TO-DATE
+> Task :acmeair-ss:compileTestJava NO-SOURCE
+> Task :acmeair-ss:processTestResources NO-SOURCE
+> Task :acmeair-ss:testClasses UP-TO-DATE
+> Task :acmeair-ss:test NO-SOURCE
+> Task :acmeair-ss:check UP-TO-DATE
+> Task :acmeair-ss:build UP-TO-DATE
+> Task :acmeair-webapp:compileJava UP-TO-DATE
+> Task :acmeair-webapp:processResources NO-SOURCE
+> Task :acmeair-webapp:classes UP-TO-DATE
+> Task :acmeair-webapp:war UP-TO-DATE
+> Task :acmeair-webapp:assemble UP-TO-DATE
+> Task :acmeair-webapp:compileTestJava NO-SOURCE
+> Task :acmeair-webapp:processTestResources NO-SOURCE
+> Task :acmeair-webapp:testClasses UP-TO-DATE
+> Task :acmeair-webapp:test NO-SOURCE
+> Task :acmeair-webapp:check UP-TO-DATE
+> Task :acmeair-webapp:build UP-TO-DATE
+
+BUILD SUCCESSFUL in 30s
+23 actionable tasks: 23 up-to-date
+acmeair_db uses an image, skipping
+Building mono_service_liberty1
+Step 1/11 : FROM websphere-liberty:kernel
+ ---> 49039c47c833
+Step 2/11 : ADD Dockerfile /root/Dockerfile
+ ---> Using cache
+ ---> 62fa44cef048
+Step 3/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 526b0a263def
+Step 4/11 : ADD server.xml /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 8061dadacf1e
+Step 5/11 : RUN installUtility install --acceptLicense defaultServer
+ ---> Using cache
+ ---> bf52529d2a9c
+Step 6/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/workarea
+ ---> Using cache
+ ---> 9d48a223ebc0
+Step 7/11 : ADD ./build/libs/*.war /opt/ibm/wlp/usr/servers/defaultServer/apps
+ ---> Using cache
+ ---> a1ccd8e5bbe7
+Step 8/11 : EXPOSE 8080
+ ---> Using cache
+ ---> d344abfe14b0
+Step 9/11 : ENV MONGO_HOST=acmeair-db
+ ---> Using cache
+ ---> ff7f8a65b979
+Step 10/11 : ENV MONGO_DBNAME=acmeair
+ ---> Using cache
+ ---> a0a9ebb08346
+Step 11/11 : CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]
+ ---> Using cache
+ ---> 40c7d1668150
+
+Successfully built 40c7d1668150
+Successfully tagged acmeair_mono_service_liberty1:latest
+~/benchmarks/acmeair
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :acmeair-jmeter:compileJava
+> Task :acmeair-jmeter:compileJava UP-TO-DATE
+> Task :acmeair-jmeter:processResources NO-SOURCE
+> Task :acmeair-jmeter:classes UP-TO-DATE
+> Task :acmeair-jmeter:jar UP-TO-DATE
+> Task :acmeair-jmeter:assemble UP-TO-DATE
+> Task :acmeair-jmeter:compileTestJava NO-SOURCE
+> Task :acmeair-jmeter:processTestResources NO-SOURCE
+> Task :acmeair-jmeter:testClasses UP-TO-DATE
+> Task :acmeair-jmeter:test NO-SOURCE
+> Task :acmeair-jmeter:check UP-TO-DATE
+> Task :acmeair-jmeter:build UP-TO-DATE
+
+BUILD SUCCESSFUL in 49s
+2 actionable tasks: 2 up-to-date
+~/benchmarks/acmeair
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+
+> Task :acmeair-services:compileJava
+Note: /home/gradle/project/acmeair-services/src/main/java/com/acmeair/util/Util.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+
+> Task :acmeair-services:processResources
+> Task :acmeair-services:classes
+> Task :acmeair-services:jar
+> Task :acmeair-loader:compileJava
+> Task :acmeair-loader:processResources
+> Task :acmeair-loader:classes
+> Task :acmeair-loader:jar
+> Task :acmeair-services-mongo:compileJava
+> Task :acmeair-services-mongo:processResources
+> Task :acmeair-services-mongo:classes
+> Task :acmeair-services-mongo:jar
+> Task :acmeair-as:compileJava
+> Task :acmeair-as:processResources NO-SOURCE
+> Task :acmeair-as:classes
+> Task :acmeair-as:war
+> Task :acmeair-as:assemble
+> Task :acmeair-as:compileTestJava NO-SOURCE
+> Task :acmeair-as:processTestResources NO-SOURCE
+> Task :acmeair-as:testClasses UP-TO-DATE
+> Task :acmeair-as:test NO-SOURCE
+> Task :acmeair-as:check UP-TO-DATE
+> Task :acmeair-as:build
+> Task :acmeair-bs:compileJava
+> Task :acmeair-bs:processResources NO-SOURCE
+> Task :acmeair-bs:classes
+> Task :acmeair-bs:war
+> Task :acmeair-bs:assemble
+> Task :acmeair-bs:compileTestJava NO-SOURCE
+> Task :acmeair-bs:processTestResources NO-SOURCE
+> Task :acmeair-bs:testClasses UP-TO-DATE
+> Task :acmeair-bs:test NO-SOURCE
+> Task :acmeair-bs:check UP-TO-DATE
+> Task :acmeair-bs:build
+> Task :acmeair-cs:compileJava
+> Task :acmeair-cs:processResources NO-SOURCE
+> Task :acmeair-cs:classes
+> Task :acmeair-cs:war
+> Task :acmeair-cs:assemble
+> Task :acmeair-cs:compileTestJava NO-SOURCE
+> Task :acmeair-cs:processTestResources NO-SOURCE
+> Task :acmeair-cs:testClasses UP-TO-DATE
+> Task :acmeair-cs:test NO-SOURCE
+> Task :acmeair-cs:check UP-TO-DATE
+> Task :acmeair-cs:build
+> Task :acmeair-fs:compileJava
+> Task :acmeair-fs:processResources NO-SOURCE
+> Task :acmeair-fs:classes
+> Task :acmeair-fs:war
+> Task :acmeair-fs:assemble
+> Task :acmeair-fs:compileTestJava NO-SOURCE
+> Task :acmeair-fs:processTestResources NO-SOURCE
+> Task :acmeair-fs:testClasses UP-TO-DATE
+> Task :acmeair-fs:test NO-SOURCE
+> Task :acmeair-fs:check UP-TO-DATE
+> Task :acmeair-fs:build
+> Task :acmeair-loader:assemble
+> Task :acmeair-loader:compileTestJava NO-SOURCE
+> Task :acmeair-loader:processTestResources NO-SOURCE
+> Task :acmeair-loader:testClasses UP-TO-DATE
+> Task :acmeair-loader:test NO-SOURCE
+> Task :acmeair-loader:check UP-TO-DATE
+> Task :acmeair-loader:build
+> Task :acmeair-mainapp:compileJava
+> Task :acmeair-mainapp:processResources NO-SOURCE
+> Task :acmeair-mainapp:classes
+> Task :acmeair-mainapp:war
+> Task :acmeair-mainapp:assemble
+> Task :acmeair-mainapp:compileTestJava NO-SOURCE
+> Task :acmeair-mainapp:processTestResources NO-SOURCE
+> Task :acmeair-mainapp:testClasses UP-TO-DATE
+> Task :acmeair-mainapp:test NO-SOURCE
+> Task :acmeair-mainapp:check UP-TO-DATE
+> Task :acmeair-mainapp:build
+> Task :acmeair-services:assemble
+> Task :acmeair-services:compileTestJava NO-SOURCE
+> Task :acmeair-services:processTestResources NO-SOURCE
+> Task :acmeair-services:testClasses UP-TO-DATE
+> Task :acmeair-services:test NO-SOURCE
+> Task :acmeair-services:check UP-TO-DATE
+> Task :acmeair-services:build
+> Task :acmeair-services-mongo:assemble
+> Task :acmeair-services-mongo:compileTestJava NO-SOURCE
+> Task :acmeair-services-mongo:processTestResources NO-SOURCE
+> Task :acmeair-services-mongo:testClasses UP-TO-DATE
+> Task :acmeair-services-mongo:test NO-SOURCE
+> Task :acmeair-services-mongo:check UP-TO-DATE
+> Task :acmeair-services-mongo:build
+> Task :acmeair-ss:compileJava
+> Task :acmeair-ss:processResources NO-SOURCE
+> Task :acmeair-ss:classes
+> Task :acmeair-ss:war
+> Task :acmeair-ss:assemble
+> Task :acmeair-ss:compileTestJava NO-SOURCE
+> Task :acmeair-ss:processTestResources NO-SOURCE
+> Task :acmeair-ss:testClasses UP-TO-DATE
+> Task :acmeair-ss:test NO-SOURCE
+> Task :acmeair-ss:check UP-TO-DATE
+> Task :acmeair-ss:build
+> Task :acmeair-webapp:compileJava
+> Task :acmeair-webapp:processResources NO-SOURCE
+> Task :acmeair-webapp:classes
+> Task :acmeair-webapp:war
+> Task :acmeair-webapp:assemble
+> Task :acmeair-webapp:compileTestJava NO-SOURCE
+> Task :acmeair-webapp:processTestResources NO-SOURCE
+> Task :acmeair-webapp:testClasses UP-TO-DATE
+> Task :acmeair-webapp:test NO-SOURCE
+> Task :acmeair-webapp:check UP-TO-DATE
+> Task :acmeair-webapp:build
+
+BUILD SUCCESSFUL in 20s
+23 actionable tasks: 23 executed
+acmeair_db uses an image, skipping
+Building mono_service_liberty1
+Step 1/11 : FROM websphere-liberty:kernel
+ ---> 49039c47c833
+Step 2/11 : ADD Dockerfile /root/Dockerfile
+ ---> Using cache
+ ---> 62fa44cef048
+Step 3/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 526b0a263def
+Step 4/11 : ADD server.xml /opt/ibm/wlp/usr/servers/defaultServer/server.xml
+ ---> Using cache
+ ---> 8061dadacf1e
+Step 5/11 : RUN installUtility install --acceptLicense defaultServer
+ ---> Using cache
+ ---> bf52529d2a9c
+Step 6/11 : RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/workarea
+ ---> Using cache
+ ---> 9d48a223ebc0
+Step 7/11 : ADD ./build/libs/*.war /opt/ibm/wlp/usr/servers/defaultServer/apps
+ ---> de24a849119f
+Step 8/11 : EXPOSE 8080
+ ---> Running in 9a719997aa52
+Removing intermediate container 9a719997aa52
+ ---> c568ce66ae8f
+Step 9/11 : ENV MONGO_HOST=acmeair-db
+ ---> Running in 650b234d6415
+Removing intermediate container 650b234d6415
+ ---> 0e931ca55876
+Step 10/11 : ENV MONGO_DBNAME=acmeair
+ ---> Running in aeed6cc81fc4
+Removing intermediate container aeed6cc81fc4
+ ---> 3ea8082ebceb
+Step 11/11 : CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]
+ ---> Running in 2e9d99db931a
+Removing intermediate container 2e9d99db931a
+ ---> 5ec4ad1be3ca
+
+Successfully built 5ec4ad1be3ca
+Successfully tagged acmeair_mono_service_liberty1:latest
+~/benchmarks/acmeair
+
+Welcome to Gradle 5.5!
+
+Here are the highlights of this release:
+ - Kickstart Gradle plugin development with gradle init
+ - Distribute organization-wide Gradle properties in custom Gradle distributions
+ - Transform dependency artifacts on resolution
+
+For more details see https://docs.gradle.org/5.5/release-notes.html
+
+Starting a Gradle Daemon (subsequent builds will be faster)
+> Task :acmeair-jmeter:compileJava
+> Task :acmeair-jmeter:processResources NO-SOURCE
+> Task :acmeair-jmeter:classes
+> Task :acmeair-jmeter:jar
+> Task :acmeair-jmeter:assemble
+> Task :acmeair-jmeter:compileTestJava NO-SOURCE
+> Task :acmeair-jmeter:processTestResources NO-SOURCE
+> Task :acmeair-jmeter:testClasses UP-TO-DATE
+> Task :acmeair-jmeter:test NO-SOURCE
+> Task :acmeair-jmeter:check UP-TO-DATE
+> Task :acmeair-jmeter:build
+
+BUILD SUCCESSFUL in 56s
+2 actionable tasks: 2 executed
+~/benchmarks/acmeair

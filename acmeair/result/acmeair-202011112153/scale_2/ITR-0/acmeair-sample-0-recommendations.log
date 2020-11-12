@@ -1,0 +1,15 @@
+[
+  {
+    "application_name": "acmeair-sample-0",
+    "resources": {
+      "requests": {
+        "memory": "188.2M",
+        "cpu": 0.8
+      },
+      "limits": {
+        "memory": "248.5M",
+        "cpu": 1.0
+      }
+    }
+  }
+]

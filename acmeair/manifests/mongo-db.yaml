@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acmeair-db
+  labels:
+    app: acmeair-db
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: acmeair-db
+  template:
+    metadata:
+      labels:
+        name: acmeair-db
+        app: acmeair-db
+        app.kubernetes.io/name: "myapp"
+        version: v1
+    spec:
+      containers:
+      - name: acmeair-db
+        image: mongo:latest
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 27017
+        resources:
+          requests:
+            memory: 200M
+            cpu: .4
+          limits:
+            memory: 512M
+            cpu: 1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acmeair-db
+  labels:
+    name: acmeair-db
+spec:
+    type: ClusterIP
+    selector:
+      app: acmeair-db
+    ports:
+      - protocol: TCP
+        port: 27017
+        targetPort: 27017

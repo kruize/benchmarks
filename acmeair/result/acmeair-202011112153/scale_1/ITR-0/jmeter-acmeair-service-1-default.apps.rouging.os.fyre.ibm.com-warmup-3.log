@@ -1,0 +1,11 @@
+Writing log file to: /opt/app/logs/jmeter..log
+Creating summariser <summary>
+Created the tree successfully using /opt/app/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx
+Starting the test @ Wed Nov 11 16:27:14 GMT 2020 (1605112034633)
+Waiting for possible Shutdown/StopTestNow/Heapdump message on port 4445
+usePureIDs property was set.
+summary +     23 in 00:00:45 =    0.5/s Avg: 30799 Min: 30727 Max: 31485 Err:    23 (100.00%) Active: 128 Started: 150 Finished: 22
+summary +    127 in 00:00:25 =    5.0/s Avg: 30883 Min: 30728 Max: 33259 Err:   127 (100.00%) Active: 0 Started: 150 Finished: 150
+summary =    150 in 00:01:11 =    2.1/s Avg: 30870 Min: 30727 Max: 33259 Err:   150 (100.00%)
+Tidying up ...    @ Wed Nov 11 16:28:25 GMT 2020 (1605112105518)
+... end of run

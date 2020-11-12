@@ -1,0 +1,24 @@
+FROM adoptopenjdk:8-jre-openj9
+ 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends wget ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN JMETER_FILE="apache-jmeter-3.1.tgz" \
+    && wget -q -O /tmp/apache-jmeter.tgz https://archive.apache.org/dist/jmeter/binaries/${JMETER_FILE} \
+    && ESUM="e697a17ef47f645c81f02c8f98f56400e2a182fa580904d329a0d277935edeec" \
+    && echo "${ESUM}  /tmp/apache-jmeter.tgz" | sha256sum -c - \
+    && tar -xf /tmp/apache-jmeter.tgz \
+    && mv apache-jmeter-3.1 /opt/jmeter \
+    && JSON_SIMPLE_URL="https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/json-simple" \
+    && JSON_SIMPLE_VER="json-simple-1.1.1.jar" \
+    && wget -q -O /tmp/json-simple-1.1.1.jar ${JSON_SIMPLE_URL}/${JSON_SIMPLE_VER} \
+    && JSUM="108045c9675ebf6d6ec4d8dcc331693f9b944ac7c87de52dccff2c55e8dfa6f1" \
+    && echo "${JSUM}  /tmp/json-simple-1.1.1.jar" | sha256sum -c - \
+    && mv /tmp/json-simple-1.1.1.jar /opt/jmeter/lib/ext \
+    && rm -f /tmp/apache-jmeter.tgz
+
+COPY acmeair-driver/acmeair-jmeter/build/libs/acmeair-jmeter-*-SNAPSHOT.jar /opt/jmeter/lib/ext
+
+ENV JMETER_DIR=/opt/jmeter \
+    PATH=/opt/jmeter/bin:$PATH
