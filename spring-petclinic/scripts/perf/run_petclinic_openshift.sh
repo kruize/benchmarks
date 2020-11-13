@@ -2,13 +2,9 @@
 
 ROOT_DIR=.
 pushd ${ROOT_DIR}
-ROOT=${PWD}
-JMX_FILE="${ROOT}/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx"
-LOG_FILE="${ROOT}/logs/jmeter.log"
-LOGFILE="${ROOT}/logs/setup.log"
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
-# Ex of ARGS :  wobbled.os.fyre.ibm.com default /acmeair/results 400 300 5 3
+# Ex of ARGS :  wobbled.os.fyre.ibm.com openshift-monitoring /petclinic/results 400 300 5 3
 
 function usage() {
 	echo
@@ -74,7 +70,7 @@ if [ -z "${RE_DEPLOY}" ]; then
 	RE_DEPLOY=false
 fi
 
-RESULTS_DIR_ROOT=$RESULTS_DIR_PATH/acmeair-$(date +%Y%m%d%H%M)
+RESULTS_DIR_ROOT=$RESULTS_DIR_PATH/petclinic-$(date +%Y%m%d%H%M)
 mkdir -p $RESULTS_DIR_ROOT
 
 #Adding 10 secs buffer to retrieve CPU and MEM info
@@ -90,10 +86,9 @@ function run_jmeter_workload() {
 	# Store results in this file
 	RESULTS_LOG=$2
 	IP_ADDR=$1
-
 	# Run the jmeter load
 	echo "Running jmeter load with the following parameters"
-	cmd="docker run --rm -v ${PWD}:/opt/app dinogun/jmeter:3.1 jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR} -n -t /opt/app/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.${iter}.log -j /opt/app/logs/jmeter.${iter}.log"
+	cmd="docker run  --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} kusumach/petclinic_jmeter_noport:0423"
 	echo "CMD = ${cmd}"
 	$cmd > $RESULTS_LOG
 }
@@ -103,24 +98,11 @@ function run_jmeter_with_scaling()
 	RESULTS_DIR_J=$1
 	TYPE=$2
 	RUN=$3
-	# Load dummy users into the DB
-	wget -O- http://${IP_ADDR}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS}  2> ${LOGFILE}
-
-	echo " "
-
-	# Reset the max user id value to default
-	git checkout ${JMX_FILE}
-
-	# Calculate maximum user ids based on the USERS values passed
-	MAX_USER_ID=$(( JMETER_LOAD_USERS-1 ))
-
-	# Update the jmx value with the max user id
-	sed -i 's/"maximumValue">99</"maximumValue">'${MAX_USER_ID}'</' ${JMX_FILE}
-	
-	svc_apis=($(oc status --namespace=$NAMESPACE | grep "acmeair" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+	svc_apis=($(oc status --namespace=$NAMESPACE | grep "petclinic" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 	for svc_api  in "${svc_apis[@]}"
 	do
 		RESULT_LOG=$RESULTS_DIR_J/jmeter-$svc_api-$TYPE-$RUN.log
+		#echo "run_jmeter_workload $svc_api $RESULT_LOG"
 		run_jmeter_workload $svc_api $RESULT_LOG &
 	done
 }
@@ -134,7 +116,7 @@ function parseData() {
 	do
 		thrp_sum=0
 		wer_sum=0
-		svc_apis=($(oc status --namespace=$NAMESPACE | grep "acmeair" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+		svc_apis=($(oc status --namespace=$NAMESPACE | grep "petclinic" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 		for svc_api  in "${svc_apis[@]}"
 		do
 			RESULT_LOG=$RESULTS_DIR_P/jmeter-$svc_api-$TYPE-$run.log
@@ -165,12 +147,7 @@ function parseCpuMem()  {
 		done
 		for podmemlog in "${podmemlogs[@]}"
 		do
-			# Parsing CPU logs for POD
-			parsePodCpuLog $podcpulog $TYPE $run $ITR
-		done
-		for podmemlog in "${podmemlogs[@]}"
-		do
-		parsePodMemLog $podmemlog $TYPE $run $ITR
+			parsePodMemLog $podmemlog $TYPE $run $ITR
 		done
 		for clusterlog in "${clusterlogs[@]}"
 		do
@@ -253,6 +230,7 @@ function parseResults() {
 		#Calculte Average and Median of Throughput, Memory and CPU  scores
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f2 >> $RESULTS_DIR_J/throughput-measure-temp.log
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/weberror-measure-temp.log
+
 		for podcpulog in "${podcpulogs[@]}"
 		do
 			cat $RESULTS_DIR_J/${podcpulog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${podcpulog}-measure-temp.log
@@ -266,6 +244,7 @@ function parseResults() {
 			cat $RESULTS_DIR_J/${clusterlog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${clusterlog}-measure-temp.log
 		done
 	done
+
 	for metric in "${total_logs[@]}"
 	do
 		val=$(echo `calcAvg $RESULTS_DIR_J/${metric}-measure-temp.log | cut -d "=" -f2`)
@@ -315,7 +294,7 @@ function runItr()
 	do
 		echo "##### $TYPE $run"
 		# Get CPU and MEM info through prometheus queries
-		./scripts/perf/getstats-openshift.sh $TYPE-$run $CPU_MEM_DURATION $RESULTS_runItr $BENCHMARK_SERVER acmeair &
+		./scripts/perf/getstats-openshift.sh $TYPE-$run $CPU_MEM_DURATION $RESULTS_runItr $BENCHMARK_SERVER petclinic &
 		# Run the jmeter workload
 		run_jmeter_with_scaling $RESULTS_runItr $TYPE $run
 		# Sleep till the jmeter load completes
@@ -327,7 +306,7 @@ function runItr()
 function get_recommendations_from_kruize()
 {
 	TOKEN=`oc whoami --show-token`
-	app_list=($(oc get deployments --namespace=$NAMESPACE | grep "acmeair" | cut -d " " -f1))
+	app_list=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
 	for app in "${app_list[@]}"
 	do
 		curl --silent -k -H "Authorization: Bearer $TOKEN" http://kruize-openshift-monitoring.apps.${BENCHMARK_SERVER}/recommendations?application_name=$app > $RESULTS_DIR_I/${app}-recommendations.log
@@ -344,7 +323,7 @@ function runIterations() {
 	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
 	do
 		if [ $RE_DEPLOY == "true" ]; then
-			./scripts/acmeair-deploy-openshift.sh $BENCHMARK_SERVER $NAMESPACE $MANIFESTS_DIR $SCALING
+			./scripts/petclinic-deploy-openshift.sh $BENCHMARK_SERVER $NAMESPACE $MANIFESTS_DIR $SCALING
 		fi
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-$itr
@@ -357,6 +336,7 @@ function runIterations() {
 	done
 }
 
+#TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
 # Scale the instances and run the iterations
 echo "Instances , Throughput , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
 echo "Instances ,  MEM_RSS , MEM_USAGE , MEM_REQ , MEM_LIM , MEM_REQ_IN_P , MEM_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-mem.log

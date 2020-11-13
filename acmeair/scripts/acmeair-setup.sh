@@ -28,9 +28,7 @@ if [ -z "${JMETER_IMAGE}" ]; then
 	JMETER_IMAGE=docker.io/dinogun/jmeter:3.1
 fi
 
-ROOT_DIR=".."
-source ./acmeair-common.sh
-cd ${ROOT_DIR}
+source ./scripts/acmeair-common.sh
 
 # Check if docker and docker-compose are installed
 echo -n "Checking prereqs..."

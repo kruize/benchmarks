@@ -87,7 +87,7 @@
           <stringProp name="variableName">USER_ID</stringProp>
           <stringProp name="outputFormat"></stringProp>
           <stringProp name="minimumValue">0</stringProp>
-          <stringProp name="maximumValue">99</stringProp>
+          <stringProp name="maximumValue">149</stringProp>
           <stringProp name="randomSeed"></stringProp>
           <boolProp name="perThread">false</boolProp>
         </RandomVariableConfig>

@@ -1,10 +1,10 @@
 #!/bin/bash
 
 # Set the defaults for the app
-export ACMEAIR_PORT="32333"
+export ACMEAIR_PORT="32221"
 export NETWORK="acmeair-net"
 
-LOGFILE="${ROOT_DIR}/setup.log"
+LOGFILE="${PWD}/setup.log"
 
 function err_exit() {
 	if [ $? != 0 ]; then
@@ -62,9 +62,9 @@ function build_jmeter() {
 
 # Pull the jmeter image
 function pull_image() {
-        JMETER_IMAGE=$1
-        docker pull ${JMETER_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
-        err_exit "Error: Unable to pull the docker image ${JMETER_IMAGE}."
+	JMETER_IMAGE=$1
+	docker pull ${JMETER_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
+	err_exit "Error: Unable to pull the docker image ${JMETER_IMAGE}."
 }
 
 # Run the acmeair application and tje mongo db container

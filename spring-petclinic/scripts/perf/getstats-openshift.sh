@@ -1,7 +1,5 @@
 #!/bin/bash
 
-pushd ${PWD}
-
 function get_pod_mem_rss()
 {
 	node=$1

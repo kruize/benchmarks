@@ -3,7 +3,7 @@
 # Script to load test acmeair app
 # 
 
-source ./acmeair-common.sh
+source ./scripts/acmeair-common.sh
 
 function usage() {
 	echo
@@ -15,7 +15,6 @@ LOAD_TYPE=$1
 MAX_LOOP=$2
 IP_ADDR=$3
 
-
 if [ -z "${LOAD_TYPE}" ]; then
 	usage
 fi
@@ -24,37 +23,35 @@ if [ -z "${MAX_LOOP}" ]; then
 	MAX_LOOP=5
 fi
 
-
-# Go back up one dir
-pushd ..
 ROOT_DIR=${PWD}
 JMX_FILE="${ROOT_DIR}/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx"
 LOG="${ROOT_DIR}/logs"
-chmod +rwx ${LOG}
 LOG_FILE="${ROOT_DIR}/logs/jmeter.log"
 LOGFILE="${ROOT_DIR}/logs/setup.log"
 LOG_DIR="${ROOT_DIR}/logs/acmeair-$(date +%Y%m%d%H%M)"
 mkdir -p ${LOG_DIR}
 
-
-# IP addr of the server where acmeair is running (could be k8s proxy node)
-
 case $LOAD_TYPE in
 docker)
 	if [ -z "${IP_ADDR}" ]; then
 		get_ip
-		ACMEAIR_PORT="32333"
 	fi
-	JMETER_FOR_LOAD="jmeter:3.1"
+	if [[ "$(docker images -q jmeter:3.1 2> /dev/null)" == "" ]]; then
+		JMETER_FOR_LOAD=docker.io/dinogun/jmeter:3.1
+	else
+		JMETER_FOR_LOAD="jmeter:3.1"
+	fi
 	err_exit "Error: Unable to load the jmeter image"
-	
 	;;
 icp|minikube)
 	if [ -z "${IP_ADDR}" ]; then
 		IP_ADDR=$(minikube ip)
-		ACMEAIR_PORT="32221"
 	fi
-	JMETER_FOR_LOAD="jmeter:3.1"
+	if [[ "$(docker images -q jmeter:3.1 2> /dev/null)" == "" ]]; then
+		JMETER_FOR_LOAD=docker.io/dinogun/jmeter:3.1
+	else
+		JMETER_FOR_LOAD="jmeter:3.1"
+	fi
 	err_exit "Error: Unable to load the jmeter image"
 	;;
 openshift)
@@ -84,11 +81,10 @@ do
 	
 	sleep 120 
 	
-	
 	if [ ${LOAD_TYPE} == "openshift" ]; then
 		# Load dummy users into the DB
 		wget -O- http://${IP_ADDR}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS}  2> ${LOGFILE}
-		cmd="docker run --rm -v ${PWD}:/opt/app dinogun/jmeter:3.1 jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR} -n -t /opt/app/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.${iter}.log -j /opt/app/logs/jmeter.${iter}.log"
+		cmd="docker run --rm -v ${PWD}:/opt/app -it ${JMETER_FOR_LOAD} jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR} -n -t /opt/app/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.${iter}.log -j /opt/app/logs/jmeter.${iter}.log"
 	else
 		# Load dummy users into the DB
 		wget -O- http://${IP_ADDR}:${ACMEAIR_PORT}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS} 2> ${LOGFILE}

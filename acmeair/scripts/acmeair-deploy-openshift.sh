@@ -4,7 +4,7 @@ ROOT_DIR=.
 pushd ${ROOT_DIR}
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER NAMESPACE MANIFESTS_DIR RESULTS_DIR_PATH
-# Ex of ARGS :  wobbled.os.fyre.ibm.com openshift-monitoring rt-cloud-benchmarks/acmeair/manifests /acmeair/results
+# Ex of ARGS :  wobbled.os.fyre.ibm.com default rt-cloud-benchmarks/acmeair/manifests /acmeair/results
 BENCHMARK_SERVER=$1
 NAMESPACE=$2
 MANIFESTS_DIR=$3
@@ -54,9 +54,6 @@ function createInstances() {
 		((acmeair_port=acmeair_port+1))
 	done
 	
-	# Server instances on different worker node
-	# Hard coded the node name for now
-	# TODO for automation
 	#Wait till acmeair starts
 	sleep 40
 	#Expose the services
