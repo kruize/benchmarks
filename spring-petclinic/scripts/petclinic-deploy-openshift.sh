@@ -17,7 +17,7 @@ fi
 if [ -z "${SERVER_INSTANCES}" ]; then
 	SERVER_INSTANCES=1
 else
-	SERVER_INSTANCES=$5
+	SERVER_INSTANCES=$4
 fi
 
 function err_exit() {
