@@ -88,7 +88,7 @@ function run_jmeter_workload() {
 	IP_ADDR=$1
 	# Run the jmeter load
 	echo "Running jmeter load with the following parameters"
-	cmd="docker run  --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} kusumach/petclinic_jmeter_noport:0423"
+	cmd="docker run  --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} kruize/jmeter_petclinic:noport"
 	echo "CMD = ${cmd}"
 	$cmd > $RESULTS_LOG
 }
