@@ -122,6 +122,41 @@ To test with multiple instances follow [README.md](/spring-petclinic/scripts/per
 # Cleanup
 `$ ./scripts/petclinic-cleanup.sh`
 
+# Changes to be done to get kruize runtime recommendations for petclinic
+**Add the following in**
+
+- **pom.xml file**
+```
+<!-- Micrometer Prometheus registry  -->
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
+``` 
+- **Application.properties**
+```
+#Since cadvisor uses the port 8080, use the port 8081
+server.port=8081
+#management
+management.endpoints.web.base-path=/manage
+```
+Compile and build the application 
+
+- **Use 8081 for port mapping**
+
+- **Add petclinic as target in kruize/manifests/docker/prometheus.yaml**
+```
+- job_name: petclinic-app
+  honor_timestamps: true
+  scrape_interval: 2s
+  scrape_timeout: 1s
+  metrics_path: /manage/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+      - petclinic-app:8081
+```
+****
 # Note for RHEL 8.0 users
 podman docker should have the latest network version to work.
 
