@@ -2,7 +2,7 @@
 
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
-export NETWORK="petclinic-net"
+export NETWORK="kruize-network"
 CPU="2.5"
 MEMORY="1024M"
 ROOT_DIR=${PWD}
@@ -65,7 +65,7 @@ function pull_image() {
 function run_petclinic() {
 	PETCLINIC_IMAGE=$1   
 	ARGS=$2   
-	if [ "$1" == "docker.io/kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" ]; then
+	if [ "$1" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" ]; then
 		PORT=8081
 	fi   
 	# Create docker network bridge "petclinic-net"
