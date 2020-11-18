@@ -86,6 +86,15 @@ podmemlogs=(mem memusage memrequests memlimits memreq_in_p memlimit_in_p)
 clusterlogs=(c_mem c_cpu c_cpulimits c_cpurequests c_memlimits c_memrequests)
 total_logs=(${throughputlogs[@]} ${podcpulogs[@]} ${podmemlogs[@]} ${clusterlogs[@]})
 
+function check_app() {
+	CMD=$(oc get pods --namespace=$NAMESPACE | grep "acmeair" | grep "Running" | cut -d " " -f1)
+if [ -z "${CMD}" ]; then
+	STATUS=0
+else
+	STATUS=1
+fi
+}
+
 function run_jmeter_workload() {
 	# Store results in this file
 	RESULTS_LOG=$2
@@ -103,6 +112,7 @@ function run_jmeter_with_scaling()
 	RESULTS_DIR_J=$1
 	TYPE=$2
 	RUN=$3
+	
 	# Load dummy users into the DB
 	wget -O- http://${IP_ADDR}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS}  2> ${LOGFILE}
 
@@ -165,15 +175,12 @@ function parseCpuMem()  {
 		done
 		for podmemlog in "${podmemlogs[@]}"
 		do
-			# Parsing CPU logs for POD
-			parsePodCpuLog $podcpulog $TYPE $run $ITR
-		done
-		for podmemlog in "${podmemlogs[@]}"
-		do
-		parsePodMemLog $podmemlog $TYPE $run $ITR
+			# Parsing mem logs for POD
+			parsePodMemLog $podmemlog $TYPE $run $ITR
 		done
 		for clusterlog in "${clusterlogs[@]}"
 		do
+			# Parsing cluster logs for POD
 			parseClusterLog $clusterlog $RESULTS_DIR_P/${clusterlog}-${TYPE}-${run}.json ${clusterlog}-${TYPE}-${itr}.log
 		done
 	done
@@ -245,11 +252,19 @@ function parseResults() {
 	for (( itr=0 ; itr<$TOTAL_ITR ;itr++))
 	do
 		RESULTS_DIR_P=$RESULTS_DIR_J/ITR-$itr
+		# input:Total number of warmups, iteration number
+		# output:Creates the throughput log file for each warmup
 		parseData warmup $WARMUPS $itr
+		# input:Total number of measures, iteration number
+		# output:Creates the throughput log file for each measure
 		parseData measure $MEASURES $itr
+		# input:Total number of warmups, iteration number
+		# output:Creates cpu, memory and cluster information in the form of log files for each warmup
 		parseCpuMem warmup $WARMUPS $itr
+		# input:Total number of measures, iteration number
+		# output:Creates cpu, memory and cluster information in the form of log files for each measure
 		parseCpuMem measure $MEASURES $itr
-
+		
 		#Calculte Average and Median of Throughput, Memory and CPU  scores
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f2 >> $RESULTS_DIR_J/throughput-measure-temp.log
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/weberror-measure-temp.log
@@ -313,10 +328,20 @@ function runItr()
 	RESULTS_runItr=$3
 	for (( run=0; run<${RUNS}; run++ ))
 	do
+		# Check if the application is running
+		check_app
+		if [ "$STATUS" == 0 ]; then
+			echo "Application pod did not come up"
+			exit 0;
+		fi
 		echo "##### $TYPE $run"
 		# Get CPU and MEM info through prometheus queries
+		# input: type of run(warmup or measure)-iteration number, cpu_mem_duration(jmeter_duration+10), result directory , benchmark server
+		# output: Cpu info, memory info, node info in the form of jason files.
 		./scripts/perf/getstats-openshift.sh $TYPE-$run $CPU_MEM_DURATION $RESULTS_runItr $BENCHMARK_SERVER acmeair &
 		# Run the jmeter workload
+		# input:result directory, type of run(warmup or measure), total number of runs
+		# output:Apply jmeter load and store the result in jason file
 		run_jmeter_with_scaling $RESULTS_runItr $TYPE $run
 		# Sleep till the jmeter load completes
 		sleep $JMETER_LOAD_DURATION
@@ -349,10 +374,18 @@ function runIterations() {
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-$itr
 		echo "Running ${WARMUPS} warmups for ${USERS} users"
+		# Perform warmup runs
+		# input: number of warmup runs, result directory 
+		# output: Cpu info, memory info, node info, jmeter load for each warmup runs in the form of jason files.
 		runItr warmup $WARMUPS $RESULTS_DIR_I
 		echo "Running ${MEASURES} measures for ${USERS} users"
+		# Perform measure runs
+		# input: number of measure runs, result directory
+		# output: Cpu info, memory info, node info, jmeter load for each measure runs in the form of jason files.
 		runItr measure $MEASURES $RESULTS_DIR_I
 		sleep 60
+		# input: result directory
+		# output: kruize recommendations for acmeair
 		get_recommendations_from_kruize $RESULTS_DIR_I
 	done
 }
@@ -368,8 +401,12 @@ do
 	RESULTS_SC=${RESULTS_DIR_ROOT}/scale_$scale
 	echo "RESULTS DIRECTORY is " $RESULTS_DIR_ROOT 
 	echo "Running the benchmark with $scale  instances with $TOTAL_ITR iterations having $WARMUPS warmups and $MEASURES measurements"
+	# Perform warmup and measure runs
+	# input: scaling instance, total number of iterations, warmups , measures , result directory 
 	runIterations $scale $TOTAL_ITR $WARMUPS $MEASURES $RESULTS_SC
 	echo "Parsing results for $scale instances"
+	# Parse the results
+	# input: Total number of iterations, result directory, scaling instance
+	# ouput: Creates required log
 	parseResults $TOTAL_ITR $RESULTS_SC $scale
 done
-
