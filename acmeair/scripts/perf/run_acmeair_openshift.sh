@@ -80,7 +80,7 @@ mkdir -p $RESULTS_DIR_ROOT
 #Adding 10 secs buffer to retrieve CPU and MEM info
 CPU_MEM_DURATION=`expr $JMETER_LOAD_DURATION + 10`
 
-throughputlogs=(throughput weberror)
+throughputlogs=(throughput responsetime weberror)
 podcpulogs=(cpu cpurequests cpulimits cpureq_in_p cpulimits_in_p)
 podmemlogs=(mem memusage memrequests memlimits memreq_in_p memlimit_in_p)
 clusterlogs=(c_mem c_cpu c_cpulimits c_cpurequests c_memlimits c_memrequests)
@@ -143,6 +143,7 @@ function parseData() {
 	for (( run=0 ; run<$TOTAL_RUNS ;run++))
 	do
 		thrp_sum=0
+		resp_sum=0
 		wer_sum=0
 		svc_apis=($(oc status --namespace=$NAMESPACE | grep "acmeair" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 		for svc_api  in "${svc_apis[@]}"
@@ -154,9 +155,10 @@ function parseData() {
 			weberrors=`echo $summary | awk '{print $15}' | sed 's%/s%%g'`
 			pages=`echo $summary | awk '{print $3}' | sed 's%/s%%g'`
 			thrp_sum=$(echo $thrp_sum+$throughput | bc)
+			resp_sum=$(echo $resp_sum+$responsetime | bc)
 			wer_sum=`expr $wer_sum + $weberrors`
 		done
-		echo "$run,$thrp_sum,$wer_sum" >> $RESULTS_DIR_J/Throughput-$TYPE-$itr.log
+		echo "$run,$thrp_sum,$resp_sum,$wer_sum" >> $RESULTS_DIR_J/Throughput-$TYPE-$itr.log
 	done
 }
 
@@ -267,7 +269,8 @@ function parseResults() {
 		
 		#Calculte Average and Median of Throughput, Memory and CPU  scores
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f2 >> $RESULTS_DIR_J/throughput-measure-temp.log
-		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/weberror-measure-temp.log
+		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/responsetime-measure-temp.log
+		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f4 >> $RESULTS_DIR_J/weberror-measure-temp.log
 		for podcpulog in "${podcpulogs[@]}"
 		do
 			cat $RESULTS_DIR_J/${podcpulog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${podcpulog}-measure-temp.log
@@ -287,7 +290,7 @@ function parseResults() {
 		eval total_${metric}_avg=$val
 	done
 
-	echo "$sca ,  $total_throughput_avg , $total_mem_avg , $total_cpu_avg , $total_c_mem_avg , $total_c_cpu_avg , $total_weberror_avg" >> $RESULTS_DIR_J/../Metrics.log
+	echo "$sca ,  $total_throughput_avg , $total_responsetime_avg , $total_mem_avg , $total_cpu_avg , $total_c_mem_avg , $total_c_cpu_avg , $total_weberror_avg" >> $RESULTS_DIR_J/../Metrics.log
 	echo "$sca ,  $total_mem_avg , $total_memusage_avg , $total_memrequests_avg , $total_memlimits_avg , $total_memreq_in_p_avg , $total_memlimit_in_p_avg " >> $RESULTS_DIR_J/../Metrics-mem.log
 	echo "$sca ,  $total_cpu_avg , $total_cpurequests_avg , $total_cpulimits_avg , $total_cpureq_in_p_avg , $total_cpulimits_in_p_avg " >> $RESULTS_DIR_J/../Metrics-cpu.log
 	echo "$sca , $total_c_cpu_avg , $total_c_cpurequests_avg , $total_c_cpulimits_avg , $total_c_mem_avg , $total_c_memrequests_avg , $total_c_memlimits_avg " >> $RESULTS_DIR_J/../Metrics-cluster.log
@@ -391,7 +394,7 @@ function runIterations() {
 }
 
 # Scale the instances and run the iterations
-echo "Instances , Throughput , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
+echo "Instances , Throughput , Responsetime , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
 echo "Instances ,  MEM_RSS , MEM_USAGE , MEM_REQ , MEM_LIM , MEM_REQ_IN_P , MEM_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-mem.log
 echo "Instances ,  CPU_USAGE , CPU_REQ , CPU_LIM , CPU_REQ_IN_P , CPU_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-cpu.log
 echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
