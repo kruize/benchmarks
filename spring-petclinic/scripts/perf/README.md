@@ -24,12 +24,12 @@ Example to test with multiple instances
 
 **`$./scripts/perf/run_petclinic_openshift.sh rouging.os.fyre.ibm.com openshift-monitoring result/ 300 60 5 3`**
 
-Refer Metrics.log to get the output data generated during the run i.e, throghput, total memory used by the pod, total cpu used by the pod, cluster memory usage in percentage,cluster cpu in percentage and web errors if any.
+Refer Metrics.log to get the output data generated during the run i.e, throghput, response time, total memory used by the pod, total cpu used by the pod, cluster memory usage in percentage,cluster cpu in percentage and web errors if any.
 
 **`$ cat Metrics.log`**
 ``` 
-Instances , Throughput , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS 
-1 ,  118.417 , 520.336 , 0.452839 , 39.8044 , 29.3174 , 0
-2 ,  233.683 , 1293.21 , 0.974918 , 43.2881 , 29.8591 , 0
+Instances , Throughput , Responsetime , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS 
+1 ,  89.8 , 2351.5 , 476.676 , 0.382072 , 40.5538 , 24.535 , 0
+
 ```
 For CPU and Memory details refer Metrics-cpu.log and Metrics-mem.log . And for individual informations look into the logs generated during the run.
