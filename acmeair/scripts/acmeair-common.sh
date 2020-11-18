@@ -88,7 +88,7 @@ function check_app() {
 	if [ "${LOAD_TYPE}" == "minikube" ]; then
 		CMD=$(kubectl get pods | grep "acmeair" | grep "Running" | cut -d " " -f1)
 	elif [ "${LOAD_TYPE}" == "openshift" ]; then
-		CMD=$(oc get pods --namespace=default | grep "acmeair" | grep "Running" | cut -d " " -f1)
+		CMD=$(oc get pods --namespace=$NAMESPACE | grep "acmeair" | grep "Running" | cut -d " " -f1)
 	fi
 	if [ -z "${CMD}" ]; then
 		STATUS=0
