@@ -23,6 +23,9 @@ function err_exit() {
 }
 
 function createInstances() {
+	# Deploy service monitor to get Java Heap recommendations from petclinic$
+	kubectl apply -f $MANIFESTS_DIR/service-monitor.yaml
+
 	#Create the deployments and services
 	kubectl apply -f $MANIFESTS_DIR/petclinic.yaml 
 	err_exit "Error: Issue in deploying."
