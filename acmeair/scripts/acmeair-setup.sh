@@ -40,6 +40,7 @@ get_ip
 
 if [ $SETUP  ]; then
 	# Build the acmeair application sources and create the docker image
+	# output:build the application from scratch and create the acmeair docker image 
 	echo -n "Building acmeair application..."
 	build_acmeair
 	ACMEAIR_IMAGE=acmeair_mono_service_liberty
@@ -55,12 +56,16 @@ if [ $SETUP  ]; then
 	build_jmeter
 	echo "done"
 else
+	# Pull the jmeter image
+	# input: jmeter image to be pulled
 	echo -n "Pulling the jmeter image..."
 	pull_image ${JMETER_IMAGE}
 	echo "done"
 fi
 
 # Run the application and mongo db
+# input:acmeair image to be used 
+# output:Creates network bridge "acmeair-net" and runs acmeair application container on the same network
 echo -n "Running acmeair and mongo db..."
 run_acmeair ${ACMEAIR_IMAGE}
 echo "done"
