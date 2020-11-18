@@ -19,24 +19,23 @@ if [ "$1" == "do_setup" ]; then
 	IMAGE=$2
 	if [ -z "${IMAGE}" ]; then
 		IMAGE=adoptopenjdk/openjdk11-openj9:latest
-		JVM_ARGS=-Xshareclasses:none
+		JVM_ARGS="-Xshareclasses:none"
 	fi
 else
 	PETCLINIC_IMAGE=$2
 	JMETER_IMAGE=$3
-fi
+	if [ -z "${PETCLINIC_IMAGE}" ]; then
+		PETCLINIC_IMAGE=kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
+	fi
 
-if [ -z "${PETCLINIC_IMAGE}" ]; then
-	PETCLINIC_IMAGE=docker.io/kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
-fi
-
-if [ -z "${JMETER_IMAGE}" ]; then
-	JMETER_IMAGE=docker.io/kruize/jmeter_petclinic:3.1
+	if [ -z "${JMETER_IMAGE}" ]; then
+		JMETER_IMAGE=docker.io/kruize/jmeter_petclinic:3.1
+	fi
 fi
 
 ROOT_DIR=".."
 source ./scripts/petclinic-common.sh
-cd ${ROOT_DIR}
+pushd ${ROOT_DIR}
 
 # Check if docker and docker-compose are installed
 echo -n "Checking prereqs..."
@@ -48,22 +47,28 @@ get_ip
 
 if [ $SETUP  ]; then
 	# Build the petclinic application sources and create the docker image
+	# input:base_image 
+	# output:build the application from scratch and create the petclinic docker image with the specified base_image(input)
 	echo -n "Building petclinic application..."
 	build_petclinic ${IMAGE} 
 	PETCLINIC_IMAGE="spring-petclinic"
 	echo "done"
-# Build the jmeter docker image with the petclinic driver
+	# Build the jmeter docker image with the petclinic driver
 	echo -n "Building jmeter with petclinic driver..."
 	build_jmeter
 	echo "done"
 else
-	echo -n "Pulling the jmeter image..."
+	# Pull the jmeter image
+	# input: jmeter image to be pulled
+	echo -n "Pulling the jmeter image..." 
 	pull_image ${JMETER_IMAGE}
 	echo "done"
 fi
 
 # Run the application and mongo db
+# input:petclinic image to be used and JVM arguments if any
+# output:Create network bridge "kruize-network" and run petclinic application container on the same network 
 echo -n "Running petclinic with inbuilt db..."
-run_petclinic ${PETCLINIC_IMAGE} ${JVM_ARGS}
+run_petclinic ${PETCLINIC_IMAGE} ${JVM_ARGS} 
 echo "done"
 
