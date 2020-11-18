@@ -16,7 +16,6 @@ function get_pod_mem_rss()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool. 
-		#TODO curl picks data of only 7 points for 10 seconds. Need to check if we can improve on this.
 		curl --silent -G -kH "Authorization: Bearer $TOKEN" --data-urlencode 'query=sum(node_namespace_pod_container:container_memory_rss{node='\"$node\"'}) by (pod)' $URL | jq '[ .data.result[] | [ .value[0], .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> $RESULTS_DIR/${node}_mem-$ITER.json
 	done
 }
@@ -34,7 +33,6 @@ function get_pod_mem_usage()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		#TODO curl picks data of only 7 points for 10 seconds. Need to check if we can improve on this.
 		curl --silent -G -kH "Authorization: Bearer $TOKEN" --data-urlencode 'query=sum(node_namespace_pod_container:container_memory_working_set_bytes{node='\"$node\"'}) by (pod)' $URL | jq '[ .data.result[] | [ .value[0], .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> $RESULTS_DIR/${node}_memusage-$ITER.json
 	done
 }
@@ -52,7 +50,6 @@ function get_pod_mem_requests()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		#TODO curl picks data of only 7 points for 10 seconds. Need to check if we can improve on this.
 		curl --silent -G -kH "Authorization: Bearer $TOKEN" --data-urlencode 'query=sum(kube_pod_container_resource_requests_memory_bytes{node='\"$node\"'}) by (pod)' $URL | jq '[ .data.result[] | [ .value[0], .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> $RESULTS_DIR/${node}_memrequests-$ITER.json
 	done
 }
@@ -70,7 +67,6 @@ function get_pod_mem_requests_in_p()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		#TODO curl picks data of only 7 points for 10 seconds. Need to check if we can improve on this.
 		curl --silent -G -kH "Authorization: Bearer $TOKEN" --data-urlencode 'query=sum(node_namespace_pod_container:container_memory_working_set_bytes{node='\"$node\"'}) by (pod) / sum(kube_pod_container_resource_requests_memory_bytes{node='\"$node\"'}) by (pod)' $URL | jq '[ .data.result[] | [ .value[0], .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> $RESULTS_DIR/${node}_memreq_in_p-$ITER.json
 	done
 }
@@ -88,7 +84,6 @@ function get_pod_mem_limits()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		#TODO curl picks data of only 7 points for 10 seconds. Need to check if we can improve on this.
 		curl --silent -G -kH "Authorization: Bearer $TOKEN" --data-urlencode 'query=sum(kube_pod_container_resource_limits_memory_bytes{node='\"$node\"'}) by (pod)' $URL | jq '[ .data.result[] | [ .value[0], .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> $RESULTS_DIR/${node}_memlimits-$ITER.json
 	done
 }
@@ -106,7 +101,6 @@ function get_pod_mem_limits_in_p()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		#TODO curl picks data of only 7 points for 10 seconds. Need to check if we can improve on this.
 		curl --silent -G -kH "Authorization: Bearer $TOKEN" --data-urlencode 'query=sum(node_namespace_pod_container:container_memory_working_set_bytes{node='\"$node\"'}) by (pod) / sum(kube_pod_container_resource_limits_memory_bytes{node='\"$node\"'}) by (pod)' $URL | jq '[ .data.result[] | [ .value[0], .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> $RESULTS_DIR/${node}_memlimit_in_p-$ITER.json
 	done
 }
@@ -242,7 +236,6 @@ URL=https://${PROMETHEUS_APP}.${BENCHMARK_SERVER}/api/v1/query
 TOKEN=`oc whoami --show-token`
 
 worker_nodes=($(oc get nodes | grep worker | cut -d " " -f1))
-#echo ${worker_nodes[@]}
 #Need to export the function to enable timeout
 export -f get_pod_mem_rss get_pod_mem_usage get_pod_mem_requests get_pod_mem_requests_in_p get_pod_mem_limits get_pod_mem_limits_in_p
 export -f get_pod_cpu_usage get_pod_cpu_requests get_pod_cpu_requests_in_p get_pod_cpu_limits get_pod_cpu_limits_in_p
