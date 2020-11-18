@@ -2,11 +2,12 @@
 
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
-export NETWORK="petclinic-net"
+export NETWORK="kruize-network"
 CPU="2.5"
 MEMORY="1024M"
 ROOT_DIR=${PWD}
 LOGFILE="${ROOT_DIR}/setup.log"
+PORT="8080"
 
 function err_exit() {
 	if [ $? != 0 ]; then
@@ -49,10 +50,8 @@ function build_petclinic() {
 
 # Build the jmeter application along with the petclinic
 function build_jmeter() {
-	#pushd spring-petclinic >>${LOGFILE}
 	docker build --pull -t jmeter_petclinic:3.1 -f Dockerfile_jmeter . 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Building of jmeter image."
-	#popd >>${LOGFILE}
 }
 
 # Pull the jmeter image
@@ -65,16 +64,40 @@ function pull_image() {
 # Run the petclinic application 
 function run_petclinic() {
 	PETCLINIC_IMAGE=$1   
-	ARGS=$2      
-	# Create docker network bridge "petclinic-net"
-	docker network create --driver bridge ${NETWORK} 2>>${LOGFILE} >>${LOGFILE}
+	ARGS=$2   
+	if [ "$1" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" ]; then
+		PORT=8081
+	fi   
+	# Create docker network bridge "kruize-network"
+	NET_NAME=`docker network ls -f "name=${NETWORK}" --format {{.Name}} | tail -n 1`
+
+	if [[ -z $NET_NAME ]];  then
+		echo "Creating Kruize network: ${NETWORK}"
+		docker network --driver bridge create ${NETWORK} 2>>${LOGFILE} >>${LOGFILE}
+	else
+		echo "${NETWORK} already exists"
+	fi
 	err_exit "Error: Unable to create docker bridge network ${NETWORK}."
 
-	# Run the petclinic app container on "petclinic-net"
-	docker run -d --name=petclinic-app --cpus=${CPU} --memory=${MEMORY} -p ${PETCLINIC_PORT}:8080 --network=${NETWORK} -e JVM_ARGS=${ARGS} ${PETCLINIC_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
+	# Run the petclinic app container on "kruize-network"
+	docker run -d --name=petclinic-app --cpus=${CPU} --memory=${MEMORY} -p ${PETCLINIC_PORT}:${PORT} --network=${NETWORK} -e JVM_ARGS=${ARGS} ${PETCLINIC_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to start petclinic container."
 }
- 
+
+# Check if the application is running
+function check_app() {
+	if [ "${LOAD_TYPE}" == "minikube" ]; then
+		CMD=$(kubectl get pods | grep "petclinic" | grep "Running" | cut -d " " -f1)
+	elif [ "${LOAD_TYPE}" == "openshift" ]; then
+		CMD=$(oc get pods --namespace=$NAMESPACE | grep "petclinic" | grep "Running" | cut -d " " -f1)
+	fi
+	if [ -z "${CMD}" ]; then
+		STATUS=0
+	else
+		STATUS=1
+	fi
+}
+
 # Parse the Throughput Results
 function parse_petclinic_results() {
 	RESULTS_DIR=$1
@@ -91,4 +114,3 @@ function parse_petclinic_results() {
 		echo "$log,$throughput,$pages,$responsetime,$weberrors" >> ${RESULTS_DIR}/Throughput.log
 	done
 }
-
