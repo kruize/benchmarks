@@ -32,7 +32,7 @@ fi
 
 if [ -z "${JMETER_LOAD_USERS}" ]; then
 	JMETER_LOAD_USERS=400
-else 
+else
 	JMETER_LOAD_USERS=$4
 fi
 
@@ -42,16 +42,16 @@ else
 	JMETER_LOAD_DURATION=$5
 fi
 
-if [ -z "${WARMUPS}" ]; then 
+if [ -z "${WARMUPS}" ]; then
 	WARMUPS=5
 else
 	WARMUPS=$6
 fi
 
 if [ -z "${MEASURES}" ]; then
-	 MEASURES=3
+	MEASURES=3
 else
-	 MEASURES=$7
+	MEASURES=$7
 fi
 
 if [ -z "${TOTAL_INST}" ]; then
@@ -76,11 +76,20 @@ mkdir -p $RESULTS_DIR_ROOT
 #Adding 10 secs buffer to retrieve CPU and MEM info
 CPU_MEM_DURATION=`expr $JMETER_LOAD_DURATION + 10`
 
-throughputlogs=(throughput weberror)
+throughputlogs=(throughput responsetime weberror)
 podcpulogs=(cpu cpurequests cpulimits cpureq_in_p cpulimits_in_p)
 podmemlogs=(mem memusage memrequests memlimits memreq_in_p memlimit_in_p)
 clusterlogs=(c_mem c_cpu c_cpulimits c_cpurequests c_memlimits c_memrequests)
 total_logs=(${throughputlogs[@]} ${podcpulogs[@]} ${podmemlogs[@]} ${clusterlogs[@]})
+
+function check_app() {
+	CMD=$(oc get pods --namespace=$NAMESPACE | grep "petclinic" | grep "Running" | cut -d " " -f1)
+if [ -z "${CMD}" ]; then
+	STATUS=0
+else
+	STATUS=1
+fi
+}
 
 function run_jmeter_workload() {
 	# Store results in this file
@@ -88,9 +97,9 @@ function run_jmeter_workload() {
 	IP_ADDR=$1
 	# Run the jmeter load
 	echo "Running jmeter load with the following parameters"
-	cmd="docker run  --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} kusumach/petclinic_jmeter_noport:0423"
+	cmd="docker run  --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} kruize/jmeter_petclinic:noport"
 	echo "CMD = ${cmd}"
-	$cmd > $RESULTS_LOG 
+	$cmd > $RESULTS_LOG
 }
 
 function run_jmeter_with_scaling()
@@ -102,9 +111,8 @@ function run_jmeter_with_scaling()
 	for svc_api  in "${svc_apis[@]}"
 	do
 		RESULT_LOG=$RESULTS_DIR_J/jmeter-$svc_api-$TYPE-$RUN.log
-		#echo "run_jmeter_workload $svc_api $RESULT_LOG"
 		run_jmeter_workload $svc_api $RESULT_LOG &
-	done	
+	done
 }
 
 function parseData() {
@@ -115,6 +123,7 @@ function parseData() {
 	for (( run=0 ; run<$TOTAL_RUNS ;run++))
 	do
 		thrp_sum=0
+		resp_sum=0
 		wer_sum=0
 		svc_apis=($(oc status --namespace=$NAMESPACE | grep "petclinic" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 		for svc_api  in "${svc_apis[@]}"
@@ -126,9 +135,10 @@ function parseData() {
 			weberrors=`echo $summary | awk '{print $15}' | sed 's%/s%%g'`
 			pages=`echo $summary | awk '{print $3}' | sed 's%/s%%g'`
 			thrp_sum=$(echo $thrp_sum+$throughput | bc)
+			resp_sum=$(echo $resp_sum+$responsetime | bc)
 			wer_sum=`expr $wer_sum + $weberrors`
 		done
-		echo "$run,$thrp_sum,$wer_sum" >> $RESULTS_DIR_J/Throughput-$TYPE-$itr.log
+		echo "$run,$thrp_sum,$resp_sum,$wer_sum" >> $RESULTS_DIR_J/Throughput-$TYPE-$itr.log
 	done
 }
 
@@ -142,15 +152,17 @@ function parseCpuMem()  {
 	do
 		for podcpulog in "${podcpulogs[@]}"
 		do
-		# Parsing CPU logs for POD
+			# Parsing CPU logs for pod
 			parsePodCpuLog $podcpulog $TYPE $run $ITR
 		done
 		for podmemlog in "${podmemlogs[@]}"
-		do        
+		do
+			# Parsing Mem logs for pod
 			parsePodMemLog $podmemlog $TYPE $run $ITR
 		done
 		for clusterlog in "${clusterlogs[@]}"
 		do
+			# Parsing Cluster logs 
 			parseClusterLog $clusterlog $RESULTS_DIR_P/${clusterlog}-${TYPE}-${run}.json ${clusterlog}-${TYPE}-${itr}.log
 		done
 	done
@@ -202,7 +214,7 @@ function parsePodMemLog()
 			fi
 			mem_sum=$(echo $mem_sum+$each_pod_mem_avg | bc)
 		done
-	 done
+	done
 	echo "$run , $mem_sum " >> $RESULTS_DIR_J/$RESULTS_LOG
 }
 
@@ -222,15 +234,24 @@ function parseResults() {
 	for (( itr=0 ; itr<$TOTAL_ITR ;itr++))
 	do
 		RESULTS_DIR_P=$RESULTS_DIR_J/ITR-$itr
+		# input:Total number of warmups, iteration number
+		# output:Creates the throughput log file for each warmup
 		parseData warmup $WARMUPS $itr
+		# input:Total number of measures, iteration number
+		# output:Creates the throughput log file for each measure
 		parseData measure $MEASURES $itr
+		# input:Total number of warmups, iteration number
+		# output:Creates cpu, memory and cluster information in the form of log files for each warmup
 		parseCpuMem warmup $WARMUPS $itr
+		# input:Total number of measures, iteration number
+		# output:Creates cpu, memory and cluster information in the form of log files for each measure
 		parseCpuMem measure $MEASURES $itr
 
 		#Calculte Average and Median of Throughput, Memory and CPU  scores
 		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f2 >> $RESULTS_DIR_J/throughput-measure-temp.log
-		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/weberror-measure-temp.log
-		
+		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f3 >> $RESULTS_DIR_J/responsetime-measure-temp.log
+		cat $RESULTS_DIR_J/Throughput-measure-$itr.log | cut -d "," -f4 >> $RESULTS_DIR_J/weberror-measure-temp.log
+
 		for podcpulog in "${podcpulogs[@]}"
 		do
 			cat $RESULTS_DIR_J/${podcpulog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${podcpulog}-measure-temp.log
@@ -244,17 +265,17 @@ function parseResults() {
 			cat $RESULTS_DIR_J/${clusterlog}-measure-${itr}.log | cut -d "," -f2 >> $RESULTS_DIR_J/${clusterlog}-measure-temp.log
 		done
 	done
-	
+
 	for metric in "${total_logs[@]}"
 	do
 		val=$(echo `calcAvg $RESULTS_DIR_J/${metric}-measure-temp.log | cut -d "=" -f2`)
 		eval total_${metric}_avg=$val
 	done
 
-	echo "$sca ,  $total_throughput_avg , $total_mem_avg , $total_cpu_avg , $total_c_mem_avg , $total_c_cpu_avg , $total_weberror_avg" >> $RESULTS_DIR_J/../Metrics.log
+	echo "$sca ,  $total_throughput_avg , $total_responsetime_avg , $total_mem_avg , $total_cpu_avg , $total_c_mem_avg , $total_c_cpu_avg , $total_weberror_avg" >> $RESULTS_DIR_J/../Metrics.log
 	echo "$sca ,  $total_mem_avg , $total_memusage_avg , $total_memrequests_avg , $total_memlimits_avg , $total_memreq_in_p_avg , $total_memlimit_in_p_avg " >> $RESULTS_DIR_J/../Metrics-mem.log
 	echo "$sca ,  $total_cpu_avg , $total_cpurequests_avg , $total_cpulimits_avg , $total_cpureq_in_p_avg , $total_cpulimits_in_p_avg " >> $RESULTS_DIR_J/../Metrics-cpu.log
-	echo "$sca ,  $total_c_cpu_avg , $total_c_cpurequests_avg , $total_c_cpulimits_avg , $total_c_mem_avg , $total_c_memrequests_avg , $total_c_memlimits_avg " >> $RESULTS_DIR_J/../Metrics-cluster.log
+	echo "$sca , $total_c_cpu_avg , $total_c_cpurequests_avg , $total_c_cpulimits_avg , $total_c_mem_avg , $total_c_memrequests_avg , $total_c_memlimits_avg " >> $RESULTS_DIR_J/../Metrics-cluster.log
 }
 
 function calcAvg_inMB()
@@ -292,10 +313,20 @@ function runItr()
 	RESULTS_runItr=$3
 	for (( run=0; run<${RUNS}; run++ ))
 	do
+		# Check if the application is running
+		check_app
+		if [ "$STATUS" == 0 ]; then
+			echo "Application pod did not come up"
+			exit 0;
+		fi
 		echo "##### $TYPE $run"
 		# Get CPU and MEM info through prometheus queries
+		# input: type of run(warmup or measure)-iteration number, cpu_mem_duration(jmeter_duration+10), result directory , benchmark server
+		# output: Cpu info, memory info, node info in the form of jason files.
 		./scripts/perf/getstats-openshift.sh $TYPE-$run $CPU_MEM_DURATION $RESULTS_runItr $BENCHMARK_SERVER petclinic &
 		# Run the jmeter workload
+		# input:result directory, type of run(warmup or measure), total number of runs
+		# output:Apply jmeter load and store the result in jason file
 		run_jmeter_with_scaling $RESULTS_runItr $TYPE $run
 		# Sleep till the jmeter load completes
 		sleep $JMETER_LOAD_DURATION
@@ -323,23 +354,29 @@ function runIterations() {
 	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
 	do
 		if [ $RE_DEPLOY == "true" ]; then
-		./scripts/petclinic-deploy-openshift.sh $BENCHMARK_SERVER $NAMESPACE $MANIFESTS_DIR $RESULTS_DIR_ITR $SCALING
+			./scripts/petclinic-deploy-openshift.sh $BENCHMARK_SERVER $NAMESPACE $MANIFESTS_DIR $SCALING
 		fi
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-$itr
-		#mkdir -p $RESULTS_DIR_I
 		echo "Running ${WARMUPS} warmups for ${USERS} users"
-		runItr warmup $WARMUPS $RESULTS_DIR_I	
+		# Perform warmup runs
+		# input: number of warmup runs, result directory 
+		# output: Cpu info, memory info, node info, jmeter load for each warmup runs in the form of jason files.
+		runItr warmup $WARMUPS $RESULTS_DIR_I
 		echo "Running ${MEASURES} measures for ${USERS} users"
+		# Perform measure runs
+		# input: number of measure runs, result directory
+		# output: Cpu info, memory info, node info, jmeter load for each measure runs in the form of jason files.
 		runItr measure $MEASURES $RESULTS_DIR_I
 		sleep 60
+		# input: result directory
+		# output: kruize recommendations for petclinic
 		get_recommendations_from_kruize $RESULTS_DIR_I
 	done
 }
 
-#TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
 # Scale the instances and run the iterations
-echo "Instances , Throughput , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
+echo "Instances , Throughput , Responsetime , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
 echo "Instances ,  MEM_RSS , MEM_USAGE , MEM_REQ , MEM_LIM , MEM_REQ_IN_P , MEM_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-mem.log
 echo "Instances ,  CPU_USAGE , CPU_REQ , CPU_LIM , CPU_REQ_IN_P , CPU_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-cpu.log
 echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
@@ -347,11 +384,16 @@ echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_
 for (( scale=1; scale<=${TOTAL_INST}; scale++ ))
 do
 	RESULTS_SC=${RESULTS_DIR_ROOT}/scale_$scale
-	#mkdir -p $RESULTS_SC
 	echo "RESULTS DIRECTORY is " $RESULTS_DIR_ROOT 
 	echo "Running the benchmark with $scale  instances with $TOTAL_ITR iterations having $WARMUPS warmups and $MEASURES measurements"
+	# Perform warmup and measure runs
+	# input: scaling instance, total number of iterations, warmups , measures , result directory 
 	runIterations $scale $TOTAL_ITR $WARMUPS $MEASURES $RESULTS_SC
 	echo "Parsing results for $scale instances"
+	# Parse the results
+	# input: Total number of iterations, result directory, scaling instance
+	# ouput: Creates required log files
 	parseResults $TOTAL_ITR $RESULTS_SC $scale
 done
+
 
