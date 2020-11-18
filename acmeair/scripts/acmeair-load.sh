@@ -2,6 +2,7 @@
 #
 # Script to load test acmeair app
 # 
+NAMESPACE="default"
 
 source ./scripts/acmeair-common.sh
 
@@ -56,7 +57,6 @@ icp|minikube)
 	;;
 openshift)
 	if [ -z "${IP_ADDR}" ]; then
-		NAMESPACE="default"
 		IP_ADDR=($(oc status --namespace=$NAMESPACE | grep "acmeair" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 	fi
 	JMETER_FOR_LOAD="dinogun/jmeter:3.1"
@@ -80,6 +80,14 @@ do
 	JMETER_LOAD_DURATION=20
 	
 	sleep 120 
+	
+	# Check if the application is running
+	# output: Returns 1 if the pod is running else returns 0.
+	check_app
+	if [ "$STATUS" == 0 ]; then
+		echo "Application pod did not come up"
+		exit 0;
+	fi
 	
 	if [ ${LOAD_TYPE} == "openshift" ]; then
 		# Load dummy users into the DB
@@ -108,13 +116,15 @@ do
 	$cmd > ${LOG_DIR}/jmeter-${iter}.log
 done
 
-#Ret the max user value to previous value
+#Reset the max user value to previous value
 git checkout ${JMX_FILE} > ${LOGFILE}
 
-# Reset the jmx value 
+# Reset the jmx maximumValue 
 sed -i 's/"maximumValue">${MAX_USER_ID}</"maximumValue">'99'</' ${JMX_FILE}
 
 # Parse the results
+# input:result directory , Number of iterations of the jmeter load
+# output:Throughput log file
 parse_acmeair_results ${LOG_DIR} ${MAX_LOOP}
 echo "#########################################################################################"
 echo "				Displaying the results					       "
