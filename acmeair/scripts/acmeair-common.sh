@@ -83,6 +83,20 @@ function run_acmeair() {
 	err_exit "Error: Unable to start acmeair container."
 }
 
+# Check if the application is running
+function check_app() {
+	if [ "${LOAD_TYPE}" == "minikube" ]; then
+		CMD=$(kubectl get pods | grep "acmeair" | grep "Running" | cut -d " " -f1)
+	elif [ "${LOAD_TYPE}" == "openshift" ]; then
+		CMD=$(oc get pods --namespace=default | grep "acmeair" | grep "Running" | cut -d " " -f1)
+	fi
+	if [ -z "${CMD}" ]; then
+		STATUS=0
+	else
+		STATUS=1
+	fi
+}
+
 # Parse the Throughput Results
 function parse_acmeair_results() {
 	RESULTS_DIR=$1
