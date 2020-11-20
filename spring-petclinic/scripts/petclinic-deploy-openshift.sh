@@ -20,6 +20,9 @@ else
 	SERVER_INSTANCES=$4
 fi
 
+# checks if the previous command is executed successfully
+# input:Return value of previous command
+# output:Prompts the error message if the return value is not zero 
 function err_exit() {
 	if [ $? != 0 ]; then
 		printf "$*"
@@ -28,8 +31,9 @@ function err_exit() {
 	fi
 }
 
+# Create multiple yamls based on instances and Update the template yamls with names and create multiple files
+# input:petclinic and service-monitor yaml file
 function createInstances() {
-	# Create multiple yamls based on instances and Update the template yamls with names and create multiple files
 	#Create the deployments and services
 	#Using inmem DB so no DB specific pods
 
@@ -64,6 +68,7 @@ function createInstances() {
 	done
 }
 
+# Delete the petclinic deployments,services and routes if it is already present 
 function stopAllInstances() {
 	# Delete the deployments first to avoid creating replica pods
 	petclinic_deployments=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
