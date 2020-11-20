@@ -18,15 +18,6 @@ if [ "$#" -lt 1 ]; then
 	usage
 fi
 
-function err_exit() {
-	if [ $? != 0 ]; then
-		printf "$*"
-		echo
-		echo "See ${LOGFILE} for more details"
-		exit -1
-	fi
-}
-
 LOAD_TYPE=$1
 MAX_LOOP=$2
 IP_ADDR=$3
@@ -100,7 +91,6 @@ do
 	fi
 	
 	# Check if the application is running
-	# output: Returns 1 if the application is running else returns 0
 	check_app
 	if [ "$STATUS" == 0 ]; then
 		echo "Application pod did not come up"
@@ -117,8 +107,6 @@ do
 done
 
 # Parse the results
-# input:result directory , Number of iterations of the jmeter load
-# output:Throughput log file
 parse_petclinic_results ${LOG_DIR} ${MAX_LOOP}
 echo "#########################################################################################"
 echo "				Displaying the results					       "
