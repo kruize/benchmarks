@@ -9,6 +9,9 @@ ROOT_DIR=${PWD}
 LOGFILE="${ROOT_DIR}/setup.log"
 PORT="8080"
 
+# checks if the previous command is executed successfully
+# input:Return value of previous command
+# output:Prompts the error message if the return value is not zero 
 function err_exit() {
 	if [ $? != 0 ]; then
 		printf "$*"
@@ -33,6 +36,8 @@ function get_ip() {
 }
 
 # Build the petclinic application
+# input:base_image 
+# output:build the application from scratch and create the petclinic docker image with the specified base_image(input)
 function build_petclinic() {
 	IMAGE=$1
 	# Build the application from git clone. Requires git , JAVA compiler on your machine to work.
@@ -55,6 +60,7 @@ function build_jmeter() {
 }
 
 # Pull the jmeter image
+# input: jmeter image to be pulled
 function pull_image() {
 	JMETER_IMAGE=$1
 	docker pull ${JMETER_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
@@ -62,6 +68,8 @@ function pull_image() {
 }
 
 # Run the petclinic application 
+# input:petclinic image to be used and JVM arguments if any
+# output:Create network bridge "kruize-network" and run petclinic application container on the same network
 function run_petclinic() {
 	PETCLINIC_IMAGE=$1   
 	ARGS=$2   
@@ -85,6 +93,7 @@ function run_petclinic() {
 }
 
 # Check if the application is running
+# output: Returns 1 if the application is running else returns 0
 function check_app() {
 	if [ "${LOAD_TYPE}" == "minikube" ]; then
 		CMD=$(kubectl get pods | grep "petclinic" | grep "Running" | cut -d " " -f1)
@@ -99,6 +108,8 @@ function check_app() {
 }
 
 # Parse the Throughput Results
+# input:result directory , Number of iterations of the jmeter load
+# output:Throughput log file (throughput, Number of pages it has retreived, average response time and errors if any)
 function parse_petclinic_results() {
 	RESULTS_DIR=$1
 	TOTAL_LOGS=$2
