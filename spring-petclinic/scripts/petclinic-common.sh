@@ -85,7 +85,6 @@ function run_petclinic() {
 	else
 		echo "${NETWORK} already exists"
 	fi
-	err_exit "Error: Unable to create docker bridge network ${NETWORK}."
 
 	# Run the petclinic app container on "kruize-network"
 	docker run -d --name=petclinic-app --cpus=${CPU} --memory=${MEMORY} -p ${PETCLINIC_PORT}:${PORT} --network=${NETWORK} -e JVM_ARGS=${ARGS} ${PETCLINIC_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
