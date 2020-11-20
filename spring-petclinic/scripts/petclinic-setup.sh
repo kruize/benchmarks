@@ -20,7 +20,6 @@ if [ "$1" == "do_setup" ]; then
 	IMAGE=$2
 	if [ -z "${IMAGE}" ]; then
 		IMAGE=adoptopenjdk/openjdk11-openj9:latest
-		JVM_ARGS="-Xshareclasses:none"
 	fi
 else
 	PETCLINIC_IMAGE=$2
@@ -32,6 +31,10 @@ else
 	if [ -z "${JMETER_IMAGE}" ]; then
 		JMETER_IMAGE=docker.io/kruize/jmeter_petclinic:3.1
 	fi
+fi
+
+if [ "${IMAGE}" == "adoptopenjdk/openjdk11-openj9:latest" ]; then
+	JVM_ARGS="-Xshareclasses:none"
 fi
 
 ROOT_DIR=".."
