@@ -3,6 +3,7 @@
 # Script to build and run the petclinic application and do a test load of the app
 # 
 
+# Usage of the script
 function usage() {
 	echo
 	echo "Usage: [do_setup/use_image]" 
@@ -47,8 +48,6 @@ get_ip
 
 if [ $SETUP  ]; then
 	# Build the petclinic application sources and create the docker image
-	# input:base_image 
-	# output:build the application from scratch and create the petclinic docker image with the specified base_image(input)
 	echo -n "Building petclinic application..."
 	build_petclinic ${IMAGE} 
 	PETCLINIC_IMAGE="spring-petclinic"
@@ -59,16 +58,12 @@ if [ $SETUP  ]; then
 	echo "done"
 else
 	# Pull the jmeter image
-	# input: jmeter image to be pulled
 	echo -n "Pulling the jmeter image..." 
 	pull_image ${JMETER_IMAGE}
 	echo "done"
 fi
 
-# Run the application and mongo db
-# input:petclinic image to be used and JVM arguments if any
-# output:Create network bridge "kruize-network" and run petclinic application container on the same network 
+# Run the application and mongo db 
 echo -n "Running petclinic with inbuilt db..."
 run_petclinic ${PETCLINIC_IMAGE} ${JVM_ARGS} 
 echo "done"
-
