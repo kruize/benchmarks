@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Get the memory details for pod
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the memory information for pod through prometheus query and store it in json file
 function get_pod_mem_rss()
 {
 	node=$1
@@ -18,6 +21,9 @@ function get_pod_mem_rss()
 	done
 }
 
+# Get the memory usage details for pod
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the memory usage information for pod through prometheus query and store it in json file
 function get_pod_mem_usage()
 {
 	node=$1
@@ -35,6 +41,9 @@ function get_pod_mem_usage()
 	done
 }
 
+# Get the memory request details for pod
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the memory request information for pod through prometheus query and store it in json file
 function get_pod_mem_requests()
 {
 	node=$1
@@ -52,6 +61,9 @@ function get_pod_mem_requests()
 	done
 }
 
+# Get the memory usage details for pod in percentage
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the memory usage information in percentage through prometheus query and store it in json file
 function get_pod_mem_requests_in_p()
 {
 	node=$1
@@ -69,6 +81,9 @@ function get_pod_mem_requests_in_p()
 	done
 }
 
+# Get the memory limit details for pod
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the memory limit information for pod through prometheus query and store it in json file
 function get_pod_mem_limits()
 {
 	node=$1
@@ -86,6 +101,9 @@ function get_pod_mem_limits()
 	done
 }
 
+# Get the memory limit details for pod in percentage
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the memory percentage information in percentage through prometheus query and store it in json file
 function get_pod_mem_limits_in_p()
 {
 	node=$1
@@ -103,6 +121,9 @@ function get_pod_mem_limits_in_p()
 	done
 }
 
+# Get the cpu usage details for pod
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the cpu usage information for pod through prometheus query and store it in json file
 function get_pod_cpu_usage()
 {
 	node=$1
@@ -121,6 +142,9 @@ function get_pod_cpu_usage()
 	done
 }
 
+# Get the cpu request details for pod
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the cpu request information for pod through prometheus query and store it in json file
 function get_pod_cpu_requests()
 {
 	node=$1
@@ -139,6 +163,9 @@ function get_pod_cpu_requests()
 	done
 }
 
+# Get the cpu request details for pod in percentage
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the cpu request information in percentage through prometheus query and store it in json file
 function get_pod_cpu_requests_in_p()
 {
 	node=$1
@@ -157,6 +184,9 @@ function get_pod_cpu_requests_in_p()
 	done
 }
 
+# Get the cpu limits details for pod
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the cpu limits information for pod through prometheus query and store it in json file
 function get_pod_cpu_limits()
 {
 	node=$1
@@ -175,6 +205,9 @@ function get_pod_cpu_limits()
 	done
 }
 
+# Get the cpu limits details for pod in percentage
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the cpu limits information in percentage through prometheus query and store it in json file
 function get_pod_cpu_limits_in_p()
 {
 	node=$1
@@ -193,6 +226,9 @@ function get_pod_cpu_limits_in_p()
 	done
 }
 
+# Get the cluster information for pod 
+# input:worker node, prometheus url, authorization token, result directory, application name
+# output:generate the cluster information for pod through prometheus query and store it in json file
 function get_cluster_info()
 {
 	node=$1
