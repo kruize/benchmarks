@@ -122,11 +122,11 @@ total_logs=(${throughputlogs[@]} ${podcpulogs[@]} ${podmemlogs[@]} ${clusterlogs
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
 	CMD=$(oc get pods --namespace=$NAMESPACE | grep "petclinic" | grep "Running" | cut -d " " -f1)
-if [ -z "${CMD}" ]; then
-	STATUS=0
-else
-	STATUS=1
-fi
+	if [ -z "${CMD}" ]; then
+		STATUS=0
+	else
+		STATUS=1
+	fi
 }
 
 # Run the jmeter load
