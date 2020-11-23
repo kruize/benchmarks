@@ -14,9 +14,6 @@ if [[  -z $MANIFESTS_DIR ]]; then
 	exit 1
 fi
 
-# checks if the previous command is executed successfully
-# input:Return value of previous command
-# output:Prompts the error message if the return value is not zero
 function err_exit() {
 	if [ $? != 0 ]; then
 		printf "$*"
@@ -25,12 +22,7 @@ function err_exit() {
 	fi
 }
 
-# Deploy the service monitor and petclinic application
-# input:petclinic and service-monitor yaml file
 function createInstances() {
-	# Deploy service monitor to get Java Heap recommendations from petclinic$
-	kubectl apply -f $MANIFESTS_DIR/service-monitor.yaml
-
 	#Create the deployments and services
 	kubectl apply -f $MANIFESTS_DIR/petclinic.yaml 
 	err_exit "Error: Issue in deploying."
@@ -39,7 +31,6 @@ function createInstances() {
 	sleep 40
 }
 
-# Delete the petclinic deployment,service and route if it is already present 
 function stopAllInstances() {
 	# Delete the deployments first to avoid creating replica pods
 	petclinic_deployments=($(kubectl get deployments  | grep "petclinic" | cut -d " " -f1))

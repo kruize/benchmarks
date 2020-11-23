@@ -52,7 +52,6 @@ To deploy the benchmark use `petclinic-deploy-minikube.sh`
 **`$./scripts/petclinic-deploy-minikube.sh manifests/`** 
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-servicemonitor.monitoring.coreos.com/petclinic-0 created
 deployment.apps/petclinic-sample-0 created
 service/petclinic-service-0 created
 
@@ -62,19 +61,20 @@ To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
 `./scripts/petclinic-deploy-openshift.sh deploy_info`
 
-**deploy_info**: Benchmark server , Namespace and Manifests directory 
+**deploy_info**: Benchmark server , Namespace , Manifests directory and Results directory path
 
 - **Benchmark server**: Name of the cluster you are using
 - **Namespace**: openshift-monitoring
 - **Manifests directory**: Path where the manifest directory exists
+- **Results directory path**: Location where you want to store the results
 
-**`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/`**
+**`$./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/ result/`**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
-servicemonitor.monitoring.coreos.com/petclinic-0 created
 deployment.apps/petclinic-sample-0 created
 service/petclinic-service-0 created
 route.route.openshift.io/petclinic-service-0 exposed
+
 ```
 
 # Run the load
@@ -122,43 +122,84 @@ To test with multiple instances follow [README.md](/spring-petclinic/scripts/per
 # Cleanup
 `$ ./scripts/petclinic-cleanup.sh`
 
-# Changes to be done to get kruize runtime recommendations for petclinic
-**Add the following in**
+# Kruize
+If you want to quickly size the petclinic application container using a test load, run the Kruize container locally and point it to petclinic application container to get recommendation. Kruize monitors the app container using Prometheus and provides recommendations as a Grafana dashboard (Prometheus and Grafana containers are automatically downloaded when you run kruize).
 
-- **pom.xml file**
-```
-<!-- Micrometer Prometheus registry  -->
-<dependency>
-    <groupId>io.micrometer</groupId>
-    <artifactId>micrometer-registry-prometheus</artifactId>
-</dependency>
-``` 
-- **Application.properties**
-```
-#Since cadvisor uses the port 8080, use the port 8081
-server.port=8081
-#management
-management.endpoints.web.base-path=/manage
-```
-Compile and build the application 
+**kruize supports**
+- Docker
+- Minikube
+- Openshift
 
-- **Use 8081 for port mapping**
+**Installation**
 
-- **Add petclinic as target in kruize/manifests/docker/prometheus.yaml**
+Create required setup and deploy kruize on different environments(docker,minikube and openshift)
+
+`$ ./scripts/kruize-setup.sh [docker|minikube|openshift]` 
+
+## Docker
+
+**`$ ./scripts/kruize-setup.sh docker`**
+
+Edit `manifests/docker/kruize-docker.yaml` to add the petclinic container name that you need kruize to monitor.
+
 ```
-- job_name: petclinic-app
-  honor_timestamps: true
-  scrape_interval: 2s
-  scrape_timeout: 1s
-  metrics_path: /manage/prometheus
-  scheme: http
-  static_configs:
-  - targets:
-      - petclinic-app:8081
+$ cat manifests/docker/kruize-docker.yaml 
+---
+# Add names of the containers that you want kruize to monitor, one per line in double quotes
+containers:
+  - name: "cadvisor"
+  - name: "grafana"
+  - name: "kruize"
+  - name: "prometheus"
+  - name: "petclinic-app"
 ```
-****
+
+In the above example, kruize is monitoring the petclinic application container `petclinic-app`. You should now see the "App Monitor loop" listing the new containers to be monitored
+
+```
+ cadvisor: found. Adding to list of containers to be monitored.
+ grafana: found. Adding to list of containers to be monitored.
+ kruize: found. Adding to list of containers to be monitored.
+ prometheus: found. Adding to list of containers to be monitored.
+ petclinic-app: found. Adding to list of containers to be monitored.
+```
+
+**Kruize Recommendation**
+`$./scripts/kruize-recommendation.sh [docker|minikube|openshift]`
+
+Example to get the kruize recommendation for petclinic application on docker 
+**`$./scripts/kruize-recommendation.sh docker`**
+```
+#############################################################
+
+              kruize recommendation for petclinic..
+#############################################################
+
+[
+  {
+    "application_name": "petclinic-app",
+    "resources": {
+      "requests": {
+        "memory": "418.7M",
+        "cpu": 1.1
+      },
+      "limits": {
+        "memory": "502.4M",
+        "cpu": 1.2
+      }
+    }
+  }
+]
+
+```
+
 # Note for RHEL 8.0 users
 podman docker should have the latest network version to work.
+
+
+
+
+
 
 
 
