@@ -4,115 +4,167 @@
 - [Minikube](#Minikube)
 - [Openshift](#Openshift)
 
-## Docker
-Create the required setup
-`./scripts/petclinic-setup.sh setup_info`
+# Create custom images
+Generate custom petclinic images required for the setup 
+`./scripts/build.sh `
 
-**setup_info**: (do_setup/use_image)
+Pre-requisites: javac and git 
 
-- **do_setup**: Builds the petclinic application from the scratch by cloning the spring-petclinic repository and creates the images required for the setup.
-- **use_image**: Uses already built petclinic image 
+`./scripts/build.sh baseimage`
 
-Pre-requisites for do_setup: javac and git 
+baseimage: baseimage for petclinic. It is optional, if it is not specified then the default image `adoptopenjdk/openjdk11-openj9:latest` will be considered as base image.
 
-`./scripts/petclinic-setup.sh do_setup javaimage`
+The image which u have with openj9 uses - "Xshareclasses:none" . Include the required JVM_ARGS in petclinic Dockerfile
 
-**javaimage**: By default `adoptopenjdk/openjdk11-openj9:latest` will be considered as java image . if you want to use other java images then you can mention it explicitly.
+Example to build the custom image for petclinic application
 
-To add any JVM parameters use JVM_ARGS variable while starting the container. The image which u have with openj9 uses - "Xshareclasses:none" . 
-
-Example to build and run the petclinic application from the scratch
-
-**`$./scripts/petclinic-setup.sh do_setup adoptopenjdk/openjdk11:latest`**
+**`$./scripts/build.sh adoptopenjdk/openjdk11-openj9:latest`**
 ```
+~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 Checking prereqs...done
 Building petclinic application...done
 Building jmeter with petclinic driver...done
-Running petclinic with inbuilt db...done
+
+```
+## Docker
+ To deploy the benchmark use `petclinic-deploy-docker.sh`
+ 
+`./scripts/petclinic-deploy-docker.sh Total_instances Petclinic_image JVM_ARGS`
+
+- **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
+- **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
+- **JVM_ARGS**: JVM agruments if any
+
+Example to deploy petclinic application using custom image
+
+**`$./scripts/petclinic-deploy-docker.sh 1 spring-petclinic:latest -Xshareclasses:none`**
+```
+~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
+Checking prereqs...done
+Using custom petclinic image spring-petclinic:latest... 
+Pulling the jmeter image...done
+Running petclinic instance 1 with inbuilt db...
+Creating Kruize network: kruize-network...done
+
 ```
  
-In case of `use_image` by default it uses `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` for petclinic application and `kruize/jmeter_petclinic:3.1` for jmeter. If you want to use custom images then you need to mention it explicitly.
+Example to deploy and run multiple petclinic application instances using default image
 
-Example to run the petclinic application using built in image
-
-**`$./scripts/petclinic-setup.sh use_image kruize/spring_petclinic:2.2.0-jdk-11.0.8-hotspot kruize/jmeter_petclinic:3.1`**
+**`$./scripts/petclinic-deploy-docker.sh 2`**
 ```
+~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 Checking prereqs...done
 Pulling the jmeter image...done
-Running petclinic with inbuilt db...done
+Running petclinic instance 1 with inbuilt db...
+Creating Kruize network: kruize-network...done
+Running petclinic instance 2 with inbuilt db...
+kruize-network already exists...done
 
 ```
 ## Minikube
-To deploy the benchmark use `petclinic-deploy-minikube.sh`
+To deploy the benchmark use `petclinic-deploy-minikube.sh `
 
-`./scripts/petclinic-deploy-openshift.sh manifest_dir`
+`./scripts/petclinic-deploy-openshift.sh manifest_dir Total_instances petclinic_image`
 
-**manifest_dir**: Path where the manifest directory exists
+- **manifest_dir**: Path where the manifest directory exists
+- **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
+- **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
-**`$./scripts/petclinic-deploy-minikube.sh manifests/`** 
+Example to deploy and run multiple petclinic application instances on docker
+
+**`$./scripts/petclinic-deploy-minikube.sh manifests 2/`** 
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
+servicemonitor.monitoring.coreos.com/petclinic-0 created
+servicemonitor.monitoring.coreos.com/petclinic-1 created
 deployment.apps/petclinic-sample-0 created
 service/petclinic-service-0 created
+deployment.apps/petclinic-sample-1 created
+service/petclinic-service-1 created
 
 ```
 ## Openshift
 To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
-`./scripts/petclinic-deploy-openshift.sh deploy_info`
+`./scripts/petclinic-deploy-openshift.sh deploy_info Total_instances petclinic_image`
 
-**deploy_info**: Benchmark server , Namespace , Manifests directory and Results directory path
+**deploy_info**: Benchmark server , Namespace and Manifests directory 
 
 - **Benchmark server**: Name of the cluster you are using
 - **Namespace**: openshift-monitoring
 - **Manifests directory**: Path where the manifest directory exists
-- **Results directory path**: Location where you want to store the results
+- **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
+- **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
-**`$./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/ result/`**
+**`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/2`**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
+servicemonitor.monitoring.coreos.com/petclinic-0 created
 deployment.apps/petclinic-sample-0 created
 service/petclinic-service-0 created
 route.route.openshift.io/petclinic-service-0 exposed
-
 ```
 
 # Run the load
 Simulating the load on petclinic benchmarks using jmeter
 `./scripts/petclinic-load.sh load_info`
 
-**load_info**: [load type] [Number of iterations of the jmeter load] [ip_addr / namespace]"
+**load_info**: [load type] [Total Number of instances] [Number of iterations of the jmeter load] [ip_addr / namespace]"
 - **load type**: docker icp openshift
+- **Total Number of instances**: Number of petclinic instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
 - **Number of iterations of the jmeter load**: Number of times you want to run the load. It is optional, if is not specified then by default it will be considered as 5 iterations.
 - **ip_addr**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
 
 `jmeter-petclinic:3.1` is the image used to apply the load
 
-Example to run the load on openshift cluster
+Example to run the load on minikube
 
-**`./scripts/petclinic-load.sh openshift 2`**
+**`$./scripts/petclinic-load.sh minikube 2 2`**
 ```
+
 #########################################################################################
                              Starting Iteration 1                                  
 #########################################################################################
 
-Running jmeter load with the following parameters
-JHOST=petclinic-service-0-openshift-monitoring.apps.rouging.os.fyre.ibm.com JDURATION=20 JUSERS=150 JPORT=8080 
-jmter logs Dir : /root/rt-cloud-benchmarks/spring-petclinic/logs/petclinic-202010052035
+Running jmeter load for instance  with the following parameters
+docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=150 -e JPORT=32334 jmeter_petclinic:3.1
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
 
 #########################################################################################
                              Starting Iteration 2                                  
 #########################################################################################
 
-Running jmeter load with the following parameters
-JHOST=petclinic-service-0-openshift-monitoring.apps.rouging.os.fyre.ibm.com JDURATION=20 JUSERS=300 JPORT=8080 
-jmter logs Dir : /root/rt-cloud-benchmarks/spring-petclinic/logs/petclinic-202010052035
+Running jmeter load for instance  with the following parameters
+docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=300 -e JPORT=32334 jmeter_petclinic:3.1
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
 #########################################################################################
-				Displaying the results				       
+				Displaying the results					       
 #########################################################################################
 RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
-1,142.8,3117,435,0
-2,267.2,6229,438,0
+1,44.1,1397,4475,0
+2,44.1,1397,4475,0
+
+#########################################################################################
+                             Starting Iteration 1                                  
+#########################################################################################
+
+Running jmeter load for instance  with the following parameters
+docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=150 -e JPORT=32335 jmeter_petclinic:3.1
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
+
+#########################################################################################
+                             Starting Iteration 2                                  
+#########################################################################################
+
+Running jmeter load for instance  with the following parameters
+docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=300 -e JPORT=32335 jmeter_petclinic:3.1
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
+#########################################################################################
+				Displaying the results					       
+#########################################################################################
+RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
+1,18.5,852,12323,0
+2,18.5,852,12323,0
 
 ```
 Above image shows the logs of the load run, it processes and displays the output for each run. See Displaying the results section of the log for information about throughput, Number of pages it has retreived, average response time and errors if any.
@@ -122,79 +174,45 @@ To test with multiple instances follow [README.md](/spring-petclinic/scripts/per
 # Cleanup
 `$ ./scripts/petclinic-cleanup.sh`
 
-# Kruize
-If you want to quickly size the petclinic application container using a test load, run the Kruize container locally and point it to petclinic application container to get recommendation. Kruize monitors the app container using Prometheus and provides recommendations as a Grafana dashboard (Prometheus and Grafana containers are automatically downloaded when you run kruize).
+# Changes to be done to get kruize runtime recommendations for petclinic
+**Add the following in**
 
-**kruize supports**
-- Docker
-- Minikube
-- Openshift
-
-**Installation**
-
-Create required setup and deploy kruize on different environments(docker,minikube and openshift)
-
-`$ ./scripts/kruize-setup.sh [docker|minikube|openshift]` 
-
-## Docker
-
-**`$ ./scripts/kruize-setup.sh docker`**
-
-Edit `manifests/docker/kruize-docker.yaml` to add the petclinic container name that you need kruize to monitor.
+- **pom.xml file**
 
 ```
-$ cat manifests/docker/kruize-docker.yaml 
----
-# Add names of the containers that you want kruize to monitor, one per line in double quotes
-containers:
-  - name: "cadvisor"
-  - name: "grafana"
-  - name: "kruize"
-  - name: "prometheus"
-  - name: "petclinic-app"
+<!-- Micrometer Prometheus registry  -->
+<dependency>
+    <groupId>io.micrometer</groupId>
+    <artifactId>micrometer-registry-prometheus</artifactId>
+</dependency>
 ```
-
-In the above example, kruize is monitoring the petclinic application container `petclinic-app`. You should now see the "App Monitor loop" listing the new containers to be monitored
-
+- **Application.properties**
 ```
- cadvisor: found. Adding to list of containers to be monitored.
- grafana: found. Adding to list of containers to be monitored.
- kruize: found. Adding to list of containers to be monitored.
- prometheus: found. Adding to list of containers to be monitored.
- petclinic-app: found. Adding to list of containers to be monitored.
+#Since cadvisor uses the port 8080, use the port 8081
+server.port=8081
+#management
+management.endpoints.web.base-path=/manage
 ```
+Compile and build the application 
 
-**Kruize Recommendation**
-`$./scripts/kruize-recommendation.sh [docker|minikube|openshift]`
+- **Use 8081 for port mapping**
 
-Example to get the kruize recommendation for petclinic application on docker 
-**`$./scripts/kruize-recommendation.sh docker`**
+- **Add petclinic as target in kruize/manifests/docker/prometheus.yaml**
 ```
-#############################################################
-
-              kruize recommendation for petclinic..
-#############################################################
-
-[
-  {
-    "application_name": "petclinic-app",
-    "resources": {
-      "requests": {
-        "memory": "418.7M",
-        "cpu": 1.1
-      },
-      "limits": {
-        "memory": "502.4M",
-        "cpu": 1.2
-      }
-    }
-  }
-]
-
+- job_name: petclinic-app
+  honor_timestamps: true
+  scrape_interval: 2s
+  scrape_timeout: 1s
+  metrics_path: /manage/prometheus
+  scheme: http
+  static_configs:
+  - targets:
+      - petclinic-app:8081
 ```
 
 # Note for RHEL 8.0 users
 podman docker should have the latest network version to work.
+
 
 
 

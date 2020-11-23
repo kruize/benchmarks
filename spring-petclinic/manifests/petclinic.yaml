@@ -27,7 +27,7 @@ spec:
         - name: "JVM_ARGS"
           value: "-Xshareclasses:none -Xgcpolicy:optavgpause"
         ports:
-          - containerPort: 8080
+          - containerPort: 8081
         volumeMounts:
           - name: "test-volume"
             mountPath: "/opt/jLogs"
@@ -44,9 +44,10 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - port: 8080
+    - port: 8081
       nodePort: 32334
-      targetPort: 8080
+      targetPort: 8081
       name: petclinic-port
   selector:
     name: petclinic-deployment
+

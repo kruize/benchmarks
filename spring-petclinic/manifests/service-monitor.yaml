@@ -11,3 +11,4 @@ spec:
   endpoints:
     - port: petclinic-port
       path: '/manage/prometheus'
+

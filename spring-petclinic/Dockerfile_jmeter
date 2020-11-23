@@ -1,3 +1,18 @@
+#
+# Copyright (c) 2020, 2020 IBM Corporation, RedHat and others.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
 # Dockerfile to build a jmeter container able to drive petclinic
 # Results appear on /output in the container
 # Must specify the hostname for the petclinic application (or localhost will be assumed)
@@ -24,15 +39,12 @@ ENV JMETER_HOME  /jmeter/apache-jmeter-$JMETER_VERSION
 # Add jmeter to the PATH  
 ENV PATH $JMETER_HOME/bin:$PATH 
 
-# Set JVM options
-ENV JVM_ARGS "-Xms1g -Xmx1g -Xtune:virtualized"
-
 # We should set summariser.interval=6 in bin/jmeter.properties
 RUN echo 'summariser.interval=6' >> $JMETER_HOME/bin/jmeter.properties
 
 # Copy the script to be executed and other needed files
-COPY petclinic-driver/petclinic.jmx $JMETER_HOME/petclinic.jmx
-COPY petclinic-driver/applyLoad.sh $JMETER_HOME/bin/applyLoad.sh
+COPY jmeter-driver/petclinic.jmx $JMETER_HOME/petclinic.jmx
+COPY jmeter-driver/applyLoad.sh $JMETER_HOME/bin/applyLoad.sh
 RUN chmod u+x $JMETER_HOME/bin/applyLoad.sh
 
 # Environment variables that we want the user to redefine
