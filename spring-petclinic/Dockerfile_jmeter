@@ -48,6 +48,6 @@ COPY jmeter-driver/applyLoad.sh $JMETER_HOME/bin/applyLoad.sh
 RUN chmod u+x $JMETER_HOME/bin/applyLoad.sh
 
 # Environment variables that we want the user to redefine
-ENV JHOST=localhost JPORT=8080 JUSERS=15 JDURATION=60
+ENV JHOST=localhost JPORT=32334 JUSERS=15 JDURATION=60
 
 ENTRYPOINT ["applyLoad.sh"]
