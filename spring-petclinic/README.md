@@ -126,7 +126,7 @@ Example to run the load on minikube
                              Starting Iteration 1                                  
 #########################################################################################
 
-Running jmeter load for instance  with the following parameters
+Running jmeter load for instance 1 with the following parameters
 docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=150 -e JPORT=32334 jmeter_petclinic:3.1
 jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
 
@@ -134,7 +134,7 @@ jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011
                              Starting Iteration 2                                  
 #########################################################################################
 
-Running jmeter load for instance  with the following parameters
+Running jmeter load for instance 1 with the following parameters
 docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=300 -e JPORT=32334 jmeter_petclinic:3.1
 jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
 #########################################################################################
@@ -148,7 +148,7 @@ RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
                              Starting Iteration 1                                  
 #########################################################################################
 
-Running jmeter load for instance  with the following parameters
+Running jmeter load for instance 2 with the following parameters
 docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=150 -e JPORT=32335 jmeter_petclinic:3.1
 jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
 
@@ -156,7 +156,7 @@ jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011
                              Starting Iteration 2                                  
 #########################################################################################
 
-Running jmeter load for instance  with the following parameters
+Running jmeter load for instance 2 with the following parameters
 docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=300 -e JPORT=32335 jmeter_petclinic:3.1
 jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
 #########################################################################################
@@ -172,7 +172,7 @@ Above image shows the logs of the load run, it processes and displays the output
 To test with multiple instances follow [README.md](/spring-petclinic/scripts/perf/README.md)
 
 # Cleanup
-`$ ./scripts/petclinic-cleanup.sh`
+`$ ./scripts/petclinic-cleanup.sh cluster_type[docker|minikube|openshift]`
 
 # Changes to be done to get kruize runtime recommendations for petclinic
 **Add the following in**
