@@ -348,7 +348,6 @@ function parseResults() {
 			eval total_${metric}=$maxval
 		else
 			val=$(echo `calcAvg $RESULTS_DIR_J/${metric}-measure-temp.log | cut -d "=" -f2`)
-			echo "Log file for calcAvg = $val"
 			eval total_${metric}_avg=$val
 		fi
 		
