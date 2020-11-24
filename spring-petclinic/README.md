@@ -10,7 +10,7 @@ Generate custom petclinic images required for the setup
 
 Pre-requisites: javac and git 
 
-`./scripts/build.sh baseimage`
+`./scripts/build.sh [baseimage]`
 
 baseimage: baseimage for petclinic. It is optional, if it is not specified then the default image `adoptopenjdk/openjdk11-openj9:latest` will be considered as base image.
 
@@ -29,7 +29,7 @@ Building jmeter with petclinic driver...done
 ## Docker
  To deploy the benchmark use `petclinic-deploy-docker.sh`
  
-`./scripts/petclinic-deploy-docker.sh Total_instances Petclinic_image JVM_ARGS`
+`./scripts/petclinic-deploy-docker.sh [Total_instances] [Petclinic_image] [JVM_ARGS]`
 
 - **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
@@ -64,7 +64,7 @@ kruize-network already exists...done
 ## Minikube
 To deploy the benchmark use `petclinic-deploy-minikube.sh `
 
-`./scripts/petclinic-deploy-openshift.sh manifest_dir Total_instances petclinic_image`
+`./scripts/petclinic-deploy-minikube.sh manifest_dir [Total_instances] [petclinic_image]`
 
 - **manifest_dir**: Path where the manifest directory exists
 - **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
@@ -86,13 +86,11 @@ service/petclinic-service-1 created
 ## Openshift
 To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
-`./scripts/petclinic-deploy-openshift.sh deploy_info Total_instances petclinic_image`
+`./scripts/petclinic-deploy-openshift.sh Benchmark_server Namespace Manifests_directory [Total_instances] [petclinic_image]`
 
-**deploy_info**: Benchmark server , Namespace and Manifests directory 
-
-- **Benchmark server**: Name of the cluster you are using
+- **Benchmark_server**: Name of the cluster you are using
 - **Namespace**: openshift-monitoring
-- **Manifests directory**: Path where the manifest directory exists
+- **Manifests_directory**: Path where the manifest directory exists
 - **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
@@ -102,22 +100,19 @@ To deploy the benchmark use `petclinic-deploy-openshift.sh`
 servicemonitor.monitoring.coreos.com/petclinic-0 created
 deployment.apps/petclinic-sample-0 created
 service/petclinic-service-0 created
-Waiting for deployment "petclinic-sample-0" rollout to finish: 0 of 1 updated replicas are available...
-deployment "petclinic-sample-0" successfully rolled out
 route.route.openshift.io/petclinic-service-0 exposed
 ```
 
 # Run the load
 Simulating the load on petclinic benchmarks using jmeter
-`./scripts/petclinic-load.sh load_info`
+`./scripts/petclinic-load.sh load_type [Total Number of instances] [Number of iterations of the jmeter load] [ip_addr / namespace]`
 
-**load_info**: [load type] [Total Number of instances] [Number of iterations of the jmeter load] [ip_addr / namespace]"
-- **load type**: docker icp openshift
+- **load_type**: docker icp openshift
 - **Total Number of instances**: Number of petclinic instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
 - **Number of iterations of the jmeter load**: Number of times you want to run the load. It is optional, if is not specified then by default it will be considered as 5 iterations.
 - **ip_addr**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
 
-`jmeter-petclinic:3.1` is the image used to apply the load
+`kruize/jmeter_petclinic:noport` is the image used to apply the load
 
 Example to run the load on openshift
 
@@ -126,53 +121,48 @@ Example to run the load on openshift
 #########################################################################################
                              Starting Iteration 1                                  
 #########################################################################################
-
 Running jmeter load for petclinic instance 1 with the following parameters
 docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=150 kruize/jmeter_petclinic:noport
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
-
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241746
 #########################################################################################
                              Starting Iteration 2                                  
 #########################################################################################
-
 Running jmeter load for petclinic instance 1 with the following parameters
 docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=300 kruize/jmeter_petclinic:noport
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241746
 #########################################################################################
 				Displaying the results				       
 #########################################################################################
 RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
-1,89.0,2130,1953,0
-2,89.0,2130,1953,0
-
+1,72.1,1705,1096,0
+2,113.3,2895,1329,0
 #########################################################################################
                              Starting Iteration 1                                  
 #########################################################################################
-
 Running jmeter load for petclinic instance 2 with the following parameters
-docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=150 kruize/jmeter_petclinic:noport
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
-
+docker run  --rm -e JHOST=petclinic-service-0-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=150 kruize/jmeter_petclinic:noport
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241746
 #########################################################################################
                              Starting Iteration 2                                  
 #########################################################################################
-
 Running jmeter load for petclinic instance 2 with the following parameters
-docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=300 kruize/jmeter_petclinic:noport
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
+docker run  --rm -e JHOST=petclinic-service-0-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=300 kruize/jmeter_petclinic:noport
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241746
 #########################################################################################
 				Displaying the results				       
 #########################################################################################
 RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
-1,107.2,2566,1539,0
-2,107.2,2566,1539,0
+1,66.7,1738,1071,0
+2,116.9,3007,1282,0
 ```
 Above image shows the logs of the load run, it processes and displays the output for each run. See Displaying the results section of the log for information about throughput, Number of pages it has retreived, average response time and errors if any.
 
 To test with multiple instances follow [README.md](/spring-petclinic/scripts/perf/README.md)
 
 # Cleanup
-`$ ./scripts/petclinic-cleanup.sh cluster_type[docker|minikube|openshift]`
+`$ ./scripts/petclinic-cleanup.sh cluster_type`
+
+- **cluster_type**: docker|minikube|openshift
 
 # Changes to be done to get kruize runtime recommendations for petclinic
 **Add the following in**
