@@ -96,12 +96,14 @@ To deploy the benchmark use `petclinic-deploy-openshift.sh`
 - **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
-**`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/2`**
+**`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/`**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 servicemonitor.monitoring.coreos.com/petclinic-0 created
 deployment.apps/petclinic-sample-0 created
 service/petclinic-service-0 created
+Waiting for deployment "petclinic-sample-0" rollout to finish: 0 of 1 updated replicas are available...
+deployment "petclinic-sample-0" successfully rolled out
 route.route.openshift.io/petclinic-service-0 exposed
 ```
 
@@ -117,55 +119,53 @@ Simulating the load on petclinic benchmarks using jmeter
 
 `jmeter-petclinic:3.1` is the image used to apply the load
 
-Example to run the load on minikube
+Example to run the load on openshift
 
-**`$./scripts/petclinic-load.sh minikube 2 2`**
+**`$./scripts/petclinic-load.sh openshift 2 2`**
 ```
-
 #########################################################################################
                              Starting Iteration 1                                  
 #########################################################################################
 
-Running jmeter load for instance 1 with the following parameters
-docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=150 -e JPORT=32334 jmeter_petclinic:3.1
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
+Running jmeter load for petclinic instance 1 with the following parameters
+docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=150 kruize/jmeter_petclinic:noport
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
 
 #########################################################################################
                              Starting Iteration 2                                  
 #########################################################################################
 
-Running jmeter load for instance 1 with the following parameters
-docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=300 -e JPORT=32334 jmeter_petclinic:3.1
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
+Running jmeter load for petclinic instance 1 with the following parameters
+docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=300 kruize/jmeter_petclinic:noport
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
 #########################################################################################
-				Displaying the results					       
+				Displaying the results				       
 #########################################################################################
 RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
-1,44.1,1397,4475,0
-2,44.1,1397,4475,0
+1,89.0,2130,1953,0
+2,89.0,2130,1953,0
 
 #########################################################################################
                              Starting Iteration 1                                  
 #########################################################################################
 
-Running jmeter load for instance 2 with the following parameters
-docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=150 -e JPORT=32335 jmeter_petclinic:3.1
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
+Running jmeter load for petclinic instance 2 with the following parameters
+docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=150 kruize/jmeter_petclinic:noport
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
 
 #########################################################################################
                              Starting Iteration 2                                  
 #########################################################################################
 
-Running jmeter load for instance 2 with the following parameters
-docker run --rm -e JHOST=172.17.0.2 -e JDURATION=20 -e JUSERS=300 -e JPORT=32335 jmeter_petclinic:3.1
-jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011222111
+Running jmeter load for petclinic instance 2 with the following parameters
+docker run  --rm -e JHOST=petclinic-service-1-openshift-monitoring.apps.rouging.os.fyre.ibm.com -e JDURATION=20 -e JUSERS=300 kruize/jmeter_petclinic:noport
+jmter logs Dir : /home/shruthi/benchmarks/spring-petclinic/logs/petclinic-202011241146
 #########################################################################################
-				Displaying the results					       
+				Displaying the results				       
 #########################################################################################
 RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
-1,18.5,852,12323,0
-2,18.5,852,12323,0
-
+1,107.2,2566,1539,0
+2,107.2,2566,1539,0
 ```
 Above image shows the logs of the load run, it processes and displays the output for each run. See Displaying the results section of the log for information about throughput, Number of pages it has retreived, average response time and errors if any.
 
