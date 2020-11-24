@@ -140,14 +140,14 @@ function parse_petclinic_results() {
 	RESULTS_DIR=$1
 	TOTAL_LOGS=$2
 	echo "RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS" > ${RESULTS_DIR}/Throughput.log
-	for (( log=1 ; log<=${TOTAL_LOGS} ;log++))
+	for (( iteration=1 ; iteration<=${TOTAL_LOGS} ;iteration++))
 	do
-		RESULT_LOG=${RESULTS_DIR}/jmeter-${inst}-${iter}.log
+		RESULT_LOG=${RESULTS_DIR}/jmeter-${inst}-${iteration}.log
 		summary=`cat $RESULT_LOG | sed 's%<summary>%%g' | grep "summary = " | tail -n 1`
 		throughput=`echo $summary | awk '{print $7}' | sed 's%/s%%g'`
 		responsetime=`echo $summary | awk '{print $9}' | sed 's%/s%%g'`
 		weberrors=`echo $summary | awk '{print $15}' | sed 's%/s%%g'`
 		pages=`echo $summary | awk '{print $3}' | sed 's%/s%%g'`
-		echo "$log,$throughput,$pages,$responsetime,$weberrors" >> ${RESULTS_DIR}/Throughput.log
+		echo "$iteration,$throughput,$pages,$responsetime,$weberrors" >> ${RESULTS_DIR}/Throughput.log
 	done
 }
