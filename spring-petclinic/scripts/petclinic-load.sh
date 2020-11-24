@@ -27,6 +27,7 @@ function usage() {
 	echo
 	echo "Usage: [load_type] [Total Number of instances] [Number of iterations of the jmeter load] [ip_adddr / namespace]"
 	echo "load_type : docker minikube openshift "
+	#echo "usage for openshift cluster_type"
 	exit -1
 }
 
@@ -87,7 +88,7 @@ LOG_DIR="${PWD}/logs/petclinic-$(date +%Y%m%d%H%M)"
 mkdir -p ${LOG_DIR}
 
 for(( inst=1; inst<=${SERVER_INSTANCES}; inst++ ))
-do
+do	
 	for iter in `seq 1 ${MAX_LOOP}`
 	do
 		echo
@@ -101,11 +102,10 @@ do
 		JMETER_LOAD_DURATION=20
 	
 		if [ "${LOAD_TYPE}" == "openshift" ]; then
-			cmd="docker run  --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} ${JMETER_FOR_LOAD}" 
+			cmd="docker run  --rm -e JHOST=${IP_ADDR[inst-1]} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} ${JMETER_FOR_LOAD}" 
 		else
 			cmd="docker run --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} -e JPORT=${PETCLINIC_PORT} ${JMETER_FOR_LOAD}"
 		fi
-		
 		# Check if the application is running
 		check_app
 		if [ "$STATUS" == 0 ]; then
