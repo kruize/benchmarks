@@ -30,11 +30,6 @@ SERVER_INSTANCES=$4
 PETCLINIC_IMAGE=$5
 DEFAULT_IMAGE=kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
 
-CPU_REQ=$6
-MEM_REQ=$7
-CPU_LIM=$8
-MEM_LIM=$9
-
 if [[ -z $BENCHMARK_SERVER || -z $NAMESPACE  || -z $MANIFESTS_DIR ]]; then
 	echo "Do set all the variables - BENCHMARK_SERVER , NAMESPACE and MANIFESTS_DIR "
 	exit 1
@@ -88,20 +83,11 @@ function createInstances() {
 		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		sed -i 's/32334/'$port'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-		
-		# Setting cpu/mem request limits
-		sed -i 's/cpu: 2/cpu: '$CPU_REQ'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-		sed -i 's/cpu: 4/cpu: '$CPU_LIM'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-		sed -i 's/memory: 512M/memory: '$MEM_REQ'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-		sed -i 's/memory: 1024M/memory: '$MEM_LIM'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-		
+
 		oc create -f $MANIFESTS_DIR/petclinic-$inst.yaml -n $NAMESPACE
 		err_exit "Error: Issue in deploying."
 		((port=port+1))
-		
-		# Check status of deployment
-		oc rollout status deployment petclinic-sample-$inst -n $NAMESPACE
-		err_exit "Error: Issues in deployment"
+
 	done
 
 	#Wait till petclinic starts
