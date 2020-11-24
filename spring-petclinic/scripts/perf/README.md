@@ -22,11 +22,11 @@
 
 Example to test with multiple instances
 
-**`$./scripts/perf/run_petclinic_openshift.sh rouging.os.fyre.ibm.com openshift-monitoring result/ 300 60 5 3`**
+**`$ ./scripts/perf/run-petclinic-openshift.sh  rouging.os.fyre.ibm.com openshift-monitoring result/ 150 30 5 3 2 2 true manifests/`**
 
 ``` 
 Instances , Throughput , Responsetime , TOTAL_PODS_MEM , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS 
-1 ,  89.8 , 2351.5 , 476.676 , 0.382072 , 40.5538 , 24.535 , 0
+1 , 82.15 , 1088.67 , 237.49 , 0.389959 , .31169272612446086 , .5156339981290373 , 234 , 241 , 41.6153 , 20.0384 , 0
 
 ```
 Above image shows the log of the load run i.e, throghput, response time, total memory used by the pod, minimum cpu, maximum cpu, minimum memory, maximum memory, total cpu used by the pod, cluster memory usage in percentage,cluster cpu in percentage and web errors if any.
