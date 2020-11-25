@@ -18,21 +18,17 @@
 #
 
 ROOT_DIR=.
-pushd ${ROOT_DIR}
+pushd ${ROOT_DIR} 
 # Run the benchmark as
 # SCRIPT  MANIFESTS_DIR 
-# Ex of ARGS :   rt-cloud-benchmarks/spring-petclinic/manifests  
+# Ex of ARGS :  2 kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0  
 
 LOGFILE="${ROOT_DIR}/setup.log"
-MANIFESTS_DIR=$1
-SERVER_INSTANCES=$2
-PETCLINIC_IMAGE=$3
-DEFAULT_IMAGE=kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
+SERVER_INSTANCES=$1
+PETCLINIC_IMAGE=$2
+MANIFESTS_DIR="${HOME}/benchmarks/spring-petclinic/manifests/"
+DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
 
-if [[  -z $MANIFESTS_DIR ]]; then
-	echo "Do set the variable -   MANIFESTS_DIR "
-	exit 1
-fi
 
 if [ -z "${SERVER_INSTANCES}" ]; then
 	SERVER_INSTANCES=1
@@ -40,9 +36,11 @@ fi
 
 if [ -z "${PETCLINIC_IMAGE}" ]; then
 	PETCLINIC_IMAGE="${DEFAULT_IMAGE}"
+fi
+
+if [[ "${PETCLINIC_IMAGE}" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" || "${PETCLINIC_IMAGE}" == "spring-petclinic:latest" ]]; then
 	PORT=8081
 else
-	PETCLINIC_IMAGE=$3
 	PORT=8080
 fi
 
@@ -63,7 +61,7 @@ function createInstances() {
 	# Deploy service monitor to get Java Heap recommendations from petclinic$
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 	do
-		sed 's/petclinic/petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
+		sed 's/name: petclinic/name: petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
 		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
 		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
 		kubectl apply -f $MANIFESTS_DIR/service-monitor-$inst.yaml

@@ -17,6 +17,10 @@
 ###  Script to build and run the petclinic application and do a test load of the app  ###
 # 
 
+ROOT_DIR=.
+pushd ${ROOT_DIR}
+source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
+
 TOTAL_INST=$1
 PETCLINIC_IMAGE=$2
 JVM_ARGS=$3
@@ -29,10 +33,6 @@ fi
 if [ -z "${PETCLINIC_IMAGE}" ]; then
 	PETCLINIC_IMAGE=kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
 fi
-
-ROOT_DIR=".."
-source ./scripts/petclinic-common.sh
-pushd ${ROOT_DIR}
 
 # Check if docker and docker-compose are installed
 echo -n "Checking prereqs..."

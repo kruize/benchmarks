@@ -21,17 +21,22 @@ ROOT_DIR=.
 pushd ${ROOT_DIR}
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER NAMESPACE MANIFESTS_DIR RESULTS_DIR_PATH
-# Ex of ARGS :  wobbled.os.fyre.ibm.com openshift-monitoring rt-cloud-benchmarks/spring-petclinic/manifests /petclinic/results
+# Ex of ARGS :  wobbled.os.fyre.ibm.com 2 kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
 
 BENCHMARK_SERVER=$1
-NAMESPACE=$2
-MANIFESTS_DIR=$3
-SERVER_INSTANCES=$4
-PETCLINIC_IMAGE=$5
-DEFAULT_IMAGE=kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
+SERVER_INSTANCES=$2
+PETCLINIC_IMAGE=$3
+NAMESPACE="openshift-monitoring"
+MANIFESTS_DIR="${HOME}/benchmarks/spring-petclinic/manifests/"
+DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
 
-if [[ -z $BENCHMARK_SERVER || -z $NAMESPACE  || -z $MANIFESTS_DIR ]]; then
-	echo "Do set all the variables - BENCHMARK_SERVER , NAMESPACE and MANIFESTS_DIR "
+CPU_REQ=$4
+MEM_REQ=$5
+CPU_LIM=$6
+MEM_LIM=$7
+
+if [ -z $BENCHMARK_SERVER ]; then
+	echo "Do set the variable - BENCHMARK_SERVER  "
 	exit 1
 fi
 
@@ -43,7 +48,7 @@ if [ -z "${PETCLINIC_IMAGE}" ]; then
 	PETCLINIC_IMAGE="${DEFAULT_IMAGE}"
 fi
 
-if [ "${PETCLINIC_IMAGE}" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" ]; then
+if [[ "${PETCLINIC_IMAGE}" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"  || "${PETCLINIC_IMAGE}" == "spring-petclinic:latest" ]]; then
 	PORT=8081
 else
 	PORT=8080
@@ -68,7 +73,7 @@ function createInstances() {
 
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 	do
-		sed 's/petclinic/petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
+		sed 's/name: petclinic/name: petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
 		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
 		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
 		oc create -f $MANIFESTS_DIR/service-monitor-$inst.yaml -n $NAMESPACE
@@ -83,7 +88,12 @@ function createInstances() {
 		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		sed -i 's/32334/'$port'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
-
+		
+		# Setting cpu/mem request limits
+		if [ ! -z  ${CPU_REQ} ]; then
+			sed -i '31 s/^/          cpu: '$CPU_REQ'\n          memory: '$MEM_REQ'\n/' $MANIFESTS_DIR/petclinic-$inst.yaml
+			sed -i '34 s/^/          cpu: '$CPU_LIM'\n          memory: '$MEM_LIM'\n/' $MANIFESTS_DIR/petclinic-$inst.yaml
+		fi
 		oc create -f $MANIFESTS_DIR/petclinic-$inst.yaml -n $NAMESPACE
 		err_exit "Error: Issue in deploying."
 		((port=port+1))

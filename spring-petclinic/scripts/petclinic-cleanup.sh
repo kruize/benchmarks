@@ -17,9 +17,9 @@
 ### Script to remove the petclinic setup ###
 #
 
-ROOT_DIR=".."
-source ./scripts/petclinic-common.sh
+ROOT_DIR=.
 pushd ${ROOT_DIR}
+source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
 
 function usage() {
 	echo
@@ -33,10 +33,8 @@ fi
 
 CLUSTER_TYPE=$1
 
-# Remove Petclinic instances from docker
-# output: Stop the running petclinic container and remove it. Remove the network and also remove the petclinic and jmeter images if present 
 function remove_petclinic_docker() {
-	petclinic_containers=$(docker ps -q)
+	petclinic_containers=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
 	for con in "${petclinic_containers[@]}"
 	do
 		if [ $con ]; then
@@ -47,16 +45,12 @@ function remove_petclinic_docker() {
 		fi
 	done
 
-	# remove the network
+	# remove the petclinic network
 	docker network rm ${NETWORK}
 
 	# remove the petclinic image if present
 	if [[ "$(docker images -q spring-petclinic:latest 2> /dev/null)" != "" ]]; then
 		docker rmi spring-petclinic:latest
-	fi
-	
-	if [[ "$(docker images -q kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 2> /dev/null)" != "" ]]; then
-		docker rmi kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
 	fi
 	
 	# remove the jmeter image if present
@@ -65,8 +59,6 @@ function remove_petclinic_docker() {
 	fi
 }
 
-# Remove Petclinic instances from minikube
-# output: Remove the petclinic deployments and service-monitors
 function remove_petclinic_minikube() {
 	petclinic_deployments=($(kubectl get deployments  | grep "petclinic" | cut -d " " -f1))
 	
@@ -83,8 +75,6 @@ function remove_petclinic_minikube() {
 	done	
 }
 
-# Remove Petclinic instances from openshift
-# output: Remove the petclinic deployments, service-monitors and services
 function remove_petclinic_openshift() {
 	# Delete the deployments first to avoid creating replica pods
 	petclinic_deployments=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))

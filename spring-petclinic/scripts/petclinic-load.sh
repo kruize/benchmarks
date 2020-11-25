@@ -19,9 +19,9 @@
 # Script to load test petclinic app
 # 
 
-NAMESPACE="openshift-monitoring"
-
-source ./scripts/petclinic-common.sh
+ROOT_DIR=.
+pushd ${ROOT_DIR}
+source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
 
 function usage() {
 	echo
@@ -39,6 +39,7 @@ LOAD_TYPE=$1
 SERVER_INSTANCES=$2
 MAX_LOOP=$3
 IP_ADDR=$4
+NAMESPACE="openshift-monitoring"
 
 if [ -z "${SERVER_INSTANCES}" ]; then
 	SERVER_INSTANCES=1
@@ -123,7 +124,7 @@ do
 	((PETCLINIC_PORT=PETCLINIC_PORT+1))
 
 	# Parse the results
-	parse_petclinic_results ${LOG_DIR} ${MAX_LOOP}
+	parse_petclinic_results ${LOG_DIR} ${MAX_LOOP} 
 	echo "#########################################################################################"
 	echo "				Displaying the results					       "
 	echo "#########################################################################################"

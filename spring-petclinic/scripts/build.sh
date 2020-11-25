@@ -22,9 +22,9 @@ if [ -z "${IMAGE}" ]; then
 	IMAGE=adoptopenjdk/openjdk11-openj9:latest
 fi
 
-ROOT_DIR=".."
-source ./scripts/petclinic-common.sh
+ROOT_DIR="."
 pushd ${ROOT_DIR}
+source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
 
 # Check if docker and docker-compose are installed
 echo -n "Checking prereqs..."
@@ -39,6 +39,7 @@ echo -n "Building petclinic application..."
 build_petclinic ${IMAGE} 
 PETCLINIC_IMAGE="spring-petclinic"
 echo "done"
+
 # Build the jmeter docker image with the petclinic driver
 echo -n "Building jmeter with petclinic driver..."
 build_jmeter

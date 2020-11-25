@@ -19,7 +19,7 @@
 
 ROOT_DIR=.
 pushd ${ROOT_DIR} >> setup.log
-SCRIPT="${PWD}/scripts"
+SCRIPT="${HOME}/benchmarks/spring-petclinic/scripts/"
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
 # Ex of ARGS :  wobbled.os.fyre.ibm.com openshift-monitoring /petclinic/results 400 300 5 3
@@ -29,27 +29,30 @@ SCRIPT="${PWD}/scripts"
 # output:Prompts the error message if the return value is not zero 
 function usage() {
 	echo
-	echo "Usage: BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES "
-	echo " For perf runs: TOTAL_INST TOTAL_ITR RE_DEPLOY MANIFESTS_DIR"
+	echo "Usage: BENCHMARK_SERVER_NAME RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES "
+	echo " For perf runs: TOTAL_INST TOTAL_ITR RE_DEPLOY PETCLINIC_IMAGE"
 	echo " RE_DEPLOY should be set to true for perf runs"
 	exit -1
 }
 
 BENCHMARK_SERVER=$1
-NAMESPACE=$2
-RESULTS_DIR_PATH=$3
-JMETER_LOAD_USERS=$4
-JMETER_LOAD_DURATION=$5
-WARMUPS=$6
-MEASURES=$7
-TOTAL_INST=$8
-TOTAL_ITR=$9
-RE_DEPLOY=${10}
-MANIFESTS_DIR=${11}
-CPU_REQ=${12}
-MEM_REQ=${13}
-CPU_LIM=${14}
-MEM_LIM=${15}
+RESULTS_DIR_PATH=$2
+JMETER_LOAD_USERS=$3
+JMETER_LOAD_DURATION=$4
+WARMUPS=$5
+MEASURES=$6
+TOTAL_INST=$7
+TOTAL_ITR=$8
+RE_DEPLOY=$9
+PETCLINIC_IMAGE=${10}
+NAMESPACE="openshift-monitoring"
+MANIFESTS_DIR="${HOME}/benchmarks/spring-petclinic/manifests/"
+
+# setting CPU and memory Request/limits
+CPU_REQ="2"
+MEM_REQ="512M"
+CPU_LIM="4"
+MEM_LIM="1024M"
 
 if [ "$#" -lt 4 ]; then
 	usage
@@ -58,43 +61,46 @@ fi
 if [ -z "${JMETER_LOAD_USERS}" ]; then
 	JMETER_LOAD_USERS=400
 else
-	JMETER_LOAD_USERS=$4
+	JMETER_LOAD_USERS=$3
 fi
 
 if [ -z "${JMETER_LOAD_USERS}" ]; then
 	JMETER_LOAD_DURATION=300
 else
-	JMETER_LOAD_DURATION=$5
+	JMETER_LOAD_DURATION=$4
 fi
 
 if [ -z "${WARMUPS}" ]; then
 	WARMUPS=5
 else
-	WARMUPS=$6
+	WARMUPS=$5
 fi
 
 if [ -z "${MEASURES}" ]; then
 	MEASURES=3
 else
-	MEASURES=$7
+	MEASURES=$6
 fi
 
 if [ -z "${TOTAL_INST}" ]; then
 	TOTAL_INST=1
 else
-	TOTAL_INST=$8
+	TOTAL_INST=$7
 fi
 
 if [ -z "${TOTAL_ITR}" ]; then
 	TOTAL_ITR=1
 else
-	TOTAL_ITR=$9
+	TOTAL_ITR=$8
 fi
 
 if [ -z "${RE_DEPLOY}" ]; then
 	RE_DEPLOY=false
 fi
 
+if [ -z "${PETCLINIC_IMAGE}" ]; then
+	PETCLINIC_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
+fi
 # checks if the previous command is executed successfully
 # input:Return value of previous command
 # output:Prompts the error message if the return value is not zero 
@@ -147,7 +153,7 @@ function run_jmeter_workload() {
 # input: Result directory, Type of run(warmup|measure), iteration number
 # output: call the run_jmeter_workload for each application service
 function run_jmeter_with_scaling()
-{
+{	
 	RESULTS_DIR_J=$1
 	TYPE=$2
 	RUN=$3
@@ -423,11 +429,11 @@ function runItr()
 	for (( run=0; run<${RUNS}; run++ ))
 	do
 		# Check if the application is running
-		check_app
-		if [ "$STATUS" == 0 ]; then
-			echo "Application pod did not come up"
-			exit -1;
-		fi
+		#check_app
+		#if [ "$STATUS" == 0 ]; then
+		#	echo "Application pod did not come up"
+		#	exit -1;
+		#fi
 		echo "##### $TYPE $run" >> setup.log
 		# Get CPU and MEM info through prometheus queries
 		${SCRIPT}/perf/getstats-openshift.sh $TYPE-$run $CPU_MEM_DURATION $RESULTS_runItr $BENCHMARK_SERVER petclinic &
@@ -467,7 +473,7 @@ function runIterations() {
 	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
 	do
 		if [ $RE_DEPLOY == "true" ]; then
-			${SCRIPT}/petclinic-deploy-openshift.sh $BENCHMARK_SERVER $NAMESPACE $MANIFESTS_DIR $SCALING kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 $CPU_REQ $MEM_REQ $CPU_LIM $MEM_LIM >> setup.log
+			${SCRIPT}/petclinic-deploy-openshift.sh $BENCHMARK_SERVER $SCALING $PETCLINIC_IMAGE $CPU_REQ $MEM_REQ $CPU_LIM $MEM_LIM>> setup.log
 		fi
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-$itr

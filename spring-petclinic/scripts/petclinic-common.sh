@@ -65,6 +65,9 @@ function build_petclinic() {
 	git clone https://github.com/spring-projects/spring-petclinic.git 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to clone the git repo"
 	pushd spring-petclinic >>${LOGFILE}
+	# Change the server port in application.properties
+	sed -i '1 s/^/server.port=8081\n/' src/main/resources/application.properties
+	sed -i '19imanagement.endpoints.web.base-path=/manage\n' src/main/resources/application.properties
 	./mvnw package 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to build the benchmark"
 	popd >>${LOGFILE}
@@ -95,7 +98,7 @@ function run_petclinic() {
 	PETCLINIC_IMAGE=$1 
 	INST=$2
 	JVM_ARGS=$3     
-	if [ "$1" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" ]; then
+	if [ "$1" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" || "$1" == "spring-petclinic:latest" ]; then
 		PORT=8081
 	fi   
 	

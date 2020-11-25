@@ -64,15 +64,14 @@ kruize-network already exists...done
 ## Minikube
 To deploy the benchmark use `petclinic-deploy-minikube.sh `
 
-`./scripts/petclinic-deploy-minikube.sh manifest_dir [Total_instances] [petclinic_image]`
+`./scripts/petclinic-deploy-minikube.sh [Total_instances] [petclinic_image]`
 
-- **manifest_dir**: Path where the manifest directory exists
 - **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
 Example to deploy and run multiple petclinic application instances on docker
 
-**`$./scripts/petclinic-deploy-minikube.sh manifests 2/`** 
+**`$./scripts/petclinic-deploy-minikube.sh 2/`** 
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 servicemonitor.monitoring.coreos.com/petclinic-0 created
@@ -86,15 +85,13 @@ service/petclinic-service-1 created
 ## Openshift
 To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
-`./scripts/petclinic-deploy-openshift.sh Benchmark_server Namespace Manifests_directory [Total_instances] [petclinic_image]`
+`./scripts/petclinic-deploy-openshift.sh Benchmark_server [Total_instances] [petclinic_image]`
 
 - **Benchmark_server**: Name of the cluster you are using
-- **Namespace**: openshift-monitoring
-- **Manifests_directory**: Path where the manifest directory exists
 - **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
-**`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com openshift-monitoring manifests/`**
+**`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com 2`**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 servicemonitor.monitoring.coreos.com/petclinic-0 created
@@ -114,10 +111,11 @@ Simulating the load on petclinic benchmarks using jmeter
 
 `kruize/jmeter_petclinic:noport` is the image used to apply the load
 
-Example to run the load on openshift
+Example to run the load on 2 petclinic instances for 2 iterations in openshift cluster
 
 **`$./scripts/petclinic-load.sh openshift 2 2`**
 ```
+
 #########################################################################################
                              Starting Iteration 1                                  
 #########################################################################################
