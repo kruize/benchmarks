@@ -91,7 +91,7 @@ To deploy the benchmark use `petclinic-deploy-openshift.sh`
 - **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
-Example to deploy and run petclinic application 
+Example to deploy and run petclinic application on openshift cluster
 
 **`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com `**
 ```
