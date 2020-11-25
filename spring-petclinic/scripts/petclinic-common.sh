@@ -20,8 +20,6 @@
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
 export NETWORK="kruize-network"
-CPU="2.5"
-MEMORY="1024M"
 ROOT_DIR=${PWD}
 LOGFILE="${ROOT_DIR}/setup.log"
 PORT="8080"
@@ -113,7 +111,7 @@ function run_petclinic() {
 	fi
 
 	# Run the petclinic app container on "kruize-network"
-	cmd="docker run -d --name=petclinic-app-${INST} --cpus=${CPU} --memory=${MEMORY} -p ${PETCLINIC_PORT}:${PORT} --network=${NETWORK} -e JVM_ARGS=${JVM_ARGS} ${PETCLINIC_IMAGE} "
+	cmd="docker run -d --name=petclinic-app-${INST}  -p ${PETCLINIC_PORT}:${PORT} --network=${NETWORK} -e JVM_ARGS=${JVM_ARGS} ${PETCLINIC_IMAGE} "
 	$cmd 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to start petclinic container."
 	((PETCLINIC_PORT=PETCLINIC_PORT+1))
