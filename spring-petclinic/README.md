@@ -92,6 +92,7 @@ To deploy the benchmark use `petclinic-deploy-openshift.sh`
 - **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
 Example to deploy and run petclinic application 
+
 **`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com `**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
