@@ -32,6 +32,7 @@ if [ "$#" -lt 1 ]; then
 fi
 
 CLUSTER_TYPE=$1
+NAMESPACE="openshift-monitoring"
 
 function remove_petclinic_docker() {
 	petclinic_containers=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
