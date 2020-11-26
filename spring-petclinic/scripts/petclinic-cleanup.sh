@@ -77,16 +77,16 @@ function remove_petclinic_minikube() {
 	done
 
 	#Delete the services and routes if any
-	petclinic_services=($(kubectl get services  | grep "petclinic" | cut -d " " -f1))
+	petclinic_services=($(kubectl get svc  | grep "petclinic" | cut -d " " -f1))
 	for se in "${petclinic_services[@]}"
 	do
-		kubectl delete service $se 
+		kubectl delete svc $se 
 	done	
 	
-	petclinic_service_monitors=($(oc get servicemonitor --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	petclinic_service_monitors=($(kubectl get servicemonitor | grep "petclinic" | cut -d " " -f1))
 	for sm in "${petclinic_service_monitors[@]}"
 	do
-		oc delete servicemonitor $sm --namespace=$NAMESPACE
+		kubectl delete servicemonitor $sm 
 	done
 }
 
