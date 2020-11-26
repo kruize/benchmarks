@@ -34,6 +34,8 @@ fi
 CLUSTER_TYPE=$1
 NAMESPACE="openshift-monitoring"
 
+# Removes the petclinic instances from docker
+# output: Stops the petclinic container and remove it, removes the network, Removes the petclinic and jmeter images if any
 function remove_petclinic_docker() {
 	petclinic_containers=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
 	for con in "${petclinic_containers[@]}"
@@ -54,12 +56,18 @@ function remove_petclinic_docker() {
 		docker rmi spring-petclinic:latest
 	fi
 	
+	if [[ "$(docker images -q kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 2> /dev/null)" != "" ]]; then
+		docker rmi kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
+	fi
+	
 	# remove the jmeter image if present
 	if [[ "$(docker images -q jmeter_petclinic:3.1 2> /dev/null)" != "" ]]; then
 		docker rmi jmeter_petclinic:3.1
 	fi
 }
 
+# Removes the petclinic instances from minikube
+# output: Removes the petclinic deployments, services and service monitors
 function remove_petclinic_minikube() {
 	petclinic_deployments=($(kubectl get deployments  | grep "petclinic" | cut -d " " -f1))
 	
@@ -74,10 +82,17 @@ function remove_petclinic_minikube() {
 	do
 		kubectl delete service $se 
 	done	
+	
+	petclinic_service_monitors=($(oc get servicemonitor --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	for sm in "${petclinic_service_monitors[@]}"
+	do
+		oc delete servicemonitor $sm --namespace=$NAMESPACE
+	done
 }
 
+# Removes the petclinic instances from openshift
+# output: Removes the petclinic deployments, services, service monitors and routes
 function remove_petclinic_openshift() {
-	# Delete the deployments first to avoid creating replica pods
 	petclinic_deployments=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
 
 	for de in "${petclinic_deployments[@]}"
@@ -86,10 +101,10 @@ function remove_petclinic_openshift() {
 	done
 
 	#Delete the services and routes if any
-	petclinic_services=($(oc get services --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	petclinic_services=($(oc get svc --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
 	for se in "${petclinic_services[@]}"
 	do
-		oc delete service $se --namespace=$NAMESPACE
+		oc delete svc $se --namespace=$NAMESPACE
 	done
 	petclinic_routes=($(oc get route --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
 	for ro in "${petclinic_routes[@]}"

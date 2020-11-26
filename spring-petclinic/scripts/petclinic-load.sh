@@ -25,21 +25,33 @@ source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
 
 function usage() {
 	echo
-	echo "Usage: [load_type] [Total Number of instances] [Number of iterations of the jmeter load] [ip_adddr / namespace]"
-	echo "load_type : docker minikube openshift "
-	#echo "usage for openshift cluster_type"
+	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-i SERVER_INSTANCES] [-l MAX_LOOP] [-a IP_ADDR]"
 	exit -1
 }
 
-if [ "$#" -lt 1 ]; then
+while getopts c:i:l:a:-: gopts
+do
+	case ${gopts} in
+	c)
+		CLUSTER_TYPE=${OPTARG}
+		;;
+	i)
+		SERVER_INSTANCES="${OPTARG}"
+		;;
+	l)
+		MAX_LOOP="${OPTARG}"		
+		;;
+	a)
+		IP_ADDR="${OPTARG}"		
+		;;
+	esac
+done
+
+NAMESPACE="openshift-monitoring"
+
+if [ -z "${CLUSTER_TYPE}" ]; then
 	usage
 fi
-
-LOAD_TYPE=$1
-SERVER_INSTANCES=$2
-MAX_LOOP=$3
-IP_ADDR=$4
-NAMESPACE="openshift-monitoring"
 
 if [ -z "${SERVER_INSTANCES}" ]; then
 	SERVER_INSTANCES=1
@@ -47,11 +59,9 @@ fi
 
 if [ -z "${MAX_LOOP}" ]; then
 	MAX_LOOP=5
-else
-	MAX_LOOP=$3
 fi
 
-case $LOAD_TYPE in
+case $CLUSTER_TYPE in
 docker)
 	if [ -z "${IP_ADDR}" ]; then
 		get_ip
@@ -102,7 +112,7 @@ do
 		JMETER_LOAD_USERS=$(( 150*iter ))
 		JMETER_LOAD_DURATION=20
 	
-		if [ "${LOAD_TYPE}" == "openshift" ]; then
+		if [ "${CLUSTER_TYPE}" == "openshift" ]; then
 			cmd="docker run  --rm -e JHOST=${IP_ADDR[inst-1]} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} ${JMETER_FOR_LOAD}" 
 		else
 			cmd="docker run --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} -e JPORT=${PETCLINIC_PORT} ${JMETER_FOR_LOAD}"

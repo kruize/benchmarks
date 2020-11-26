@@ -29,15 +29,15 @@ Building jmeter with petclinic driver...done
 ## Docker
  To deploy the benchmark use `petclinic-deploy-docker.sh`
  
-`./scripts/petclinic-deploy-docker.sh [Total_instances] [Petclinic_image] [JVM_ARGS]`
+`./scripts/petclinic-deploy-docker.sh [-i SERVER_INSTANCES] [-p PETCLINIC_IMAGE] [-a JVM_ARGS]`
 
-- **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
-- **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
+- **SERVER_INSTANCES**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
+- **PETCLINIC_IMAGE**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 - **JVM_ARGS**: JVM agruments if any
 
 Example to deploy petclinic application using custom image
 
-**`$./scripts/petclinic-deploy-docker.sh 1 spring-petclinic:latest -Xshareclasses:none`**
+**`$./scripts/petclinic-deploy-docker.sh -i 1 -p spring-petclinic:latest -a -Xshareclasses:none`**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 Checking prereqs...done
@@ -50,7 +50,7 @@ Creating Kruize network: kruize-network...done
  
 Example to deploy and run multiple petclinic application instances using default image
 
-**`$./scripts/petclinic-deploy-docker.sh 2`**
+**`$./scripts/petclinic-deploy-docker.sh -i 2`**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 Checking prereqs...done
@@ -64,14 +64,14 @@ kruize-network already exists...done
 ## Minikube
 To deploy the benchmark use `petclinic-deploy-minikube.sh `
 
-`./scripts/petclinic-deploy-minikube.sh [Total_instances] [petclinic_image]`
+`./scripts/petclinic-deploy-minikube.sh [-i SERVER_INSTANCES] [-p PETCLINIC_IMAGE]`
 
-- **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
-- **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
+- **SERVER_INSTANCES**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
+- **PETCLINIC_IMAGE**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 
 Example to deploy and run multiple petclinic application instances on minikube
 
-**`$./scripts/petclinic-deploy-minikube.sh 2/`** 
+**`$./scripts/petclinic-deploy-minikube.sh -i 2/`** 
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 servicemonitor.monitoring.coreos.com/petclinic-0 created
@@ -85,15 +85,19 @@ service/petclinic-service-1 created
 ## Openshift
 To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
-`./scripts/petclinic-deploy-openshift.sh Benchmark_server [Total_instances] [petclinic_image]`
+`./scripts/petclinic-deploy-openshift.sh -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM]`
 
-- **Benchmark_server**: Name of the cluster you are using
-- **Total_instances**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
-- **petclinic_image**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
+- **BENCHMARK_SERVER**: Name of the cluster you are using
+- **SERVER_INSTANCES**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
+- **PETCLINIC_IMAGE**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
+- **CPU_REQ**: CPU request
+- **MEM_REQ**: Memory request
+- **CPU_LIM**: CPU limit
+- **MEM_LIM**: Memory limit
 
 Example to deploy and run petclinic application on openshift cluster
 
-**`./scripts/petclinic-deploy-openshift.sh rouging.os.fyre.ibm.com `**
+**`./scripts/petclinic-deploy-openshift.sh -s rouging.os.fyre.ibm.com `**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 servicemonitor.monitoring.coreos.com/petclinic-0 created
@@ -104,18 +108,18 @@ route.route.openshift.io/petclinic-service-0 exposed
 
 # Run the load
 Simulating the load on petclinic benchmarks using jmeter
-`./scripts/petclinic-load.sh load_type [Total Number of instances] [Number of iterations of the jmeter load] [ip_addr / namespace]`
+`./scripts/petclinic-load.sh -c CLUSTER_TYPE [-i SERVER_INSTANCES] [-l MAX_LOOP] [-a IP_ADDR]`
 
-- **load_type**: docker icp openshift
-- **Total Number of instances**: Number of petclinic instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
-- **Number of iterations of the jmeter load**: Number of times you want to run the load. It is optional, if is not specified then by default it will be considered as 5 iterations.
-- **ip_addr**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
+- **CLUSTER_TYPE**: docker icp openshift
+- **SERVER_INSTANCES**: Number of petclinic instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
+- **MAX_LOOP**: Number of times you want to run the load. It is optional, if is not specified then by default it will be considered as 5 iterations.
+- **IP_ADDR**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
 
 `kruize/jmeter_petclinic:noport` is the image used to apply the load
 
 Example to run the load on 2 petclinic instances for 2 iterations in openshift cluster
 
-**`$./scripts/petclinic-load.sh openshift 2 2`**
+**`$./scripts/petclinic-load.sh -c openshift -i 2 -l 2`**
 ```
 
 #########################################################################################
@@ -160,9 +164,7 @@ Above image shows the logs of the load run, it processes and displays the output
 To test with multiple instances follow [README.md](/spring-petclinic/scripts/perf/README.md)
 
 # Cleanup
-`$ ./scripts/petclinic-cleanup.sh cluster_type`
-
-- **cluster_type**: docker|minikube|openshift
+`$ ./scripts/petclinic-cleanup.sh cluster_type[docker|minikube|openshift]`
 
 # Changes to be done to get kruize runtime recommendations for petclinic
 **Add the following in**

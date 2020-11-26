@@ -1,6 +1,6 @@
 # Test with multiple instances 
 
-`./scripts/perf/run_petclinic_openshift.sh load_info perf_info` 
+`./scripts/perf/run_petclinic_openshift.sh -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-a WARMUPS] [-m MEASURES] [-i TOTAL_INST] [-l TOTAL_ITR] [-r= set redeploy to true] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM]` 
 
 **load_info** : BENCHMARK_SERVER_NAME RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
 
@@ -18,6 +18,10 @@
 - **TOTAL_ITR**: Number of iterations you want to do the benchmarking
 - **RE_DEPLOY**: true
 - **PETCLINIC_IMAGE**: Petclinic image to be used during deployment. It is optional, if not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be used for the deployment.
+- **CPU_REQ**: CPU request
+- **MEM_REQ**: Memory request
+- **CPU_LIM**: CPU limit
+- **MEM_LIM**: Memory limit
 
 Example to test with multiple instances
 

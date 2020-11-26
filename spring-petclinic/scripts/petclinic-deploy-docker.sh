@@ -21,13 +21,26 @@ ROOT_DIR=.
 pushd ${ROOT_DIR}
 source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
 
-TOTAL_INST=$1
-PETCLINIC_IMAGE=$2
-JVM_ARGS=$3
 JMETER_IMAGE=kruize/jmeter_petclinic:3.1
 
-if [ -z "${TOTAL_INST}" ]; then
-	TOTAL_INST=1
+# Iterate through the commandline options
+while getopts i:p:a:-: gopts
+do
+	case ${gopts} in
+	i)
+		SERVER_INSTANCES="${OPTARG}"
+		;;
+	p)
+		PETCLINIC_IMAGE="${OPTARG}"		
+		;;
+	a)
+		JVM_ARGS="${OPTARG}"
+		;;
+	esac
+done
+
+if [ -z "${SERVER_INSTANCES}" ]; then
+	SERVER_INSTANCES=1
 fi
 
 if [ -z "${PETCLINIC_IMAGE}" ]; then
@@ -54,9 +67,10 @@ else
 	echo "done"
 fi
 # Run the application 
-for(( inst=1; inst<=${TOTAL_INST}; inst++ ))
+for(( inst=1; inst<=${SERVER_INSTANCES}; inst++ ))
 do 
 	echo -n "Running petclinic instance $inst with inbuilt db..."
 	run_petclinic ${PETCLINIC_IMAGE} ${inst} ${JVM_ARGS}
 	echo "done"
 done
+

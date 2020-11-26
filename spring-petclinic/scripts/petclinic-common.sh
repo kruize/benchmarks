@@ -24,10 +24,6 @@ ROOT_DIR=${PWD}
 LOGFILE="${ROOT_DIR}/setup.log"
 PORT="8080"
 
-if [ "${IMAGE}" == "adoptopenjdk/openjdk11-openj9:latest" ]; then
-	JVM_ARGS="-Xshareclasses:none"
-fi
-
 # checks if the previous command is executed successfully
 # input:Return value of previous command
 # output:Prompts the error message if the return value is not zero 
@@ -96,7 +92,7 @@ function run_petclinic() {
 	PETCLINIC_IMAGE=$1 
 	INST=$2
 	JVM_ARGS=$3     
-	if [ "$1" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" || "$1" == "spring-petclinic:latest" ]; then
+	if [[ "$1" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" || "$1" == "spring-petclinic:latest" ]]; then
 		PORT=8081
 	fi   
 	
@@ -111,7 +107,7 @@ function run_petclinic() {
 	fi
 
 	# Run the petclinic app container on "kruize-network"
-	cmd="docker run -d --name=petclinic-app-${INST}  -p ${PETCLINIC_PORT}:${PORT} --network=${NETWORK} -e JVM_ARGS=${JVM_ARGS} ${PETCLINIC_IMAGE} "
+	cmd="docker run -d --name=petclinic-app-${INST} -p ${PETCLINIC_PORT}:${PORT} --network=${NETWORK} -e JVM_ARGS=${JVM_ARGS} ${PETCLINIC_IMAGE} "
 	$cmd 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to start petclinic container."
 	((PETCLINIC_PORT=PETCLINIC_PORT+1))
@@ -120,9 +116,9 @@ function run_petclinic() {
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
-	if [ "${LOAD_TYPE}" == "minikube" ]; then
+	if [ "${CLUSTER_TYPE}" == "minikube" ]; then
 		CMD=$(kubectl get pods | grep "petclinic" | grep "Running" | cut -d " " -f1)
-	elif [ "${LOAD_TYPE}" == "openshift" ]; then
+	elif [ "${CLUSTER_TYPE}" == "openshift" ]; then
 		CMD=$(oc get pods --namespace=$NAMESPACE | grep "petclinic" | grep "Running" | cut -d " " -f1)
 	else
 		CMD=$(docker ps | grep "petclinic-app" | cut -d " " -f1)

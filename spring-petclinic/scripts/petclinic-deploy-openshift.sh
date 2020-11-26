@@ -23,20 +23,55 @@ pushd ${ROOT_DIR}
 # SCRIPT BENCHMARK_SERVER 
 # Ex of ARGS :  wobbled.os.fyre.ibm.com 2 kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
 
-BENCHMARK_SERVER=$1
-SERVER_INSTANCES=$2
-PETCLINIC_IMAGE=$3
 NAMESPACE="openshift-monitoring"
 MANIFESTS_DIR="${HOME}/benchmarks/spring-petclinic/manifests/"
 DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
+PETCLINIC_REPO="${HOME}/benchmarks/spring-petclinic/scripts/"
+CLUSTER_TYPE="openshift"
 
-CPU_REQ=$4
-MEM_REQ=$5
-CPU_LIM=$6
-MEM_LIM=$7
+# Describes the usage of the script
+function usage() {
+	echo
+	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] "
+	exit -1
+}
 
-if [ -z $BENCHMARK_SERVER ]; then
-	echo "Do set the variable - BENCHMARK_SERVER  "
+# Iterate through the commandline options
+while getopts s:i:p:-: gopts
+do
+	case ${gopts} in
+	-)
+		case "${OPTARG}" in
+			cpureq=*)
+				CPU_REQ=${OPTARG#*=}
+				;;
+			memreq=*)
+				MEM_REQ=${OPTARG#*=}
+				;;
+			cpulim=*)
+				CPU_LIM=${OPTARG#*=}
+				;;
+			memlim=*)
+				MEM_LIM=${OPTARG#*=}
+				;;
+			*)
+		esac
+		;;
+	s)
+		BENCHMARK_SERVER=${OPTARG}
+		;;
+	i)
+		SERVER_INSTANCES="${OPTARG}"
+		;;
+	p)
+		PETCLINIC_IMAGE="${OPTARG}"		
+		;;
+	esac
+done
+
+if [ -z "${BENCHMARK_SERVER}" ]; then
+	echo "Do set the variable - BENCHMARK_SERVER "
+	usage
 	exit 1
 fi
 
@@ -62,6 +97,17 @@ function err_exit() {
 		printf "$*"
 		echo "See ${LOGFILE} for more details"
 		exit -1
+	fi
+}
+
+# Check if the application is running
+# output: Returns 1 if the application is running else returns 0
+function check_app() {
+	CMD=$(oc get pods --namespace=$NAMESPACE | grep "petclinic" | grep "Running" | cut -d " " -f1)
+	if [ -z "${CMD}" ]; then
+		STATUS=0
+	else
+		STATUS=1
 	fi
 }
 
@@ -91,8 +137,8 @@ function createInstances() {
 		
 		# Setting cpu/mem request limits
 		if [ ! -z  ${CPU_REQ} ]; then
-			sed -i '31 s/^/          cpu: '$CPU_REQ'\n          memory: '$MEM_REQ'\n/' $MANIFESTS_DIR/petclinic-$inst.yaml
-			sed -i '34 s/^/          cpu: '$CPU_LIM'\n          memory: '$MEM_LIM'\n/' $MANIFESTS_DIR/petclinic-$inst.yaml
+			sed -i '28 s/^/          cpu: '$CPU_REQ'\n          memory: '$MEM_REQ'\n/' $MANIFESTS_DIR/petclinic-$inst.yaml
+			sed -i '31 s/^/          cpu: '$CPU_LIM'\n          memory: '$MEM_LIM'\n/' $MANIFESTS_DIR/petclinic-$inst.yaml
 		fi
 		oc create -f $MANIFESTS_DIR/petclinic-$inst.yaml -n $NAMESPACE
 		err_exit "Error: Issue in deploying."
@@ -102,6 +148,7 @@ function createInstances() {
 
 	#Wait till petclinic starts
 	sleep 40
+
 	#Expose the services
 	svc_list=($(oc get svc --namespace=$NAMESPACE | grep "service" | grep "petclinic" | cut -d " " -f1))
 	for sv in "${svc_list[@]}"
@@ -109,34 +156,19 @@ function createInstances() {
 		oc expose svc/$sv --namespace=$NAMESPACE
 		err_exit " Error: Issue in exposing service"
 	done
+	
+	
+	# Check if the application is running
+	check_app
+	if [ "$STATUS" == 0 ]; then
+		echo "Application pod did not come up"
+		exit -1;
+	fi
 }
 
 # Delete the petclinic deployments,services and routes if it is already present 
 function stopAllInstances() {
-	# Delete the deployments first to avoid creating replica pods
-	petclinic_deployments=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
-
-	for de in "${petclinic_deployments[@]}"
-	do
-		oc delete deployment $de --namespace=$NAMESPACE
-	done
-
-	#Delete the services and routes if any
-	petclinic_services=($(oc get services --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
-	for se in "${petclinic_services[@]}"
-	do
-		oc delete service $se --namespace=$NAMESPACE
-	done
-	petclinic_routes=($(oc get route --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
-	for ro in "${petclinic_routes[@]}"
-	do
-		oc delete route $ro --namespace=$NAMESPACE
-	done
-	petclinic_service_monitors=($(oc get servicemonitor --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
-	for sm in "${petclinic_service_monitors[@]}"
-	do
-		oc delete servicemonitor $sm --namespace=$NAMESPACE
-	done
+	${PETCLINIC_REPO}/petclinic-cleanup.sh $CLUSTER_TYPE
 }
 
 # Stop all petclinic related instances if there are any

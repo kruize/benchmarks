@@ -21,14 +21,26 @@ ROOT_DIR=.
 pushd ${ROOT_DIR} 
 # Run the benchmark as
 # SCRIPT  MANIFESTS_DIR 
-# Ex of ARGS :  2 kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0  
+# Ex of ARGS :  -i 2 -p kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0  
 
 LOGFILE="${ROOT_DIR}/setup.log"
-SERVER_INSTANCES=$1
-PETCLINIC_IMAGE=$2
 MANIFESTS_DIR="${HOME}/benchmarks/spring-petclinic/manifests/"
 DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
+PETCLINIC_REPO="${HOME}/benchmarks/spring-petclinic/scripts/"
+CLUSTER_TYPE="minikube"
 
+# Iterate through the commandline options
+while getopts i:p:-: gopts
+do
+	case ${gopts} in
+	i)
+		SERVER_INSTANCES="${OPTARG}"
+		;;
+	p)
+		PETCLINIC_IMAGE="${OPTARG}"		
+		;;
+	esac
+done
 
 if [ -z "${SERVER_INSTANCES}" ]; then
 	SERVER_INSTANCES=1
@@ -54,6 +66,18 @@ function err_exit() {
 		exit -1
 	fi
 }
+
+# Check if the application is running
+# output: Returns 1 if the application is running else returns 0
+function check_app() {
+	CMD=$(kubectl get pods | grep "petclinic" | grep "Running" | cut -d " " -f1)
+	if [ -z "${CMD}" ]; then
+		STATUS=0
+	else
+		STATUS=1
+	fi
+}
+
 
 # Deploy the service monitor and petclinic application
 # input:petclinic and service-monitor yaml file
@@ -83,24 +107,18 @@ function createInstances() {
 	done
 	#Wait till petclinic starts
 	sleep 40
+	
+	# Check if the application is running
+	check_app
+	if [ "$STATUS" == 0 ]; then
+		echo "Application pod did not come up"
+		exit -1;
+	fi
 }
 
-# Delete the petclinic deployment,service and route if it is already present 
+# Delete the petclinic deployments,services and routes if it is already present 
 function stopAllInstances() {
-	# Delete the deployments first to avoid creating replica pods
-	petclinic_deployments=($(kubectl get deployments  | grep "petclinic" | cut -d " " -f1))
-	
-	for de in "${petclinic_deployments[@]}"	
-	do
-		kubectl delete deployment $de 
-	done
-
-	#Delete the services and routes if any
-	petclinic_services=($(kubectl get services  | grep "petclinic" | cut -d " " -f1))
-	for se in "${petclinic_services[@]}"
-	do
-		kubectl delete service $se 
-	done	
+	${PETCLINIC_REPO}/petclinic-cleanup.sh $CLUSTER_TYPE
 }
 
 # Stop all petclinic related instances if there are any
