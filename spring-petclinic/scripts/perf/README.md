@@ -2,17 +2,12 @@
 
 `./scripts/perf/run_petclinic_openshift.sh -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-a WARMUPS] [-m MEASURES] [-i TOTAL_INST] [-l TOTAL_ITR] [-r= set redeploy to true] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM]` 
 
-**load_info** : BENCHMARK_SERVER_NAME RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
-
 - **BENCHMARK_SERVER_NAME** : Name of the cluster you are using
 - **RESULTS_DIR_PATH** : Location where you want to store the results
 - **JMETER_LOAD_USERS** : Number of users
 - **JMETER_LOAD_DURATION** : Load duration
 - **WARMUPS** : Number of warmups
 - **MEASURES** : Number of measures
-
-**perf_info**: Redeploying the instances for different iterations for performance test
-               (TOTAL_INST TOTAL_ITR RE_DEPLOY PETCLINIC_IMAGE)
 
 - **TOTAL_INST**: Number of instances
 - **TOTAL_ITR**: Number of iterations you want to do the benchmarking
@@ -25,7 +20,7 @@
 
 Example to test with multiple instances
 
-**`$./scripts/perf/run_petclinic_openshift.sh rouging.os.fyre.ibm.com result/ 300 60 5 3 2 2 true`**
+**`$./scripts/perf/run-petclinic-openshift.sh -s rouging.os.fyre.ibm.com -e result/ -u 150 -d 40 -a 3 -m 2 -i 2 -l 2 -r`**
 
 ``` 
 Instances , Throughput , Responsetime , TOTAL_PODS_MEM , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , TOTAL_PODS_CPU , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS 
