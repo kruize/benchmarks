@@ -6,11 +6,11 @@
 
 # Create custom images
 Generate custom petclinic images required for the setup 
-`./scripts/build.sh `
+`./scripts/petclinic-build.sh `
 
 Pre-requisites: javac and git 
 
-`./scripts/build.sh [baseimage]`
+`./scripts/petclinic-build.sh [baseimage]`
 
 baseimage: baseimage for petclinic. It is optional, if it is not specified then the default image `adoptopenjdk/openjdk11-openj9:latest` will be considered as base image.
 
@@ -18,7 +18,7 @@ The image which u have with openj9 uses - "Xshareclasses:none" . Include the req
 
 Example to build the custom image for petclinic application
 
-**`$./scripts/build.sh adoptopenjdk/openjdk11-openj9:latest`**
+**`$./scripts/petclinic-build.sh adoptopenjdk/openjdk11-openj9:latest`**
 ```
 ~/benchmarks/spring-petclinic ~/benchmarks/spring-petclinic
 Checking prereqs...done
