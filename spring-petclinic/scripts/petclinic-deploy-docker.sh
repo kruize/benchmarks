@@ -67,7 +67,7 @@ else
 	echo "done"
 fi
 # Run the application 
-for(( inst=1; inst<=${SERVER_INSTANCES}; inst++ ))
+for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 do 
 	echo -n "Running petclinic instance $inst with inbuilt db..."
 	run_petclinic ${PETCLINIC_IMAGE} ${inst} ${JVM_ARGS}
