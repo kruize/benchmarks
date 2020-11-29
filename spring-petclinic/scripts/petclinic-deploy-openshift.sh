@@ -157,7 +157,7 @@ function createInstances() {
 		err_exit " Error: Issue in exposing service"
 	done
 	
-	
+	sleep 60
 	# Check if the application is running
 	check_app
 	if [ "$STATUS" == 0 ]; then
