@@ -88,7 +88,7 @@ function createInstances() {
 		sed 's/name: petclinic/name: petclinic-'$inst'/g' $MANIFESTS_DIR/service-monitor.yaml > $MANIFESTS_DIR/service-monitor-$inst.yaml
 		sed -i 's/petclinic-app/petclinic-app-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
 		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/service-monitor-$inst.yaml
-		kubectl apply -f $MANIFESTS_DIR/service-monitor-$inst.yaml
+		kubectl create -f $MANIFESTS_DIR/service-monitor-$inst.yaml
 	done
 	port=32334
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
@@ -101,7 +101,7 @@ function createInstances() {
 		sed -i 's/petclinic-port/petclinic-port-'$inst'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		sed -i 's/32334/'$port'/g' $MANIFESTS_DIR/petclinic-$inst.yaml
 		#Create the deployments and services
-		kubectl apply -f $MANIFESTS_DIR/petclinic-$inst.yaml 
+		kubectl create -f $MANIFESTS_DIR/petclinic-$inst.yaml 
 		err_exit "Error: Issue in deploying."
 		((port=port+1))
 	done
