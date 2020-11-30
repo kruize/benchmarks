@@ -27,7 +27,7 @@ export NETWORK="kruize-network"
 LOGFILE="${ROOT_DIR}/setup.log"
 PORT="8080"
 PETCLINIC_REPO="${HOME}/benchmarks/spring-petclinic"
-pushd ${PETCLINIC_REPO}
+pushd ${PETCLINIC_REPO} >> ${LOGFILE}
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
