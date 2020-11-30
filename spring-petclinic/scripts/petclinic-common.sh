@@ -17,12 +17,17 @@
 ### Script containing common functions ###
 #
 
+ROOT_DIR="."
+pushd ${ROOT_DIR}
+
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
 export NETWORK="kruize-network"
-ROOT_DIR=${PWD}
+
 LOGFILE="${ROOT_DIR}/setup.log"
 PORT="8080"
+PETCLINIC_REPO="${HOME}/benchmarks/spring-petclinic"
+pushd ${PETCLINIC_REPO}
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
