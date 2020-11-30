@@ -20,7 +20,7 @@ ARG REPOSITORY
 
 FROM $REPOSITORY
 
-COPY --chown=1001:0 ${PWD}/spring-petclinic/target/spring-petclinic-*.BUILD-SNAPSHOT.jar /target/spring-petclinic.jar
+COPY --chown=1001:0 spring-petclinic/target/spring-petclinic-*.BUILD-SNAPSHOT.jar /target/spring-petclinic.jar
 
 ENV LOG_DIR=/output 
 ENV JVM_ARGS=
