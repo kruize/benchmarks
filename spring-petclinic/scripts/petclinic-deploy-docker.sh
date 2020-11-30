@@ -66,11 +66,14 @@ else
 	pull_image ${JMETER_IMAGE}
 	echo "done"
 fi
+
+count=1
 # Run the application 
 for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 do 
-	echo -n "Running petclinic instance $inst with inbuilt db..."
+	echo -n "Running petclinic instance ${count} with inbuilt db..."
 	run_petclinic ${PETCLINIC_IMAGE} ${inst} ${JVM_ARGS}
 	echo "done"
+	((count=count+1))
 done
 
