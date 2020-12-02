@@ -106,7 +106,7 @@ function createInstances() {
 		((port=port+1))
 	done
 	#Wait till petclinic starts
-	sleep 40
+	sleep 120
 	
 	# Check if the application is running
 	check_app
