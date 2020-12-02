@@ -17,7 +17,7 @@
 # Results appear on /output in the container
 # Must specify the hostname for the petclinic application (or localhost will be assumed)
 
-FROM ibmjava:8-jre
+FROM adoptopenjdk:8-jre-hotspot
 
 ENV JMETER_VERSION 3.3
 
