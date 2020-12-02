@@ -22,7 +22,7 @@ pushd ${ROOT_DIR} >> setup.log
 SCRIPT="${HOME}/benchmarks/spring-petclinic/scripts/"
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
-# Ex of ARGS : -s wobbled.os.fyre.ibm.com -a /petclinic/results 400 300 5 3
+# Ex of ARGS : -s wobbled.os.fyre.ibm.com -a /petclinic/results -u 400 -d 300 -a 5 -m 3
 
 # Describes the usage of the script
 function usage() {
