@@ -21,7 +21,7 @@ ROOT_DIR=.
 pushd ${ROOT_DIR}
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER 
-# Ex of ARGS :  wobbled.os.fyre.ibm.com 2 kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
+# Ex of ARGS :  -s wobbled.os.fyre.ibm.com -i 2 -p kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
 
 NAMESPACE="openshift-monitoring"
 MANIFESTS_DIR="${HOME}/benchmarks/spring-petclinic/manifests/"
