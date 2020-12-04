@@ -24,7 +24,7 @@ source ${CURRENT_DIR}/petclinic-common.sh
 
 function usage() {
 	echo
-	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-i SERVER_INSTANCES] [--iter MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR]"
+	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-i SERVER_INSTANCES] [--iter=MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR]"
 	exit -1
 }
 

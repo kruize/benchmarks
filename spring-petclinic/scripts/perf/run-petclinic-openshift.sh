@@ -141,22 +141,6 @@ if [ -z "${PETCLINIC_IMAGE}" ]; then
 	PETCLINIC_IMAGE="${PETCLINIC_DEFAULT_IMAGE}"
 fi
 
-if [ -z "${CPU_REQ}" ]; then
-	CPU_REQ="2"
-fi
-
-if [ -z "${MEM_REQ}" ]; then
-	MEM_REQ="512M"
-fi
-
-if [ -z "${CPU_LIM}" ]; then
-	CPU_LIM="4"
-fi
-
-if [ -z "${MEM_LIM}" ]; then
-	MEM_LIM="1024M"
-fi
-
 if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="openshift-monitoring"
 fi
@@ -417,7 +401,7 @@ function parseResults() {
 		
 	done
 
-	echo "${sca} ,  ${total_throughput_avg} , ${total_responsetime_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_c_mem_avg} , ${total_c_cpu_avg} ,${CPU_REQ} , ${MEM_REQ} , ${total_weberror_avg}" >> ${RESULTS_DIR_J}/../Metrics.log
+	echo "${sca} ,  ${total_throughput_avg} , ${total_responsetime_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_c_mem_avg} , ${total_c_cpu_avg} , ${CPU_REQ} , ${MEM_REQ} , ${total_weberror_avg}" >> ${RESULTS_DIR_J}/../Metrics.log
 	echo "${sca} ,  ${total_mem_avg} , ${total_memusage_avg} , ${total_memrequests_avg} , ${total_memlimits_avg} , ${total_memreq_in_p_avg} , ${total_memlimit_in_p_avg} " >> ${RESULTS_DIR_J}/../Metrics-mem.log
 	echo "${sca} ,  ${total_cpu_avg} , ${total_cpurequests_avg} , ${total_cpulimits_avg} , ${total_cpureq_in_p_avg} , ${total_cpulimits_in_p_avg} " >> ${RESULTS_DIR_J}/../Metrics-cpu.log
 	echo "${sca} , ${total_c_cpu_avg} , ${total_c_cpurequests_avg} , ${total_c_cpulimits_avg} , ${total_c_mem_avg} , ${total_c_memrequests_avg} , ${total_c_memlimits_avg} " >> ${RESULTS_DIR_J}/../Metrics-cluster.log

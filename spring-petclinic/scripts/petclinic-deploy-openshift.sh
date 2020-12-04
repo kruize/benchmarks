@@ -111,12 +111,21 @@ function createInstances() {
 		sed -i 's/petclinic-app/petclinic-app-'${inst}'/g' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
 		sed -i 's/petclinic-port/petclinic-port-'${inst}'/g' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
 		sed -i 's/32334/'${PETCLINIC_PORT}'/g' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
-		
+	
 		# Setting cpu/mem request limits
-		if [ ! -z  ${CPU_REQ} ]; then
-			sed -i '28 s/^/          cpu: '${CPU_REQ}'\n          memory: '${MEM_REQ}'\n/' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
-			sed -i '31 s/^/          cpu: '${CPU_LIM}'\n          memory: '${MEM_LIM}'\n/' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+		if [ ! -z  ${MEM_REQ} ]; then
+			sed -i '/requests:/a \ \ \ \ \ \ \ \ \ \ memory: '${MEM_REQ}'' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
 		fi
+		if [ ! -z  ${CPU_REQ} ]; then
+			sed -i '/requests:/a \ \ \ \ \ \ \ \ \ \ cpu: '${CPU_REQ}'' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+		fi
+		if [ ! -z  ${MEM_LIM} ]; then
+			sed -i '/limits:/a \ \ \ \ \ \ \ \ \ \ memory: '${MEM_LIM}'' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+		fi
+		if [ ! -z  ${CPU_LIM} ]; then
+			sed -i '/limits:/a \ \ \ \ \ \ \ \ \ \ cpu: '${CPU_LIM}'' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+		fi
+		
 		oc create -f ${MANIFESTS_DIR}/petclinic-${inst}.yaml -n ${NAMESPACE}
 		err_exit "Error: Issue in deploying."
 		((PETCLINIC_PORT=PETCLINIC_PORT+1))
