@@ -108,7 +108,7 @@ route.route.openshift.io/petclinic-service-0 exposed
 
 # Run the load
 Simulating the load on petclinic benchmarks using jmeter
-`./scripts/petclinic-load.sh -c CLUSTER_TYPE [-i SERVER_INSTANCES] [-l MAX_LOOP] [-a IP_ADDR]`
+`./scripts/petclinic-load.sh -c CLUSTER_TYPE [-i SERVER_INSTANCES] [--iter=MAX_LOOP] [-a IP_ADDR]`
 
 - **CLUSTER_TYPE**: docker icp openshift
 - **SERVER_INSTANCES**: Number of petclinic instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
@@ -119,7 +119,7 @@ Simulating the load on petclinic benchmarks using jmeter
 
 Example to run the load on 2 petclinic instances for 2 iterations in openshift cluster
 
-**`$./scripts/petclinic-load.sh -c openshift -i 2 -l 2`**
+**`$./scripts/petclinic-load.sh -c openshift -i 2 --iter=2`**
 ```
 
 #########################################################################################

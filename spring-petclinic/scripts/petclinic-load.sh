@@ -19,27 +19,30 @@
 # Script to load test petclinic app
 # 
 
-ROOT_DIR=.
-pushd ${ROOT_DIR}
-source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
+CURRENT_DIR="$(dirname "$(realpath "$0")")"
+source ${CURRENT_DIR}/petclinic-common.sh
 
 function usage() {
 	echo
-	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-i SERVER_INSTANCES] [-l MAX_LOOP] [-a IP_ADDR]"
+	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-i SERVER_INSTANCES] [--iter MAX_LOOP] [-a IP_ADDR]"
 	exit -1
 }
 
 while getopts c:i:l:a:-: gopts
 do
 	case ${gopts} in
+	-)
+		case "${OPTARG}" in
+			iter=*)
+				MAX_LOOP=${OPTARG#*=}
+				;;
+		esac
+		;;
 	c)
 		CLUSTER_TYPE=${OPTARG}
 		;;
 	i)
 		SERVER_INSTANCES="${OPTARG}"
-		;;
-	l)
-		MAX_LOOP="${OPTARG}"		
 		;;
 	a)
 		IP_ADDR="${OPTARG}"		
@@ -61,15 +64,15 @@ if [ -z "${MAX_LOOP}" ]; then
 	MAX_LOOP=5
 fi
 
-case $CLUSTER_TYPE in
+case ${CLUSTER_TYPE} in
 docker)
 	if [ -z "${IP_ADDR}" ]; then
 		get_ip
 	fi
-	if [[ "$(docker images -q jmeter_petclinic:3.1 2> /dev/null)" != "" ]]; then
-		JMETER_FOR_LOAD="jmeter_petclinic:3.1" 
+	if [[ "$(docker images -q ${JMETER_CUSTOM_IMAGE} 2> /dev/null)" != "" ]]; then
+		JMETER_FOR_LOAD="${JMETER_CUSTOM_IMAGE}" 
 	else
-		JMETER_FOR_LOAD=docker.io/kruize/jmeter_petclinic:3.1
+		JMETER_FOR_LOAD=${JMETER_DEFAULT_IMAGE}
 	fi
 	err_exit "Error: Unable to load the jmeter image"
 	
@@ -78,15 +81,15 @@ icp|minikube)
 	if [ -z "${IP_ADDR}" ]; then
 		IP_ADDR=$(minikube ip)
 	fi
-	if [[ "$(docker images -q jmeter_petclinic:3.1 2> /dev/null)" == "" ]]; then
-		JMETER_FOR_LOAD=docker.io/kruize/jmeter_petclinic:3.1
+	if [[ "$(docker images -q ${JMETER_CUSTOM_IMAGE} 2> /dev/null)" == "" ]]; then
+		JMETER_FOR_LOAD=${JMETER_DEFAULT_IMAGE}
 	else
-		JMETER_FOR_LOAD="jmeter_petclinic:3.1"
+		JMETER_FOR_LOAD="${JMETER_CUSTOM_IMAGE}"
 	fi
 	;;
 openshift)
 	if [ -z "${IP_ADDR}" ]; then
-		IP_ADDR=($(oc status --namespace=$NAMESPACE | grep "petclinic" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+		IP_ADDR=($(oc status --namespace=${NAMESPACE} | grep "petclinic" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 	fi
 	JMETER_FOR_LOAD="kruize/jmeter_petclinic:noport"
 	;;
@@ -117,15 +120,12 @@ do
 		else
 			cmd="docker run --rm -e JHOST=${IP_ADDR} -e JDURATION=${JMETER_LOAD_DURATION} -e JUSERS=${JMETER_LOAD_USERS} -e JPORT=${PETCLINIC_PORT} ${JMETER_FOR_LOAD}"
 		fi
+		
 		# Check if the application is running
 		check_app
-		if [ "$STATUS" == 0 ]; then
-			echo "Application pod did not come up"
-			exit 0;
-		fi
 	
 		# Run the jmeter load
-		echo "Running jmeter load for petclinic instance $inst with the following parameters"
+		echo "Running jmeter load for petclinic instance ${inst} with the following parameters"
 		echo "${cmd}"
 		echo "jmter logs Dir : ${LOG_DIR}"
 		${cmd} > ${LOG_DIR}/jmeter-${inst}-${iter}.log

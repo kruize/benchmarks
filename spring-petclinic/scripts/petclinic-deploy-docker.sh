@@ -17,11 +17,8 @@
 ###  Script to build and run the petclinic application and do a test load of the app  ###
 # 
 
-ROOT_DIR=.
-pushd ${ROOT_DIR}
-source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
-
-JMETER_IMAGE=kruize/jmeter_petclinic:3.1
+CURRENT_DIR="$(dirname "$(realpath "$0")")"
+source ${CURRENT_DIR}/petclinic-common.sh
 
 # Iterate through the commandline options
 while getopts i:p:a:-: gopts
@@ -44,7 +41,7 @@ if [ -z "${SERVER_INSTANCES}" ]; then
 fi
 
 if [ -z "${PETCLINIC_IMAGE}" ]; then
-	PETCLINIC_IMAGE=kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
+	PETCLINIC_IMAGE=${PETCLINIC_DEFAULT_IMAGE}
 fi
 
 # Check if docker and docker-compose are installed
@@ -52,20 +49,15 @@ echo -n "Checking prereqs..."
 check_prereq
 echo "done"
 
-if [ "${PETCLINIC_IMAGE}" == "spring-petclinic:latest" ]; then
+if [ "${PETCLINIC_IMAGE}" == "${PETCLINIC_CUSTOM_IMAGE}" ]; then
 	echo -n "Using custom petclinic image ${PETCLINIC_IMAGE}..."
 	echo " "
 fi
 
-if [ "${JMETER_IMAGE}" == "jmeter_petclinic:3.1" ]; then
-	echo -n "Using custom jmeter image ${JMETER_IMAGE}..."
-	echo " "
-else
-	# Pull the jmeter image
-	echo -n "Pulling the jmeter image..." 
-	pull_image ${JMETER_IMAGE}
-	echo "done"
-fi
+# Pull the jmeter image
+echo -n "Pulling the jmeter image..." 
+pull_image 
+echo "done"
 
 count=1
 # Run the application 

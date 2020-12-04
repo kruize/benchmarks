@@ -16,18 +16,21 @@
 #
 ### Script containing common functions ###
 #
-
-ROOT_DIR="."
-pushd ${ROOT_DIR}
+CURRENT_DIR="$(dirname "$(realpath "$0")")"
+pushd "${CURRENT_DIR}" >> setup.log
+pushd ".." >> setup.log
 
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
 export NETWORK="kruize-network"
-
-LOGFILE="${ROOT_DIR}/setup.log"
-PORT="8080"
-PETCLINIC_REPO="${HOME}/benchmarks/spring-petclinic"
-pushd ${PETCLINIC_REPO} >> ${LOGFILE}
+LOGFILE="${CURRENT_DIR}/setup.log"
+PETCLINIC_REPO="${CURRENT_DIR}"
+PETCLINIC_DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
+PETCLINIC_CUSTOM_IMAGE="spring-petclinic:latest"
+NAMESPACE="openshift-monitoring"
+JMETER_CUSTOM_IMAGE="jmeter_petclinic:3.1"
+JMETER_DEFAULT_IMAGE="kruize/jmeter_petclinic:3.1"
+MANIFESTS_DIR="manifests/"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -82,12 +85,22 @@ function build_jmeter() {
 	err_exit "Error: Building of jmeter image."
 }
 
+# Set the port number according to the petclinic image passed
+# input: petclinic image
+# output: Set port number to 8081 if the input petclinic image is same as default image or the custom image built during petclinic-build, else set the port number to 8080
+function set_port() {
+	PETCLINIC_IMAGE=$1
+	if [[ "${PETCLINIC_IMAGE}" == "${PETCLINIC_DEFAULT_IMAGE}"  || "${PETCLINIC_IMAGE}" == "${PETCLINIC_CUSTOM_IMAGE}" ]]; then
+		PORT=8081
+	else
+		PORT=8080
+fi
+}
 # Pull the jmeter image
 # input: jmeter image to be pulled
 function pull_image() {
-	JMETER_IMAGE=$1
-	docker pull ${JMETER_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
-	err_exit "Error: Unable to pull the docker image ${JMETER_IMAGE}."
+	docker pull ${JMETER_DEFAULT_IMAGE} 2>>${LOGFILE} >>${LOGFILE}
+	err_exit "Error: Unable to pull the docker image ${JMETER_DEFAULT_IMAGE}."
 }
 
 # Run the petclinic application 
@@ -97,14 +110,12 @@ function run_petclinic() {
 	PETCLINIC_IMAGE=$1 
 	INST=$2
 	JVM_ARGS=$3     
-	if [[ "$1" == "kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0" || "$1" == "spring-petclinic:latest" ]]; then
-		PORT=8081
-	fi   
 	
+	set_port ${PETCLINIC_IMAGE}
 	# Create docker network bridge "kruize-network"
 	NET_NAME=`docker network ls -f "name=${NETWORK}" --format {{.Name}} | tail -n 1`
 	echo
-	if [[ -z $NET_NAME ]];  then
+	if [[ -z ${NET_NAME} ]];  then
 		echo "Creating Kruize network: ${NETWORK}..."
 		docker network create --driver bridge ${NETWORK} 2>>${LOGFILE} >>${LOGFILE}
 	else
@@ -113,9 +124,15 @@ function run_petclinic() {
 
 	# Run the petclinic app container on "kruize-network"
 	cmd="docker run -d --name=petclinic-app-${INST} -p ${PETCLINIC_PORT}:${PORT} --network=${NETWORK} -e JVM_ARGS=${JVM_ARGS} ${PETCLINIC_IMAGE} "
-	$cmd 2>>${LOGFILE} >>${LOGFILE}
+	${cmd}s 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to start petclinic container."
 	((PETCLINIC_PORT=PETCLINIC_PORT+1))
+	# Check if the application is running
+	check_app
+	if [ "${STATUS}" == 0 ]; then
+		echo "Application did not come up"
+		exit -1;
+	fi
 }
 
 # Check if the application is running
@@ -124,15 +141,17 @@ function check_app() {
 	if [ "${CLUSTER_TYPE}" == "minikube" ]; then
 		CMD=$(kubectl get pods | grep "petclinic" | grep "Running" | cut -d " " -f1)
 	elif [ "${CLUSTER_TYPE}" == "openshift" ]; then
-		CMD=$(oc get pods --namespace=$NAMESPACE | grep "petclinic" | grep "Running" | cut -d " " -f1)
+		CMD=$(oc get pods --namespace=${NAMESPACE} | grep "petclinic" | grep "Running" | cut -d " " -f1)
 	else
 		CMD=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
 	fi
-	if [ -z "${CMD}" ]; then
-		STATUS=0
-	else
-		STATUS=1
-	fi
+	for status in "${CMD[@]}"
+	do
+		if [ -z "${status}" ]; then
+			echo "Application pod did not come up"
+			exit -1;
+		fi
+	done
 }
 
 # Parse the Throughput Results
@@ -145,11 +164,11 @@ function parse_petclinic_results() {
 	for (( iteration=1 ; iteration<=${TOTAL_LOGS} ;iteration++))
 	do
 		RESULT_LOG=${RESULTS_DIR}/jmeter-${inst}-${iteration}.log
-		summary=`cat $RESULT_LOG | sed 's%<summary>%%g' | grep "summary = " | tail -n 1`
-		throughput=`echo $summary | awk '{print $7}' | sed 's%/s%%g'`
-		responsetime=`echo $summary | awk '{print $9}' | sed 's%/s%%g'`
-		weberrors=`echo $summary | awk '{print $15}' | sed 's%/s%%g'`
-		pages=`echo $summary | awk '{print $3}' | sed 's%/s%%g'`
-		echo "$iteration,$throughput,$pages,$responsetime,$weberrors" >> ${RESULTS_DIR}/Throughput.log
+		summary=`cat ${RESULT_LOG} | sed 's%<summary>%%g' | grep "summary = " | tail -n 1`
+		throughput=`echo ${summary} | awk '{print $7}' | sed 's%/s%%g'`
+		responsetime=`echo ${summary} | awk '{print $9}' | sed 's%/s%%g'`
+		weberrors=`echo ${summary} | awk '{print $15}' | sed 's%/s%%g'`
+		pages=`echo ${summary} | awk '{print $3}' | sed 's%/s%%g'`
+		echo "${iteration},${throughput},${pages},${responsetime},${weberrors}" >> ${RESULTS_DIR}/Throughput.log
 	done
 }

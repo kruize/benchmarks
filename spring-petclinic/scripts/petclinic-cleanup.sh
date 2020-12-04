@@ -17,9 +17,8 @@
 ### Script to remove the petclinic setup ###
 #
 
-ROOT_DIR=.
-pushd ${ROOT_DIR}
-source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
+CURRENT_DIR="$(dirname "$(realpath "$0")")"
+source ${CURRENT_DIR}/petclinic-common.sh
 
 function usage() {
 	echo
@@ -40,11 +39,11 @@ function remove_petclinic_docker() {
 	petclinic_containers=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
 	for con in "${petclinic_containers[@]}"
 	do
-		if [ $con ]; then
+		if [ ${con} ]; then
 			# stop the petclinic container
-			docker stop $con
+			docker stop ${con}
 			# remove the petclinic container
-			docker rm $con
+			docker rm ${con}
 		fi
 	done
 
@@ -52,17 +51,21 @@ function remove_petclinic_docker() {
 	docker network rm ${NETWORK}
 
 	# remove the petclinic image if present
-	if [[ "$(docker images -q spring-petclinic:latest 2> /dev/null)" != "" ]]; then
-		docker rmi spring-petclinic:latest
+	if [[ "$(docker images -q ${PETCLINIC_CUSTOM_IMAGE} 2> /dev/null)" != "" ]]; then
+		docker rmi ${PETCLINIC_CUSTOM_IMAGE}
 	fi
 	
-	if [[ "$(docker images -q kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 2> /dev/null)" != "" ]]; then
-		docker rmi kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
+	if [[ "$(docker images -q ${PETCLINIC_DEFAULT_IMAGE} 2> /dev/null)" != "" ]]; then
+		docker rmi ${PETCLINIC_DEFAULT_IMAGE}
 	fi
 	
 	# remove the jmeter image if present
-	if [[ "$(docker images -q jmeter_petclinic:3.1 2> /dev/null)" != "" ]]; then
-		docker rmi jmeter_petclinic:3.1
+	if [[ "$(docker images -q ${JMETER_CUSTOM_IMAGE} 2> /dev/null)" != "" ]]; then
+		docker rmi ${JMETER_CUSTOM_IMAGE}
+	fi
+	
+	if [[ "$(docker images -q ${JMETER_DEFAULT_IMAGE} 2> /dev/null)" != "" ]]; then
+		docker rmi ${JMETER_DEFAULT_IMAGE}
 	fi
 }
 
@@ -73,48 +76,48 @@ function remove_petclinic_minikube() {
 	
 	for de in "${petclinic_deployments[@]}"	
 	do
-		kubectl delete deployment $de 
+		kubectl delete deployment ${de} 
 	done
 
 	#Delete the services and routes if any
 	petclinic_services=($(kubectl get svc  | grep "petclinic" | cut -d " " -f1))
 	for se in "${petclinic_services[@]}"
 	do
-		kubectl delete svc $se 
+		kubectl delete svc ${se} 
 	done	
 	
 	petclinic_service_monitors=($(kubectl get servicemonitor | grep "petclinic" | cut -d " " -f1))
 	for sm in "${petclinic_service_monitors[@]}"
 	do
-		kubectl delete servicemonitor $sm 
+		kubectl delete servicemonitor ${sm} 
 	done
 }
 
 # Removes the petclinic instances from openshift
 # output: Removes the petclinic deployments, services, service monitors and routes
 function remove_petclinic_openshift() {
-	petclinic_deployments=($(oc get deployments --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	petclinic_deployments=($(oc get deployments --namespace=${NAMESPACE} | grep "petclinic" | cut -d " " -f1))
 
 	for de in "${petclinic_deployments[@]}"
 	do
-		oc delete deployment $de --namespace=$NAMESPACE
+		oc delete deployment ${de} --namespace=${NAMESPACE}
 	done
 
 	#Delete the services and routes if any
-	petclinic_services=($(oc get svc --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	petclinic_services=($(oc get svc --namespace=${NAMESPACE} | grep "petclinic" | cut -d " " -f1))
 	for se in "${petclinic_services[@]}"
 	do
-		oc delete svc $se --namespace=$NAMESPACE
+		oc delete svc ${se} --namespace=${NAMESPACE}
 	done
-	petclinic_routes=($(oc get route --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	petclinic_routes=($(oc get route --namespace=${NAMESPACE} | grep "petclinic" | cut -d " " -f1))
 	for ro in "${petclinic_routes[@]}"
 	do
-		oc delete route $ro --namespace=$NAMESPACE
+		oc delete route ${ro} --namespace=${NAMESPACE}
 	done
-	petclinic_service_monitors=($(oc get servicemonitor --namespace=$NAMESPACE | grep "petclinic" | cut -d " " -f1))
+	petclinic_service_monitors=($(oc get servicemonitor --namespace=${NAMESPACE} | grep "petclinic" | cut -d " " -f1))
 	for sm in "${petclinic_service_monitors[@]}"
 	do
-		oc delete servicemonitor $sm --namespace=$NAMESPACE
+		oc delete servicemonitor ${sm} --namespace=${NAMESPACE}
 	done
 }
 

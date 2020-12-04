@@ -17,14 +17,13 @@
 ###  Script to build the petclinic application  ###
 # 
 
+CURRENT_DIR="$(dirname "$(realpath "$0")")"
+source ${CURRENT_DIR}/petclinic-common.sh
+
 IMAGE=$1
 if [ -z "${IMAGE}" ]; then
 	IMAGE=adoptopenjdk/openjdk11-openj9:latest
 fi
-
-ROOT_DIR="."
-pushd ${ROOT_DIR}
-source ${HOME}/benchmarks/spring-petclinic/scripts/petclinic-common.sh
 
 # Check if docker and docker-compose are installed
 echo -n "Checking prereqs..."
