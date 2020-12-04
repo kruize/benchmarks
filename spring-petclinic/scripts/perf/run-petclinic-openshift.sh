@@ -47,19 +47,6 @@ function usage() {
 	exit -1
 }
 
-# Check if the application is running
-# output: Returns 1 if the application is running else returns 0
-function check_app() {
-	CMD=$(oc get pods --namespace=${NAMESPACE} | grep "petclinic" | grep "Running" | cut -d " " -f1)
-	for status in "${CMD[@]}"
-	do
-		if [ -z "${status}" ]; then
-			echo "Application pod did not come up" >> setup.log
-			exit -1;
-		fi
-	done
-}
-
 # Iterate through the commandline options
 while getopts s:e:u:d:w:m:i:rp:n:-: gopts
 do
@@ -173,6 +160,19 @@ fi
 if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="openshift-monitoring"
 fi
+
+# Check if the application is running
+# output: Returns 1 if the application is running else returns 0
+function check_app() {
+	CMD=$(oc get pods --namespace=${NAMESPACE} | grep "petclinic" | grep "Running" | cut -d " " -f1)
+	for status in "${CMD[@]}"
+	do
+		if [ -z "${status}" ]; then
+			echo "Application pod did not come up" >> setup.log
+			exit -1;
+		fi
+	done
+}
 
 RESULTS_DIR_ROOT=${RESULTS_DIR_PATH}/petclinic-$(date +%Y%m%d%H%M)
 mkdir -p ${RESULTS_DIR_ROOT}
