@@ -50,13 +50,7 @@ function usage() {
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
-	if [ "${CLUSTER_TYPE}" == "minikube" ]; then
-		CMD=$(kubectl get pods | grep "petclinic" | grep "Running" | cut -d " " -f1)
-	elif [ "${CLUSTER_TYPE}" == "openshift" ]; then
-		CMD=$(oc get pods --namespace=${NAMESPACE} | grep "petclinic" | grep "Running" | cut -d " " -f1)
-	else
-		CMD=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
-	fi
+	CMD=$(oc get pods --namespace=${NAMESPACE} | grep "petclinic" | grep "Running" | cut -d " " -f1)
 	for status in "${CMD[@]}"
 	do
 		if [ -z "${status}" ]; then
