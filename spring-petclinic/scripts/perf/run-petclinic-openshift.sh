@@ -38,7 +38,7 @@ function err_exit() {
 }
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
-# Ex of ARGS : -s wobbled.os.fyre.ibm.com -a /petclinic/results -u 400 -d 300 -a 5 -m 3
+# Ex of ARGS : -s wobbled.os.fyre.ibm.com -e /petclinic/results -u 400 -d 300 -w 5 -m 3
 
 # Describes the usage of the script
 function usage() {
@@ -243,6 +243,7 @@ function parseData() {
 			wer_sum=`expr ${wer_sum} + ${weberrors}`
 		done
 		echo "${run},${thrp_sum},${resp_sum},${wer_sum}" >> ${RESULTS_DIR_J}/Throughput-${TYPE}-${itr}.log
+		echo "${run} , ${CPU_REQ} , ${MEM_REQ} , ${thrp_sum} , ${responsetime} , ${wer_sum}" >> ${RESULTS_DIR_J}/Throughput-${TYPE}-raw.log
 	done
 }
 
@@ -305,6 +306,7 @@ function parsePodCpuLog()
 		done
 	done
 	echo "${run} , ${cpu_sum}, ${cpu_min} , ${cpu_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
+	echo ",${cpu_sum} , ${cpu_min} , ${cpu_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
 }
 
 # Parsing memory logs for pod
@@ -343,6 +345,7 @@ function parsePodMemLog()
 		done
 	done
 	echo "${run} , ${mem_sum}, ${mem_min} , ${mem_max} " >> ${RESULTS_DIR_J}/${RESULTS_LOG}
+	echo ", ${mem_sum} , ${mem_min} , ${mem_max} " >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
 }
 
 # Parsing memory logs for pod
@@ -393,6 +396,10 @@ function parseResults() {
 		do
 			cat ${RESULTS_DIR_J}/${clusterlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${clusterlog}-measure-temp.log
 		done
+		
+		###### Add different raw logs we want to merge
+		#Cumulative raw data
+		paste ${RESULTS_DIR_J}/Throughput-measure-raw.log ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >>  ${RESULTS_DIR_J}/../Metrics-raw.log
 	done
 
 	for metric in "${total_logs[@]}"
@@ -410,7 +417,7 @@ function parseResults() {
 		
 	done
 
-	echo "${sca} ,  ${total_throughput_avg} , ${total_responsetime_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_c_mem_avg} , ${total_c_cpu_avg} , ${total_weberror_avg}" >> ${RESULTS_DIR_J}/../Metrics.log
+	echo "${sca} ,  ${total_throughput_avg} , ${total_responsetime_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_c_mem_avg} , ${total_c_cpu_avg} ,${CPU_REQ} , ${MEM_REQ} , ${total_weberror_avg}" >> ${RESULTS_DIR_J}/../Metrics.log
 	echo "${sca} ,  ${total_mem_avg} , ${total_memusage_avg} , ${total_memrequests_avg} , ${total_memlimits_avg} , ${total_memreq_in_p_avg} , ${total_memlimit_in_p_avg} " >> ${RESULTS_DIR_J}/../Metrics-mem.log
 	echo "${sca} ,  ${total_cpu_avg} , ${total_cpurequests_avg} , ${total_cpulimits_avg} , ${total_cpureq_in_p_avg} , ${total_cpulimits_in_p_avg} " >> ${RESULTS_DIR_J}/../Metrics-cpu.log
 	echo "${sca} , ${total_c_cpu_avg} , ${total_c_cpurequests_avg} , ${total_c_cpulimits_avg} , ${total_c_mem_avg} , ${total_c_memrequests_avg} , ${total_c_memlimits_avg} " >> ${RESULTS_DIR_J}/../Metrics-cluster.log
@@ -551,10 +558,11 @@ function runIterations() {
 
 #TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
 # Scale the instances and run the iterations
-echo "Instances , Throughput , Responsetime , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
+echo "Instances , Throughput , Responsetime , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , CLUSTER_MEM% , CLUSTER_CPU% , CPU_REQ , MEM_REQ , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
 echo "Instances ,  MEM_RSS , MEM_USAGE , MEM_REQ , MEM_LIM , MEM_REQ_IN_P , MEM_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-mem.log
 echo "Instances ,  CPU_USAGE , CPU_REQ , CPU_LIM , CPU_REQ_IN_P , CPU_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-cpu.log
 echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
+echo "Run , CPU_REQ , MEM_REQ , Throughput , Responsetime , WEB_ERRORS , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
 
 for (( scale=1; scale<=${TOTAL_INST}; scale++ ))
 do
@@ -570,3 +578,4 @@ done
 
 # Display the Metrics log file
 cat ${RESULTS_DIR_ROOT}/Metrics.log
+cat ${RESULTS_DIR_ROOT}/Metrics-raw.log
