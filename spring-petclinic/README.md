@@ -114,8 +114,8 @@ Simulating the load on petclinic benchmarks using jmeter
 - **CLUSTER_TYPE**: docker|minikube|openshift
 - **SERVER_INSTANCES**: Number of petclinic instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
 - **MAX_LOOP**: Number of times you want to run the load. It is optional, if is not specified then by default it will be considered as 5 iterations.
-- **IP_ADDR**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
 - **NAMESPACE**: Namespace in which petclinic application is deployed(Required only in the case of openshift cluster and if the application is deployed in other namespaces except `openshift-monitoring`)
+- **IP_ADDR**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
 
 `kruize/jmeter_petclinic:noport` is the image used to apply the load
 
