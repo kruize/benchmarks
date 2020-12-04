@@ -502,7 +502,8 @@ function runIterations() {
 		runItr measure ${MEASURES} ${RESULTS_DIR_I}
 		sleep 60
 		# get the kruize recommendation for petclinic application
-		get_recommendations_from_kruize ${RESULTS_DIR_I}
+		# commenting for now as it is not required in all cases
+		# get_recommendations_from_kruize ${RESULTS_DIR_I}
 	done
 }
 
