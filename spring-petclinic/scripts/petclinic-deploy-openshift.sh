@@ -141,7 +141,7 @@ function createInstances() {
 
 # Delete the petclinic deployments,services and routes if it is already present 
 function stopAllInstances() {
-	${PETCLINIC_REPO}/petclinic-cleanup.sh ${CLUSTER_TYPE}
+	${PETCLINIC_REPO}/petclinic-cleanup.sh -c ${CLUSTER_TYPE}
 }
 
 # Stop all petclinic related instances if there are any
