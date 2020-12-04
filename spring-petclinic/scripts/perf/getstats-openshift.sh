@@ -329,20 +329,20 @@ export -f get_cluster_info
 
 for i in "${worker_nodes[@]}"
 do
-	echo "Collecting CPU & MEM details of nodes $i  and cluster" >> setup.log
-	timeout ${TIMEOUT} bash -c  "get_pod_mem_rss $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_cpu_usage $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_cluster_info $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	echo "Collecting CPU & MEM details of nodes ${i}  and cluster" >> setup.log
+	timeout ${TIMEOUT} bash -c  "get_pod_mem_rss ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_cpu_usage ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_cluster_info ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 
-	timeout ${TIMEOUT} bash -c  "get_pod_mem_usage $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_mem_requests $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_mem_requests_in_p $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_mem_limits $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_mem_limits_in_p $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_mem_usage ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_mem_requests ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_mem_requests_in_p ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_mem_limits ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_mem_limits_in_p ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 	
-	timeout ${TIMEOUT} bash -c  "get_pod_cpu_requests $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_cpu_requests_in_p $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_cpu_limits $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-	timeout ${TIMEOUT} bash -c  "get_pod_cpu_limits_in_p $i ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_cpu_requests ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_cpu_requests_in_p ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_cpu_limits ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+	timeout ${TIMEOUT} bash -c  "get_pod_cpu_limits_in_p ${i} ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 done
 

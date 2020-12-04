@@ -17,13 +17,25 @@
 ### Script to perform load test on multiple instances of petclinic on openshift###
 #
 
-CURRENT_DIR="$(dirname "$(realpath "$0")")" 
+CURRENT_DIR="$(dirname "$(realpath "$0")")"
 pushd "${CURRENT_DIR}" >> setup.log
 pushd ".." >> setup.log
 SCRIPT_REPO=${PWD}
-source ${SCRIPT_REPO}/petclinic-common.sh
 
 CLUSTER_TYPE="openshift"
+PETCLINIC_DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
+
+# checks if the previous command is executed successfully
+# input:Return value of previous command
+# output:Prompts the error message if the return value is not zero 
+function err_exit() {
+	if [ $? != 0 ]; then
+		printf "$*"
+		echo
+		echo "See ${LOGFILE} for more details"
+		exit -1
+	fi
+}
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH JMETER_LOAD_USERS JMETER_LOAD_DURATION WARMUPS MEASURES
 # Ex of ARGS : -s wobbled.os.fyre.ibm.com -a /petclinic/results -u 400 -d 300 -a 5 -m 3
@@ -31,14 +43,31 @@ CLUSTER_TYPE="openshift"
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo "Usage: $0 -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
 	exit -1
 }
 
-NAMESPACE="openshift-monitoring"
+# Check if the application is running
+# output: Returns 1 if the application is running else returns 0
+function check_app() {
+	if [ "${CLUSTER_TYPE}" == "minikube" ]; then
+		CMD=$(kubectl get pods | grep "petclinic" | grep "Running" | cut -d " " -f1)
+	elif [ "${CLUSTER_TYPE}" == "openshift" ]; then
+		CMD=$(oc get pods --namespace=${NAMESPACE} | grep "petclinic" | grep "Running" | cut -d " " -f1)
+	else
+		CMD=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
+	fi
+	for status in "${CMD[@]}"
+	do
+		if [ -z "${status}" ]; then
+			echo "Application pod did not come up" >> setup.log
+			exit -1;
+		fi
+	done
+}
 
 # Iterate through the commandline options
-while getopts s:e:u:d:w:m:i:rp:-: gopts
+while getopts s:e:u:d:w:m:i:rp:n:-: gopts
 do
 	case ${gopts} in
 	-)
@@ -87,6 +116,9 @@ do
 		;;
 	p)
 		PETCLINIC_IMAGE="${OPTARG}"		
+		;;
+	n)
+		NAMESPACE="${OPTARG}"		
 		;;
 	esac
 done
@@ -142,6 +174,10 @@ fi
 
 if [ -z "${MEM_LIM}" ]; then
 	MEM_LIM="1024M"
+fi
+
+if [ -z "${NAMESPACE}" ]; then
+	NAMESPACE="openshift-monitoring"
 fi
 
 RESULTS_DIR_ROOT=${RESULTS_DIR_PATH}/petclinic-$(date +%Y%m%d%H%M)
@@ -392,7 +428,9 @@ function parseResults() {
 function calcAvg_inMB()
 {
 	LOG=$1
-	awk '{sum+=$1} END { print "  Average =",sum/NR/1024/1024}' ${LOG} ;
+	if [ -s ${LOG} ]; then
+		awk '{sum+=$1} END { print "  Average =",sum/NR/1024/1024}' ${LOG} ;
+	fi
 }
 
 # Calculate average in percentage
@@ -401,7 +439,9 @@ function calcAvg_inMB()
 function calcAvg_in_p()
 {
 	LOG=$1
-	awk '{sum+=$1} END { print " % Average =",sum/NR*100}' ${LOG} ;
+	if [ -s ${LOG} ]; then
+		awk '{sum+=$1} END { print " % Average =",sum/NR*100}' ${LOG} ;
+	fi
 }
 
 # Calculate average
@@ -410,7 +450,9 @@ function calcAvg_in_p()
 function calcAvg()
 {
 	LOG=$1
-	awk '{sum+=$1} END { print "  Average =",sum/NR}' ${LOG} ;
+	if [ -s ${LOG} ]; then
+		awk '{sum+=$1} END { print "  Average =",sum/NR}' ${LOG} ;
+	fi
 }
 
 #Calculate Median
@@ -419,7 +461,9 @@ function calcAvg()
 function calcMedian()
 {
 	LOG=$1
-	sort -n ${LOG} | awk ' { a[i++]=$1; } END { x=int((i+1)/2); if (x < (i+1)/2) print "  Median =",(a[x-1]+a[x])/2; else print "  Median =",a[x-1]; }'
+	if [ -s ${LOG} ]; then
+		sort -n ${LOG} | awk ' { a[i++]=$1; } END { x=int((i+1)/2); if (x < (i+1)/2) print "  Median =",(a[x-1]+a[x])/2; else print "  Median =",a[x-1]; }'
+	fi
 }
 
 # Calculate minimum
@@ -428,7 +472,9 @@ function calcMedian()
 function calcMin()	
 {
 	LOG=$1
-	sort -n ${LOG} | head -1	
+	if [ -s ${LOG} ]; then
+		sort -n ${LOG} | head -1	
+	fi
 }
 
 # Calculate maximum
@@ -436,7 +482,9 @@ function calcMin()
 # output: Maximum value
 function calcMax() {
 	LOG=$1
-	sort -n ${LOG} | tail -1	
+	if [ -s ${LOG} ]; then
+		sort -n ${LOG} | tail -1	
+	fi
 }
 
 # Perform warmup and measure runs
@@ -503,7 +551,7 @@ function runIterations() {
 		sleep 60
 		# get the kruize recommendation for petclinic application
 		# commenting for now as it is not required in all cases
-		# get_recommendations_from_kruize ${RESULTS_DIR_I}
+		#get_recommendations_from_kruize ${RESULTS_DIR_I}
 	done
 }
 

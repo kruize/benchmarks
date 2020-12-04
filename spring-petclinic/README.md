@@ -85,10 +85,11 @@ service/petclinic-service-1 created
 ## Openshift
 To deploy the benchmark use `petclinic-deploy-openshift.sh`
 
-`./scripts/petclinic-deploy-openshift.sh -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM]`
+`./scripts/petclinic-deploy-openshift.sh -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM]`
 
 - **BENCHMARK_SERVER**: Name of the cluster you are using
 - **SERVER_INSTANCES**: Number of petclinic instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
+- **NAMESPACE**: Namespace in which petclinic application is to be deployed. It is optional, if not specified then `openshift-monitoring` will be considered as the namespace. 
 - **PETCLINIC_IMAGE**: Petclinic image to be used to deploy petclinic. It is optional, if is not specified then the default image `kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0` will be considered for the deployment.
 - **CPU_REQ**: CPU request
 - **MEM_REQ**: Memory request
@@ -108,12 +109,13 @@ route.route.openshift.io/petclinic-service-0 exposed
 
 # Run the load
 Simulating the load on petclinic benchmarks using jmeter
-`./scripts/petclinic-load.sh -c CLUSTER_TYPE [-i SERVER_INSTANCES] [--iter=MAX_LOOP] [-a IP_ADDR]`
+`./scripts/petclinic-load.sh -c CLUSTER_TYPE [-i SERVER_INSTANCES] [--iter MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR]`
 
-- **CLUSTER_TYPE**: docker icp openshift
+- **CLUSTER_TYPE**: docker|minikube|openshift
 - **SERVER_INSTANCES**: Number of petclinic instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
 - **MAX_LOOP**: Number of times you want to run the load. It is optional, if is not specified then by default it will be considered as 5 iterations.
 - **IP_ADDR**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
+- **NAMESPACE**: Namespace in which petclinic application is deployed(Required only in the case of openshift cluster and if the application is deployed in other namespaces except `openshift-monitoring`)
 
 `kruize/jmeter_petclinic:noport` is the image used to apply the load
 
@@ -164,7 +166,9 @@ Above image shows the logs of the load run, it processes and displays the output
 To test with multiple instances follow [README.md](/spring-petclinic/scripts/perf/README.md)
 
 # Cleanup
-`$ ./scripts/petclinic-cleanup.sh cluster_type[docker|minikube|openshift]`
+`$ ./scripts/petclinic-cleanup.sh -c CLUSTER_TYPE[docker|minikube|openshift] [-n NAMESPACE]`
+- **CLUSTER_TYPE**: docker|minikube|openshift
+- **NAMESPACE**: Namespace in which petclinic application is deployed(Required only in the case of openshift cluster and if the application is deployed in other namespaces except `openshift-monitoring`). 
 
 # Changes to be done to get kruize runtime recommendations for petclinic
 **Add the following in**

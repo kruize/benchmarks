@@ -27,7 +27,7 @@ LOGFILE="${CURRENT_DIR}/setup.log"
 PETCLINIC_REPO="${CURRENT_DIR}"
 PETCLINIC_DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
 PETCLINIC_CUSTOM_IMAGE="spring-petclinic:latest"
-NAMESPACE="openshift-monitoring"
+DEFAULT_NAMESPACE="openshift-monitoring"
 JMETER_CUSTOM_IMAGE="jmeter_petclinic:3.1"
 JMETER_DEFAULT_IMAGE="kruize/jmeter_petclinic:3.1"
 MANIFESTS_DIR="manifests/"
@@ -129,10 +129,6 @@ function run_petclinic() {
 	((PETCLINIC_PORT=PETCLINIC_PORT+1))
 	# Check if the application is running
 	check_app
-	if [ "${STATUS}" == 0 ]; then
-		echo "Application did not come up"
-		exit -1;
-	fi
 }
 
 # Check if the application is running
@@ -148,7 +144,7 @@ function check_app() {
 	for status in "${CMD[@]}"
 	do
 		if [ -z "${status}" ]; then
-			echo "Application pod did not come up"
+			echo "Application pod did not come up" 
 			exit -1;
 		fi
 	done

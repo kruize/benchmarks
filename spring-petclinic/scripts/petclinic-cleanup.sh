@@ -22,7 +22,7 @@ source ${CURRENT_DIR}/petclinic-common.sh
 
 function usage() {
 	echo
-	echo "Usage: cluster_type [docker|minikube|openshift]"
+	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-n NAMESPACE]"
 	exit -1
 }
 
@@ -30,8 +30,25 @@ if [ "$#" -lt 1 ]; then
 	usage
 fi
 
-CLUSTER_TYPE=$1
-NAMESPACE="openshift-monitoring"
+while getopts c:n:-: gopts
+do
+	case ${gopts} in
+	c)
+		CLUSTER_TYPE=${OPTARG}
+		;;
+	n)
+		NAMESPACE="${OPTARG}"		
+		;;
+	esac
+done
+
+if [ -z "${CLUSTER_TYPE}" ]; then
+	usage
+fi
+
+if [ -z "${NAMESPACE}" ]; then
+	NAMESPACE="${DEFAULT_NAMESPACE}"
+fi
 
 # Removes the petclinic instances from docker
 # output: Stops the petclinic container and remove it, removes the network, Removes the petclinic and jmeter images if any

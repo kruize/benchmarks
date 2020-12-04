@@ -29,12 +29,12 @@ CLUSTER_TYPE="openshift"
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
 	exit -1
 }
 
 # Iterate through the commandline options
-while getopts s:i:p:-: gopts
+while getopts s:i:p:n:-: gopts
 do
 	case ${gopts} in
 	-)
@@ -63,6 +63,9 @@ do
 	p)
 		PETCLINIC_IMAGE="${OPTARG}"		
 		;;
+	n)
+		NAMESPACE="${OPTARG}"		
+		;;
 	esac
 done
 
@@ -78,6 +81,10 @@ fi
 
 if [ -z "${PETCLINIC_IMAGE}" ]; then
 	PETCLINIC_IMAGE="${PETCLINIC_DEFAULT_IMAGE}"
+fi
+
+if [ -z "${NAMESPACE}" ]; then
+	NAMESPACE="${DEFAULT_NAMESPACE}"
 fi
 
 set_port ${PETCLINIC_IMAGE}

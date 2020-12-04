@@ -24,11 +24,11 @@ source ${CURRENT_DIR}/petclinic-common.sh
 
 function usage() {
 	echo
-	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-i SERVER_INSTANCES] [--iter MAX_LOOP] [-a IP_ADDR]"
+	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-i SERVER_INSTANCES] [--iter MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR]"
 	exit -1
 }
 
-while getopts c:i:l:a:-: gopts
+while getopts c:i:l:a:n:-: gopts
 do
 	case ${gopts} in
 	-)
@@ -47,10 +47,11 @@ do
 	a)
 		IP_ADDR="${OPTARG}"		
 		;;
+	n)
+		NAMESPACE="${OPTARG}"		
+		;;
 	esac
 done
-
-NAMESPACE="openshift-monitoring"
 
 if [ -z "${CLUSTER_TYPE}" ]; then
 	usage
@@ -62,6 +63,10 @@ fi
 
 if [ -z "${MAX_LOOP}" ]; then
 	MAX_LOOP=5
+fi
+
+if [ -z "${NAMESPACE}" ]; then
+	NAMESPACE="${DEFAULT_NAMESPACE}"
 fi
 
 case ${CLUSTER_TYPE} in
