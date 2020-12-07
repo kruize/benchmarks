@@ -36,7 +36,6 @@ get_ip
 # Build the petclinic application sources and create the docker image
 echo -n "Building petclinic application..."
 build_petclinic ${IMAGE} 
-PETCLINIC_IMAGE="${PETCLINIC_CUSTOM_IMAGE}"
 echo "done"
 
 # Build the jmeter docker image with the petclinic driver
