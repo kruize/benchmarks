@@ -33,11 +33,7 @@ spec:
           - containerPort: 8080
         resources:
          requests:
-          cpu: 2
-          memory: 512M
          limits:
-          cpu: 4
-          memory: 1024M
         volumeMounts:
           - name: "test-volume"
             mountPath: "/opt/jLogs"

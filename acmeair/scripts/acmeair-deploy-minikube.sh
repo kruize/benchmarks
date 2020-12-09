@@ -51,7 +51,6 @@ function createInstances() {
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 	do
 		sed 's/acmeair-db/acmeair-db-'${inst}'/g' ${MANIFESTS_DIR}/mongo-db.yaml > ${MANIFESTS_DIR}/mongo-db-${inst}.yaml
-		sed -i 's/27017/'${DB_PORT}'/g' ${MANIFESTS_DIR}/mongo-db-${inst}.yaml
 		kubectl create -f ${MANIFESTS_DIR}/mongo-db-${inst}.yaml 
 		err_exit "Error: Issue in deploying."
 		((DB_PORT=DB_PORT+1))
