@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acmeair-db-0
+  labels:
+    app: acmeair-db-0
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: acmeair-db-0
+  template:
+    metadata:
+      labels:
+        name: acmeair-db-0
+        app: acmeair-db-0
+        app.kubernetes.io/name: "myapp"
+        version: v1
+    spec:
+      containers:
+      - name: acmeair-db-0
+        image: mongo:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 27017
+        resources:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: acmeair-db-0
+  labels:
+    name: acmeair-db-0
+spec:
+    type: ClusterIP
+    selector:
+      app: acmeair-db-0
+    ports:
+      - protocol: TCP
+        port: 27017
+        targetPort: 27017
