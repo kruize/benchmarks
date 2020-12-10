@@ -89,13 +89,11 @@ fi
 # Deploy the mongo db and acmeair application
 # input:acmeair and mongo db yaml file
 function createInstances() {
-	echo "creating instances"
 	# Create multiple yamls based on instances and Update the template yamls with names and create multiple files
 	# #Create the deployments and services
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 	do
 		sed 's/acmeair-db/acmeair-db-'${inst}'/g' ${MANIFESTS_DIR}/mongo-db.yaml > ${MANIFESTS_DIR}/mongo-db-${inst}.yaml
-		sed -i 's/27017/'${DB_PORT}'/g' ${MANIFESTS_DIR}/mongo-db-${inst}.yaml
 		oc create -f ${MANIFESTS_DIR}/mongo-db-${inst}.yaml -n ${NAMESPACE}
 		err_exit "Error: Issue in deploying."
 		((DB_PORT=DB_PORT+1))

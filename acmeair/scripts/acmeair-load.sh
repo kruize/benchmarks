@@ -165,7 +165,7 @@ do
 	git checkout ${JMX_FILE} > ${LOGFILE}
 
 	# Reset the jmx maximumValue 
-	sed -i 's/"maximumValue">${MAX_USER_ID}</"maximumValue">'99'</' ${JMX_FILE}
+	sed -i 's/"maximumValue">'${MAX_USER_ID}'</"maximumValue">'99'</' ${JMX_FILE}
 
 	# Parse the results
 	# input:result directory , Number of iterations of the jmeter load

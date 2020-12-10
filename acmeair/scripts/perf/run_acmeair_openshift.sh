@@ -227,7 +227,7 @@ function run_jmeter_with_scaling()
 	done
 	
 	# Reset the max user value to previous value
-	git checkout ${JMX_FILE} > ${LOGFILE}
+	git checkout ${JMX_FILE} 2> ${LOGFILE}
 
 	# Reset the jmx maximumValue 
 	sed -i 's/"maximumValue">${MAX_USER_ID}</"maximumValue">'99'</' ${JMX_FILE}
