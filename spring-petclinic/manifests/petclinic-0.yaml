@@ -1,9 +1,9 @@
 apiVersion: apps/v1 
 kind: Deployment
 metadata:
-  name: petclinic-sample
+  name: petclinic-sample-0
   labels:
-    app: petclinic-app
+    app: petclinic-app-0
 spec:
   replicas: 1
   selector:
@@ -26,7 +26,11 @@ spec:
         imagePullPolicy: IfNotPresent
         resources:
          requests:
+          cpu: 2
+          memory: 512M
          limits:
+          cpu: 4
+          memory: 1024M
         ports:
           - containerPort: 8081
         volumeMounts:
@@ -36,20 +40,20 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: petclinic-service
+  name: petclinic-service-0
   # Add annotations to allow prometheus to scrape metrics from the application
   annotations:
     prometheus.io/scrape: 'true'
     prometheus.io/path: '/manage/prometheus'
   labels:
-    app: petclinic-app
+    app: petclinic-app-0
 spec:
   type: NodePort
   ports:
     - port: 8081
       nodePort: 32334
       targetPort: 8081
-      name: petclinic-port
+      name: petclinic-port-0
   selector:
     name: petclinic-deployment
 

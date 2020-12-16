@@ -56,7 +56,7 @@ function remove_petclinic_docker() {
 	petclinic_containers=$(docker ps | grep "petclinic-app" | cut -d " " -f1)
 	for con in "${petclinic_containers[@]}"
 	do
-		if [ ${con} ]; then
+		if [ "${con}" ]; then
 			# stop the petclinic container
 			docker stop ${con}
 			# remove the petclinic container
