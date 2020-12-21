@@ -138,19 +138,10 @@ do
 			# Load dummy users into the DB
 			wget -O- http://${IP_ADDR}:${ACMEAIR_PORT}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS} 2> ${LOGFILE}
 			err_exit "Error: Could not load the dummy users into the DB"
-			cmd="docker run --rm -v ${PWD}:/opt/app -it ${JMETER_FOR_LOAD} jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR} -Jport=${ACMEAIR_PORT} -n -t /opt/app/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.log -j /opt/app/logs/jmeter.log"
+			cmd="docker run --rm -v ${PWD}:/opt/app -it ${JMETER_FOR_LOAD} jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR} -Jport=${ACMEAIR_PORT} -Juser=${JMETER_LOAD_USERS} -n -t /opt/app/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.log -j /opt/app/logs/jmeter.log"
 		fi 
 	
 		echo " "
-	
-		# Reset the max user id value to default
-		git checkout ${JMX_FILE}
-
-		# Calculate maximum user ids based on the USERS values passed
-		MAX_USER_ID=$(( JMETER_LOAD_USERS-1 ))
-
-		# Update the jmx value with the max user id
-		sed -i 's/"maximumValue">99</"maximumValue">'${MAX_USER_ID}'</' ${JMX_FILE}
 	
 		# Run the jmeter load
 		echo "Running jmeter load for petclinic instance $inst with the following parameters"
@@ -160,12 +151,6 @@ do
 		err_exit "can not execute the command"
 	done
 	((ACMEAIR_PORT=ACMEAIR_PORT+1))
-	
-	# Reset the max user value to previous value
-	git checkout ${JMX_FILE} > ${LOGFILE}
-
-	# Reset the jmx maximumValue 
-	sed -i 's/"maximumValue">'${MAX_USER_ID}'</"maximumValue">'99'</' ${JMX_FILE}
 
 	# Parse the results
 	# input:result directory , Number of iterations of the jmeter load
