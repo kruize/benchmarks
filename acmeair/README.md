@@ -177,7 +177,7 @@ To run the load for multiple instances in case of openshift cluster follow [READ
 # Note for RHEL 8.0 users
 podman docker should have the latest network version to work.
 
-Acmeair source file is cloned from [github repo] (https://github.com/sabkrish/acmeair.git)
+Acmeair source file is cloned from github repository: https://github.com/sabkrish/acmeair.git
 
 
 
