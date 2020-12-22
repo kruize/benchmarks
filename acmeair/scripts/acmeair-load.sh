@@ -133,12 +133,12 @@ do
 			# Load dummy users into the DB
 			wget -O- http://${IP_ADDR[inst-1]}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS}  2> ${LOGFILE}
 			err_exit "Error: Could not load the dummy users into the DB"
-			cmd="docker run --rm -v ${PWD}:/opt/app -it ${JMETER_FOR_LOAD} jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR[inst-1]} -n -t /opt/app/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.${iter}.log -j /opt/app/logs/jmeter.${iter}.log"
+			cmd="docker run --rm -e Jdrivers=${JMETER_LOAD_USERS} -e Jduration=${JMETER_LOAD_DURATION} -e Jhost=${IP_ADDR[inst-1]} ${JMETER_FOR_LOAD} "
 		else
 			# Load dummy users into the DB
 			wget -O- http://${IP_ADDR}:${ACMEAIR_PORT}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS} 2> ${LOGFILE}
 			err_exit "Error: Could not load the dummy users into the DB"
-			cmd="docker run --rm -v ${PWD}:/opt/app -it ${JMETER_FOR_LOAD} jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR} -Jport=${ACMEAIR_PORT} -n -t /opt/app/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.log -j /opt/app/logs/jmeter.log"
+			cmd="docker run --rm -e Jdrivers=${JMETER_LOAD_USERS} -e Jduration=${JMETER_LOAD_DURATION} -e Jhost=${IP_ADDR} -e Jport=${ACMEAIR_PORT} ${JMETER_FOR_LOAD}"
 		fi 
 	
 		echo " "

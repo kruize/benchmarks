@@ -31,7 +31,7 @@ ACMEAIR_DEFAULT_IMAGE="dinogun/acmeair-monolithic"
 ACMEAIR_CUSTOM_IMAGE="acmeair_mono_service_liberty:latest"
 DEFAULT_NAMESPACE="default"
 JMETER_CUSTOM_IMAGE="jmeter:3.1"
-JMETER_DEFAULT_IMAGE="docker.io/dinogun/jmeter:3.1"
+JMETER_DEFAULT_IMAGE="kruize/jmeter_acmeair:3.1"
 MANIFESTS_DIR="manifests/"
 JMX_FILE="${PWD}/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx"
 LOG="${PWD}/logs"
@@ -92,7 +92,7 @@ function build_acmeair_driver() {
 
 # Build the jmeter application along with the acmeair driver
 function build_jmeter() {
-	docker build --pull -t jmeter:3.1 -f Dockerfile.jmeter . 2>>${LOGFILE} >>${LOGFILE}
+	docker build --pull -t jmeter_acmeair:3.1 -f Dockerfile.jmeter . 2>>${LOGFILE} >>${LOGFILE}
 }
 
 # Pull the jmeter image

@@ -187,11 +187,31 @@ function run_jmeter_workload() {
 	IP_ADDR=$1
 	RESULTS_LOG=$2
 
+	# Load dummy users into the DB
+	wget -O- http://${IP_ADDR}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS} 2> ${LOGFILE} > ${LOGFILE}
+	err_exit "Error: Could not load the dummy users into the DB"
+	echo " "
+
+	# Reset the max user id value to default
+	git checkout ${JMX_FILE} 2> ${LOGFILE}
+
+	# Calculate maximum user ids based on the USERS values passed
+	MAX_USER_ID=$(( JMETER_LOAD_USERS-1 ))
+
+	# Update the jmx value with the max user id
+	sed -i 's/"maximumValue">99</"maximumValue">'${MAX_USER_ID}'</' ${JMX_FILE}
+	
 	# Run the jmeter load
 	echo "Running jmeter load with the following parameters" >> setup.log
-	cmd="docker run --rm -v ${PWD}:/opt/app dinogun/jmeter:3.1 jmeter -Jdrivers=${JMETER_LOAD_USERS} -Jduration=${JMETER_LOAD_DURATION} -Jhost=${IP_ADDR} -n -t /opt/app/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.${iter}.log -j /opt/app/logs/jmeter.${iter}.log"
+	cmd="docker run --rm -e Jdrivers=${JMETER_LOAD_USERS} -e Jduration=${JMETER_LOAD_DURATION} -e Jhost=${IP_ADDR} kruize/jmeter_acmeair:3.1"
 	echo "CMD = ${cmd}" >> setup.log
 	${cmd} > ${RESULTS_LOG}
+	
+	# Reset the max user value to previous value
+	git checkout ${JMX_FILE} 2> ${LOGFILE}
+
+	# Reset the jmx maximumValue 
+	sed -i 's/"maximumValue">${MAX_USER_ID}</"maximumValue">'99'</' ${JMX_FILE}
 }
 
 # Run the jmeter load on each instace of the application
@@ -206,31 +226,11 @@ function run_jmeter_with_scaling()
 	
 	svc_apis=($(oc status --namespace=${NAMESPACE} | grep "acmeair" | grep port | cut -d " " -f1 | cut -d "/" -f3)) 
 	
-	# Load dummy users into the DB
-	wget -O- http://${svc_apis[inst-1]}/rest/info/loader/load?numCustomers=${JMETER_LOAD_USERS} 2> ${LOGFILE} > ${LOGFILE}
-	err_exit "Error: Could not load the dummy users into the DB"
-	echo " "
-
-	# Reset the max user id value to default
-	git checkout ${JMX_FILE} 2> ${LOGFILE}
-
-	# Calculate maximum user ids based on the USERS values passed
-	MAX_USER_ID=$(( JMETER_LOAD_USERS-1 ))
-
-	# Update the jmx value with the max user id
-	sed -i 's/"maximumValue">99</"maximumValue">'${MAX_USER_ID}'</' ${JMX_FILE}
-	
 	for svc_api  in "${svc_apis[@]}"
 	do	
 		RESULT_LOG=${RESULTS_DIR_J}/jmeter-${svc_api}-${TYPE}-${RUN}.log
 		run_jmeter_workload ${svc_api} ${RESULT_LOG} &
 	done
-	
-	# Reset the max user value to previous value
-	git checkout ${JMX_FILE} 2> ${LOGFILE}
-
-	# Reset the jmx maximumValue 
-	sed -i 's/"maximumValue">${MAX_USER_ID}</"maximumValue">'99'</' ${JMX_FILE}
 }
 
 # Parse the result log files
@@ -571,7 +571,7 @@ function runIterations() {
 }
 
 # Scale the instances and run the iterations
-echo "Instances , Throughput , Responsetime , TOTAL_PODS_MEM , TOTAL_PODS_CPU , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , CLUSTER_MEM% , CLUSTER_CPU% , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
+echo "Instances , Throughput , Responsetime , MEM_MEAN , CPU_MEAN , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , CLUSTER_MEM% , CLUSTER_CPU% , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , WEB_ERRORS " > ${RESULTS_DIR_ROOT}/Metrics.log
 echo "Instances ,  MEM_RSS , MEM_USAGE , MEM_REQ , MEM_LIM , MEM_REQ_IN_P , MEM_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-mem.log
 echo "Instances ,  CPU_USAGE , CPU_REQ , CPU_LIM , CPU_REQ_IN_P , CPU_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-cpu.log
 echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log

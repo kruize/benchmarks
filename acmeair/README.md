@@ -128,37 +128,40 @@ Simulating the load on acmeair benchmarks using jmeter
 - **NAMESPACE**: Namespace in which acmeair application is deployed(Required only in the case of openshift cluster and if the application is deployed in other namespaces except `default`)
 - **IP_ADDR**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
 
-`dinogun/jmeter:3.1` is the image used to apply the load
+`kruize/jmeter_acmeair:3.1` is the image used to apply the load
 
 Example to run the load on openshift cluster
 
-**`./scripts/acmeair-load.sh openshift 2`**
+**`./scripts/acmeair-load.sh -c openshift --iter=2`**
 
 ```
 #########################################################################################
                              Starting Iteration 1                                  
 #########################################################################################
 
-Loaded flights and 150 customers in 2.079 seconds 
+Loaded flights and 150 customers in 1.74 seconds 
 Updated 1 path from the index
-Running jmeter load with the following parameters
-docker run --rm -v /home/shruthi/benchmarks/acmeair:/opt/app dinogun/jmeter:3.1 jmeter -Jdrivers=150 -Jduration=20 -Jhost=acmeair-service-default.apps.rouging.os.fyre.ibm.com -n -t /opt/app/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.1.log -j /opt/app/logs/jmeter.1.log
+Running jmeter load for petclinic instance 1 with the following parameters
+docker run --rm -e Jdrivers=150 -e Jduration=20 -e Jhost=acmeair-service-0-default.apps.rouging.os.fyre.ibm.com kruize/jmeter_acmeair:3.1 
+jmter logs Dir : /home/shruthi/benchmarks/acmeair/logs/acmeair-202012222039
 
 #########################################################################################
                              Starting Iteration 2                                  
 #########################################################################################
 
-Loaded flights and 300 customers in 2.113 seconds 
+Loaded flights and 300 customers in 1.449 seconds 
 Updated 1 path from the index
-Running jmeter load with the following parameters
-docker run --rm -v /home/shruthi/benchmarks/acmeair:/opt/app dinogun/jmeter:3.1 jmeter -Jdrivers=300 -Jduration=20 -Jhost=acmeair-service-default.apps.rouging.os.fyre.ibm.com -n -t /opt/app/acmeair-driver/acmeair-jmeter/scripts/AcmeAir.jmx -DusePureIDs=true -l /opt/app/logs/jmeter.2.log -j /opt/app/logs/jmeter.2.log
+Running jmeter load for petclinic instance 1 with the following parameters
+docker run --rm -e Jdrivers=300 -e Jduration=20 -e Jhost=acmeair-service-0-default.apps.rouging.os.fyre.ibm.com kruize/jmeter_acmeair:3.1 
+jmter logs Dir : /home/shruthi/benchmarks/acmeair/logs/acmeair-202012222039
 Updated 1 path from the index
 #########################################################################################
-				Displaying the results				       
+				Displaying the results					       
 #########################################################################################
 RUN , THROUGHPUT , PAGES , AVG_RESPONSE_TIME , ERRORS
-1,59.5,2410,439,0
-2,119.2,4847,438,0
+1,20.5,840,1552,0
+2,16.6,931,3622,0
+
 
 ```
 Above image shows the logs of the load run, it processes and displays the output for each run in Displaying the results section of the log which includes throughput, Number of pages it has retreived, average response time and errors if any.
@@ -167,6 +170,7 @@ To run the load for multiple instances in case of openshift cluster follow [READ
 
 # Cleanup
 `$ ./scripts/acmeair-cleanup.sh -c CLUSTER_TYPE[docker|minikube|openshift] [-n NAMESPACE]`
+
 - **CLUSTER_TYPE**: docker|minikube|openshift
 - **NAMESPACE**: Namespace in which acmeair application is deployed(Required only in the case of openshift cluster and if the application is deployed in other namespaces except `default`). 
 

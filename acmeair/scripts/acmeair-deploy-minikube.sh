@@ -58,6 +58,7 @@ function createInstances() {
 	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 	do
 		sed 's/acmeair-sample/acmeair-sample-'${inst}'/g' ${MANIFESTS_DIR}/acmeair.yaml > ${MANIFESTS_DIR}/acmeair-${inst}.yaml
+		sed -i 's/acmeair-deployment/acmeair-deployment-'${inst}'/g' ${MANIFESTS_DIR}/acmeair-${inst}.yaml
 		sed -i "s|${ACMEAIR_DEFAULT_IMAGE}|${ACMEAIR_IMAGE}|g" ${MANIFESTS_DIR}/acmeair-${inst}.yaml
 		sed -i 's/acmeair-service/acmeair-service-'${inst}'/g' ${MANIFESTS_DIR}/acmeair-${inst}.yaml
 		sed -i 's/acmeair-app/acmeair-app-'${inst}'/g' ${MANIFESTS_DIR}/acmeair-${inst}.yaml
