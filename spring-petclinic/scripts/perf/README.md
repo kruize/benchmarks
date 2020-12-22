@@ -21,12 +21,17 @@
 
 Example to test with multiple instances
 
-**`$./scripts/perf/run-petclinic-openshift.sh  -s rouging.os.fyre.ibm.com -e result/ -u 150 -d 30 -w 5 -m 3 -i 2 --iter=2 -r`**
+**`$./scripts/perf/run-petclinic-openshift.sh -s rouging.os.fyre.ibm.com -e result -u 50 -d 10 -w 3 -m 2 -i 2 --iter=1 -r --cpulim=4 --cpureq=2 --memlim=1024M --memreq=512M`**
 
 ``` 
-Instances , Throughput , Responsetime , TOTAL_PODS_MEM , TOTAL_PODS_CPU ,CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX ,  CLUSTER_MEM% , CLUSTER_CPU% , WEB_ERRORS 
-1 ,  77.5 , 1197 , 450.619 , 0.263236 , .237929625421846782 , .3346264203904941265 , 441 , 468 , 40.906 , 20.6796 , 0
-2 ,  126.833 , 2923.83 , 799.59 , 0.468159 , .41725203650069820925 , .7692589955612678644 , 786 , 811 , 42.4917 , 22.1667 , 0
+Instances , Throughput , Responsetime , MEM_MEAN , CPU_MEAN , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , CLUSTER_MEM% , CLUSTER_CPU% , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , WEB_ERRORS 
+1 ,  1.5 , 13717 , 185.589 , 0.0654162 , .06008195908427761 , .07154538499852295 , 184 , 187 , 37.7179 , 21.2792 , 2 , 512M , 4 , 1024M , 0
+2 ,  1.95 , 36022 , 401.126 , 0.116614 , .08914981041467199 , .14088270408803078 , 400 , 400 , 38.7379 , 21.9882 , 2 , 512M , 4 , 1024M , 0
+Run , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , Throughput , Responsetime , WEB_ERRORS , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX
+0 , 2 , 512M , 4 , 1024M , 1.5 , 13723 , 0	,.0613606 , .06008195908427761 , .06174897795030225	, 184.267 , 184 , 184 
+1 , 2 , 512M , 4 , 1024M , 1.5 , 13711 , 0	,.0694717 , .06882558557598842 , .07154538499852295	, 186.91 , 186 , 187 
+0 , 2 , 512M , 4 , 1024M , 1.9 , 18414 , 0	,.1408827 , .14088270408803078 , .14088270408803078	, 400.887 , 400 , 400 
+1 , 2 , 512M , 4 , 1024M , 2.0 , 17763 , 0	,.0923455 , .08914981041467199 , .094000952179322626	, 401.365 , 400 , 400 
 
 ```
 Above image shows the log of the load run i.e, throghput, response time, total memory used by the pod, total cpu used by the pod, minimum cpu, maximum cpu, minimum memory, maximum memory, cluster memory usage in percentage,cluster cpu in percentage and web errors if any.
