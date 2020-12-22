@@ -23,7 +23,7 @@ pushd ".." >> setup.log
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
 export NETWORK="kruize-network"
-LOGFILE="${CURRENT_DIR}/setup.log"
+LOGFILE="${PWD}/setup.log"
 PETCLINIC_REPO="${CURRENT_DIR}"
 PETCLINIC_DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
 PETCLINIC_CUSTOM_IMAGE="spring-petclinic:latest"
@@ -75,13 +75,13 @@ function build_petclinic() {
 	popd >>${LOGFILE}
 	
 	# Build the petclinic docker image
-	docker build -t spring-petclinic --build-arg REPOSITORY=${IMAGE} . 2>>${LOGFILE} >>${LOGFILE}
+	docker build -t ${PETCLINIC_CUSTOM_IMAGE} --build-arg REPOSITORY=${IMAGE} . 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Building of docker image of petclinic."
 }
 
 # Build the jmeter application along with the petclinic 
 function build_jmeter() {
-	docker build --pull -t jmeter_petclinic:3.1 -f Dockerfile_jmeter . 2>>${LOGFILE} >>${LOGFILE}
+	docker build --pull -t ${JMETER_CUSTOM_IMAGE} -f Dockerfile_jmeter . 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Building of jmeter image."
 }
 

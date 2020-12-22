@@ -28,7 +28,7 @@ function usage() {
 	exit -1
 }
 
-while getopts c:i:a:n:-: gopts
+while getopts c:i:l:a:n:-: gopts
 do
 	case ${gopts} in
 	-)
