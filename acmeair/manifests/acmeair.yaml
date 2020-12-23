@@ -14,7 +14,8 @@ spec:
       labels:
         name: acmeair-deployment
         app: acmeair-deployment
-        app.kubernetes.io/name: "myapp"
+        # Add label to the application which is used by kruize/autotune to monitor it
+        app.kubernetes.io/name: "acmeair-deployment"
         version: v1
     spec:
       volumes:
