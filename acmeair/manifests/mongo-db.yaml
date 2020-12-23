@@ -14,7 +14,8 @@ spec:
       labels:
         name: acmeair-db
         app: acmeair-db
-        app.kubernetes.io/name: "myapp"
+        # Add label to the application which is used by kruize/autotune to monitor it
+        app.kubernetes.io/name: "acmeair-db"
         version: v1
     spec:
       containers:
