@@ -75,13 +75,13 @@ function build_petclinic() {
 	popd >>${LOGFILE}
 	
 	# Build the petclinic docker image
-	docker build -t spring-petclinic --build-arg REPOSITORY=${IMAGE} . 2>>${LOGFILE} >>${LOGFILE}
+	docker build -t ${PETCLINIC_CUSTOM_IMAGE} --build-arg REPOSITORY=${IMAGE} . 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Building of docker image of petclinic."
 }
 
 # Build the jmeter application along with the petclinic 
 function build_jmeter() {
-	docker build --pull -t jmeter_petclinic:3.1 -f Dockerfile_jmeter . 2>>${LOGFILE} >>${LOGFILE}
+	docker build --pull -t ${JMETER_CUSTOM_IMAGE} -f Dockerfile_jmeter . 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Building of jmeter image."
 }
 
