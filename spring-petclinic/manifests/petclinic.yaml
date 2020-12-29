@@ -14,7 +14,8 @@ spec:
       labels:
         name: petclinic-deployment
         app: petclinic-deployment
-        app.kubernetes.io/name: "myapp"
+        # Add label to the application which is used by kruize/autotune to monitor it
+        app.kubernetes.io/name: "petclinic-deployment"
         version: v1
     spec:
       volumes:
@@ -36,6 +37,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: petclinic-service
+  # Add annotations to allow prometheus to scrape metrics from the application
   annotations:
     prometheus.io/scrape: 'true'
     prometheus.io/path: '/manage/prometheus'

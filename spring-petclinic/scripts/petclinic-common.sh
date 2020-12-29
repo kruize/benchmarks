@@ -23,7 +23,7 @@ pushd ".." >> setup.log
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
 export NETWORK="kruize-network"
-LOGFILE="${PWD}/setup.log"
+LOGFILE="${CURRENT_DIR}/setup.log"
 PETCLINIC_REPO="${CURRENT_DIR}"
 PETCLINIC_DEFAULT_IMAGE="kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0"
 PETCLINIC_CUSTOM_IMAGE="spring-petclinic:latest"
