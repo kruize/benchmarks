@@ -1,4 +1,4 @@
-FROM websphere-liberty:common
+FROM websphere-liberty:kernel
 
 ADD Dockerfile /root/Dockerfile
 
@@ -10,9 +10,9 @@ RUN rm -rf /opt/ibm/wlp/usr/servers/defaultServer/workarea
 
 ADD ./build/libs/*.war /opt/ibm/wlp/usr/servers/defaultServer/apps
 
-EXPOSE 80
+EXPOSE 8080
 
-ENV MONGO_HOST=acmeair_db
+ENV MONGO_HOST=acmeair-db
 ENV MONGO_DBNAME=acmeair
 
 CMD ["/opt/ibm/wlp/bin/server", "run", "defaultServer"]

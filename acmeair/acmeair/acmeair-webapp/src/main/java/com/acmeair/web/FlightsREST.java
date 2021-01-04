@@ -26,6 +26,9 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import java.text.SimpleDateFormat;
+import java.text.ParseException;
+
 import com.acmeair.service.FlightService;
 import com.acmeair.service.ServiceLocator;
 
@@ -42,16 +45,21 @@ public class FlightsREST {
 	public String getTripFlights(
 			@FormParam("fromAirport") String fromAirport,
 			@FormParam("toAirport") String toAirport,
-			@FormParam("fromDate") Date fromDate,
-			@FormParam("returnDate") Date returnDate,
+			@FormParam("fromDate") String fromDate,
+			@FormParam("returnDate") String returnDate,
 			@FormParam("oneWay") boolean oneWay
-			) {
+			) throws NullPointerException,ParseException {
 		
 		String options = "";
+
+		//convert string to date
+		SimpleDateFormat date_format = new SimpleDateFormat("yyyy-MM-dd");
+		Date fromDateObj = date_format.parse(fromDate);
+		Date returnDateObj = date_format.parse(returnDate);
 		
 		// convert date to local timezone
 		Calendar tempDate = new GregorianCalendar();
-		tempDate.setTime(fromDate);
+		tempDate.setTime(fromDateObj);
 		// reset hour, minutes, seconds and millis
 		tempDate.set(Calendar.HOUR_OF_DAY, 0);
 		tempDate.set(Calendar.MINUTE, 0);
@@ -62,7 +70,7 @@ public class FlightsREST {
 		
 		if (!oneWay) {
 			// convert date to local timezone
-			tempDate.setTime(returnDate);
+			tempDate.setTime(returnDateObj);
 			// reset hour, minutes, seconds and millis
 			tempDate.set(Calendar.HOUR_OF_DAY, 0);
 			tempDate.set(Calendar.MINUTE, 0);
