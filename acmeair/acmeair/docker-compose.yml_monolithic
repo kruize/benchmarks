@@ -1,14 +1,14 @@
 acmeair_db:
-  container_name: acmeair_db
+  container_name: acmeair-db
   image: mongo
   net: ${NETWORK}
   
-mono_service_liberty1:
-  container_name: mono_service_liberty1
+mono_service_liberty:
+  container_name: mono_service_liberty
   net: ${NETWORK}
   build: ./acmeair-webapp/
   environment:
     - LICENSE=accept
   ports:
-    - "80:80"
+    - "32221:8080"
 

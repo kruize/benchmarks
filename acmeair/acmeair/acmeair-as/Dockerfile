@@ -1,4 +1,4 @@
-FROM websphere-liberty:common
+FROM websphere-liberty:kernel
 
 ADD Dockerfile /root/Dockerfile
 
@@ -12,7 +12,7 @@ ADD ./build/libs/*.war /opt/ibm/wlp/usr/servers/defaultServer/apps
 
 EXPOSE 80
 
-ENV CUSTOMER_SERVICE=nginx1/acmeair
+ENV CUSTOMER_SERVICE=nginx1/customer/acmeair-cs
 ENV MONGO_HOST=session_db1
 ENV MONGO_DBNAME=acmeair_sessiondb
 

@@ -11,7 +11,7 @@
     <!-- To access this server from a remote client add a host attribute to the following element, e.g. host="*" -->
     <httpEndpoint id="defaultHttpEndpoint"
                   host="*"
-                  httpPort="80"
+                  httpPort="8080"
                   httpsPort="9493" />
 
     <application name="acmeair-monolithic" context-root="/" type="war" location="acmeair-webapp-2.0.0-SNAPSHOT.war"></application>

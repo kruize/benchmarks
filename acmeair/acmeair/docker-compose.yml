@@ -24,7 +24,7 @@ nginx1:
   restart: always
   build: ./nginx/
   ports:
-    - "80:80"
+    - "32333:8080"
   volumes:
     - /www/public
   volumes_from:
@@ -41,6 +41,7 @@ main_service_liberty1:
   build: ./acmeair-mainapp/
   environment:
     - LICENSE=accept
+    - IBM_JAVA_OPTIONS
 
 auth_service_liberty1:
   container_name: auth_service_liberty1
@@ -48,6 +49,7 @@ auth_service_liberty1:
   build: ./acmeair-as/
   environment:
     - LICENSE=accept
+    - IBM_JAVA_OPTIONS
   volumes_from:
     - session_db1
 
@@ -57,6 +59,7 @@ booking_service_liberty1:
   build: ./acmeair-bs/
   environment:
     - LICENSE=accept
+    - IBM_JAVA_OPTIONS
   volumes_from:
     - booking_db1
 
@@ -66,6 +69,7 @@ customer_service_liberty1:
   build: ./acmeair-cs/
   environment:
     - LICENSE=accept
+    - IBM_JAVA_OPTIONS
   volumes_from:
     - customer_db1
 
@@ -75,6 +79,7 @@ flight_service_liberty1:
   build: ./acmeair-fs/
   environment:
     - LICENSE=accept
+    - IBM_JAVA_OPTIONS
   volumes_from:
     - flight_db1
 
@@ -84,3 +89,4 @@ support_service_liberty1:
   net: ${NETWORK}
   environment:
     - LICENSE=accept
+    - IBM_JAVA_OPTIONS
