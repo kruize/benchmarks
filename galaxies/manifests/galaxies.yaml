@@ -1,0 +1,52 @@
+apiVersion: apps/v1 
+kind: Deployment
+metadata:
+  name: galaxies-sample
+  labels:
+    app: galaxies-app
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: galaxies-deployment
+  template:
+    metadata:
+      labels:
+        name: galaxies-deployment
+        app: galaxies-deployment
+        app.kubernetes.io/name: "galaxies-deployment"
+        app.kubernetes.io/layer: "quarkus"
+        version: v1
+    spec:
+      volumes:
+      - name: test-volume
+      containers:
+      - name: galaxies
+        image: dinogun/galaxies:1.0-jdk-11.0.10_9
+        imagePullPolicy: IfNotPresent
+        resources:
+         requests:
+         limits:
+        ports:
+          - containerPort: 8080
+        volumeMounts:
+          - name: "test-volume"
+            mountPath: "/opt/jLogs"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: galaxies-service
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/metrics'
+  labels:
+    app: galaxies-app
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: galaxies-port
+  selector:
+    name: galaxies-deployment
