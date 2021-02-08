@@ -30,6 +30,8 @@ CLUSTER_TYPE="openshift"
 function usage() {
 	echo
 	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo " "
+	echo "Example: $0 -s rouging.os.fyre.ibm.com  -i 2 -p kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
 	exit -1
 }
 
@@ -86,6 +88,39 @@ fi
 if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="${DEFAULT_NAMESPACE}"
 fi
+
+# Check if the memory request/limit has unit. If not ask user to append the unit
+# input: Memory request/limit passed by user
+# output: Check memory request/limit for unit , if not specified suggest the user to specify the unit
+function check_memory_unit() {
+	MEM=$1
+	case "${MEM}" in
+		[0-9]*M)
+			;;
+		[0-9]*Mi)
+			;;
+		[0-9]*K)
+			;;
+		[0-9]*Ki)
+			;;
+		[0-9]*G)
+			;;
+		[0-9]*Gi)
+			;;
+		*)
+			echo "Error : Do specify the memory Unit"
+			echo "Example: ${MEM}K/Ki/M/Mi/G/Gi"
+			usage
+			;;
+	esac
+}
+
+
+# check memory request for unit
+check_memory_unit ${MEM_REQ}
+
+# check memory limit for unit
+check_memory_unit ${MEM_LIM}
 
 set_port ${PETCLINIC_IMAGE}
 
