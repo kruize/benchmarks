@@ -16,6 +16,7 @@ spec:
         app: galaxies-deployment
         app.kubernetes.io/name: "galaxies-deployment"
         app.kubernetes.io/layer: "quarkus"
+        app.kubernetes.io/quarkus_features: "agroal, cdi, hibernate-orm, hibernate-orm-panache, jdbc-h2, kubernetes, micrometer, mutiny, narayana-jta, resteasy, resteasy-jsonb, smallrye-context-propagation"
         version: v1
     spec:
       volumes:
