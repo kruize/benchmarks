@@ -36,7 +36,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import org.eclipse.microprofile.metrics.annotation.Timed;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
+
 import org.jboss.resteasy.annotations.jaxrs.PathParam;
 
 import io.quarkus.runtime.StartupEvent;
@@ -58,10 +60,8 @@ public class Galaxies {
 
     @GET
     @Timed(
-        name="getop.timer",
-        displayName="Time it takes to retrieve galaxy(ies)",
-        description="Display galaxy(ies)",
-        reusable=true)
+        value="getop.timer",
+        description="Display galaxy(ies)")
     public Galaxy[] get() {
         return entityManager.createNamedQuery("Galaxies.findAll", Galaxy.class)
                 .getResultList().toArray(new Galaxy[0]);
@@ -70,10 +70,8 @@ public class Galaxies {
     @GET
     @Path("{id}")
     @Timed(
-        name="getop.timer",
-        displayName="Time it takes to retrieve galaxy(ies)",
-        description="Display galaxy(ies)",
-        reusable=true)
+        value="getop.timer",
+        description="Display galaxy(ies)")
     public Galaxy get(@PathParam Integer id) {
         Galaxy entity = entityManager.find(Galaxy.class, id);
         if (entity == null) {
@@ -87,10 +85,8 @@ public class Galaxies {
     @Produces("application/json")
     @Transactional
     @Timed(
-        name="doop.timer",
-        displayName="Update galaxy(ies)",
-        description="Update galaxy(ies)",
-        reusable=true)
+        value="doop.timer",
+        description="Update galaxy(ies)")
     public Response create(Galaxy galaxy) {
         if (galaxy.getId() != null) {
             throw new WebApplicationException("Id was invalidly set on request.", 422);
@@ -104,19 +100,17 @@ public class Galaxies {
     @Path("{id}")
     @Transactional
     @Timed(
-        name="doop.timer",
-        displayName="Update galaxy(ies)",
-        description="Update galaxy(ies)",
-        reusable=true)
+        value="doop.timer",
+        description="Update galaxy(ies)")
     public Galaxy update(@PathParam Integer id, Galaxy galaxy) {
         if (galaxy.getName() == null) {
-            throw new WebApplicationException("Fruit Name was not set on request.", 422);
+            throw new WebApplicationException("Galaxy Name was not set on request.", 422);
         }
 
         Galaxy entity = entityManager.find(Galaxy.class, id);
 
         if (entity == null) {
-            throw new WebApplicationException("Fruit with id of " + id + " does not exist.", 404);
+            throw new WebApplicationException("Galaxy with id of " + id + " does not exist.", 404);
         }
 
         entity.setName(galaxy.getName());
@@ -128,10 +122,8 @@ public class Galaxies {
     @Path("{id}")
     @Transactional
     @Timed(
-        name="doop.timer",
-        displayName="Update galaxy(ies)",
-        description="Update galaxy(ies)",
-        reusable=true)
+        value="doop.timer",
+        description="Update galaxy(ies)")
     public Response delete(@PathParam Integer id) {
         Galaxy entity = entityManager.getReference(Galaxy.class, id);
         if (entity == null) {

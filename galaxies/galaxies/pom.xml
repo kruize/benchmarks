@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.restcrud</groupId>
   <artifactId>galaxies</artifactId>
-  <version>1.0</version>
+  <version>1.1</version>
   <properties>
     <surefire-plugin.version>2.22.1</surefire-plugin.version>
     <maven.compiler.target>11</maven.compiler.target>
@@ -56,7 +56,8 @@
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
-      <artifactId>quarkus-smallrye-metrics</artifactId>
+      <artifactId>quarkus-micrometer-registry-prometheus</artifactId>
+      <version>1.11.3.Final</version>
     </dependency>
     <dependency>
       <groupId>io.quarkus</groupId>
