@@ -5,12 +5,16 @@ metadata:
   namespace: "default"
 spec:
   sla:
-    objective_function: "transaction_response_time"
+    objective_function: "app_getop_sum/app_getop_count"
     sla_class: "response_time"
     direction: "minimize"
     function_variables:
-    - name: "transaction_response_time"
-      query: "application_org_restcrud_Galaxies_getop_timer_mean_seconds"
+    - name: "app_getop_sum"
+      query: getop_timer_seconds_sum{class="org.restcrud.Galaxies",exception="none",method="get",}
+      datasource: "prometheus"
+      value_type: "double"
+    - name: "app_getop_count"
+      query: getop_timer_seconds_count{class="org.restcrud.Galaxies",exception="none",method="get",}
       datasource: "prometheus"
       value_type: "double"
   mode: "show"
