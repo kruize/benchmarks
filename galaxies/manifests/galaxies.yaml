@@ -23,7 +23,7 @@ spec:
       - name: test-volume
       containers:
       - name: galaxies
-        image: dinogun/galaxies:1.1-jdk-11.0.10_9
+        image: dinogun/galaxies:1.2-jdk-11.0.10_9
         imagePullPolicy: IfNotPresent
         resources:
          requests:
