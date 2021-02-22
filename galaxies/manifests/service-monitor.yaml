@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: galaxies
+  labels:
+    team: galaxies-frontend
+spec:
+  selector:
+    matchLabels:
+        app: galaxies-app
+  endpoints:
+    - port: galaxies-port
+      path: '/metrics'
+

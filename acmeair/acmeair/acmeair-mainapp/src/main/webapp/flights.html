@@ -53,6 +53,8 @@
 		var fromDate = dijit.byId('fromDate').get('value');
 		var returnDate = dijit.byId('toDate').get('value');
 		var oneWayChecked = dijit.byId('oneWayCheck').checked;
+		fromDate = (dojo.date.locale.format(fromDate,{datePattern: "yyyy-MM-dd", selector: "date"}));
+		returnDate = (dojo.date.locale.format(returnDate,{datePattern: "yyyy-MM-dd", selector: "date"}));
 		dojo.xhrPost({
 			content : {
 				fromAirport: fromAirport,

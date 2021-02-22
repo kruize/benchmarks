@@ -1,0 +1,22 @@
+apiVersion: "recommender.com/v1"
+kind: Autotune
+metadata:
+  name: "galaxies-autotune"
+  namespace: "default"
+spec:
+  sla:
+    objective_function: "app_getop_count"
+    sla_class: "throughput"
+    direction: "maximize"
+    function_variables:
+    - name: "app_getop_count"
+      query: getop_timer_seconds_count{class="org.restcrud.Galaxies",exception="none",method="get",}
+      datasource: "prometheus"
+      value_type: "double"
+  mode: "show"
+  selector:
+    matchLabel: "app.kubernetes.io/name"
+    matchLabelValue: "galaxies-deployment"
+    matchRoute: ""
+    matchURI: ""
+    matchService: ""
