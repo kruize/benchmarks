@@ -1,0 +1,13 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: quarkus-resteasy
+  labels:
+    team: quarkus-resteasy-frontend
+spec:
+  selector:
+    matchLabels:
+        app: quarkus-resteasy-app
+  endpoints:
+    - port: quarkus-resteasy-port
+      path: '/metrics'
