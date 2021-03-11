@@ -10,7 +10,7 @@ Generate custom acmeair images required for the setup
 
 Example to build the custom image for acmeair application
 
-**`$./scripts/acmeair-setup.sh `**
+**`$./scripts/acmeair-build.sh `**
 
 ```
 Checking prereqs...done
