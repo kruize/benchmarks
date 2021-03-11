@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quarkus-resteasy-sample
+  labels:
+    app: quarkus-resteasy-app
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: quarkus-resteasy-deployment
+  template:
+    metadata:
+      labels:
+        name: quarkus-resteasy-deployment
+        app: quarkus-resteasy-deployment
+        # Add label to the application which is used by kruize/autotune to monitor it
+        app.kubernetes.io/name: "quarkus-resteasy-deployment"
+        app.kubernetes.io/layer: "quarkus"
+        version: v1
+    spec:
+      volumes:
+      - name: test-volume
+        hostPath:
+          path: "/root/icp/jLogs"
+          type: ""
+      containers:
+      - name: tfb-server
+        image: kusumach/tfb.quarkus.resteasy.hibernate.mm
+        imagePullPolicy: IfNotPresent
+        env:
+        ports:
+          - containerPort: 8080
+        resources:
+         requests:
+         limits:
+        volumeMounts:
+          - name: "test-volume"
+            mountPath: "/opt/jLogs"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: quarkus-resteasy-service
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/metrics'
+  labels:
+    app: quarkus-resteasy-app
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: quarkus-resteasy-port
+  selector:
+    name: quarkus-resteasy-deployment

@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfb-database
+  labels:
+    app: tfb-database
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: tfb-database
+  template:
+    metadata:
+      labels:
+        name: tfb-database
+        app: tfb-database
+        # Add label to the application which is used by kruize/autotune to monitor it
+        app.kubernetes.io/name: "tfb-database"
+        version: v1
+    spec:
+      containers:
+      - name: tfb-database
+        image: kusumach/postgres:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POSTGRES_USER
+            value: benchmarkdbuser
+          - name: POSTGRES_PASSWORD
+            value: benchmarkdbpass
+          - name: POSTGRES_DB
+            value: hello_world
+        ports:
+          - containerPort: 5432
+        resources:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tfb-database
+  labels:
+    name: tfb-database
+spec:
+    type: ClusterIP
+    selector:
+      app: tfb-database
+    ports:
+      - protocol: TCP
+        port: 5432
+        targetPort: 5432
