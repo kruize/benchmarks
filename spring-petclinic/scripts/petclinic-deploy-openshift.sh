@@ -29,7 +29,7 @@ CLUSTER_TYPE="openshift"
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-p PETCLINIC_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [--env=ENV_VAR]"
 	echo " "
 	echo "Example: $0 -s rouging.os.fyre.ibm.com  -i 2 -p kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
 	exit -1
@@ -78,6 +78,9 @@ do
 				;;
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
+				;;
+			env=*)
+				ENV_VAR=${OPTARG#*=}
 				;;
 			*)
 		esac
@@ -162,6 +165,12 @@ function createInstances() {
 		fi
 		if [ ! -z  ${CPU_LIM} ]; then
 			sed -i '/limits:/a \ \ \ \ \ \ \ \ \ \ cpu: '${CPU_LIM}'' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+		fi
+		
+		# Pass environment variables
+		if [ ! -z  ${ENV_VAR} ]; then
+			sed -i '/env:/a \ \ \ \ \ \ \ \ - name: "JVM_ARGS"' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+			sed -i '/- name: "JVM_ARGS"/a \ \ \ \ \ \ \ \ \ \ value: '${ENV_VAR}'' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
 		fi
 		
 		oc create -f ${MANIFESTS_DIR}/petclinic-${inst}.yaml -n ${NAMESPACE}

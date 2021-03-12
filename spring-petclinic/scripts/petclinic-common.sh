@@ -17,8 +17,8 @@
 ### Script containing common functions ###
 #
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-pushd "${CURRENT_DIR}" >> setup.log
-pushd ".." >> setup.log
+pushd "${CURRENT_DIR}" >> /dev/null
+pushd ".." >> /dev/null
 
 # Set the defaults for the app
 export PETCLINIC_PORT="32334"
@@ -66,7 +66,7 @@ function build_petclinic() {
 	# Build the application from git clone. Requires git , JAVA compiler on your machine to work.
 	git clone https://github.com/spring-projects/spring-petclinic.git 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to clone the git repo"
-	pushd spring-petclinic >>${LOGFILE}
+	pushd spring-petclinic >> /dev/null
 	# Change the server port in application.properties
 	sed -i '1 s/^/server.port=8081\n/' src/main/resources/application.properties
 	sed -i '19imanagement.endpoints.web.base-path=/manage\n' src/main/resources/application.properties
