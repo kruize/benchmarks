@@ -75,7 +75,7 @@ service/galaxies-service-1 created
 # Openshift
 To deploy the benchmark use `galaxies-deploy-openshift.sh`
 
-`./scripts/galaxies-deploy-openshift.sh -s BENCHMARK_SERVER [-n NAMESPACE] [-i SERVER_INSTANCES] [-g GALAXIES_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM]`
+`./scripts/galaxies-deploy-openshift.sh -s BENCHMARK_SERVER [-n NAMESPACE] [-i SERVER_INSTANCES] [-g GALAXIES_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [--env=ENV_VAR]`
 
 - **BENCHMARK_SERVER**: Name of the cluster you are using
 - **SERVER_INSTANCES**: Number of galaxies instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
@@ -85,6 +85,7 @@ To deploy the benchmark use `galaxies-deploy-openshift.sh`
 - **MEM_REQ**: Memory request
 - **CPU_LIM**: CPU limit
 - **MEM_LIM**: Memory limit
+- **ENV_VAR**: Environment variable
 
 Example to deploy and run galaxies application on openshift cluster
 
@@ -102,6 +103,51 @@ route.route.openshift.io/galaxies-service-0 exposed
 route.route.openshift.io/galaxies-service-1 exposed
 
 ```
+
+# Run the load
+Simulating the load on galaxies benchmarks using hyperfoil/wrk
+`./scripts/galaxies-load.sh -c CLUSTER_TYPE [-i SERVER_INSTANCES] [--iter MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR] [-t THREAD] [-R REQUEST_RATE] [-d DURATION] [--connection=CONNECTIONS]`
+
+- **CLUSTER_TYPE**: docker|minikube|openshift
+- **SERVER_INSTANCES**: Number of galaxies instances to which you want to run the load.  It is optional, if is not specified then by default it will be considered as 1 instance. 
+- **MAX_LOOP**: Number of times you want to run the load. It is optional, if is not specified then by default it will be considered as 5 iterations.
+- **NAMESPACE**: Namespace in which galaxies application is deployed(Required only in the case of openshift cluster and if the application is deployed in other namespaces except `openshift-monitoring`)
+- **IP_ADDR**: IP address of the machine. It is optional, if it is not specified then the get_ip function written inside the script will get the IP address of the machine.
+- **THREAD**: Number of threads
+- **REQUEST_RATE**: Requests rate
+- **DURATION**: Test duration
+- **CONNECTIONS**: Number of connections
+
+Example to run the load on 1 galaxies instances for 2 iterations in openshift cluster
+
+**`$./scripts/galaxies-load.sh -c docker --iter=2`**
+```
+#########################################################################################
+                             Starting Iteration 1                                  
+#########################################################################################
+
+Running wrk load for galaxies instance 1 with the following parameters
+CMD=./wrk2.sh --threads=10 --connections=700 --duration=60s --rate=2000 http://192.168.122.105:32000/galaxies
+wrk logs Dir : /home/shruthi/galaxies-12-mar/benchmarks/galaxies/logs/galaxies-2021-03-12:12:30
+
+#########################################################################################
+                             Starting Iteration 2                                  
+#########################################################################################
+
+Running wrk load for galaxies instance 1 with the following parameters
+CMD=./wrk2.sh --threads=20 --connections=700 --duration=60s --rate=2000 http://192.168.122.105:32000/galaxies
+wrk logs Dir : /home/shruthi/galaxies-12-mar/benchmarks/galaxies/logs/galaxies-2021-03-12:12:30
+#########################################################################################
+				Displaying the results					       
+#########################################################################################
+RUN, THROUGHPUT, RESPONSE_TIME, MAX_RESPONSE_TIME, STDDEV_RESPONSE_TIME, ERRORS
+1,     2008.90,     1.31,         150.99,              4.40,               0
+2,     2001.05,     939.76,       84.93,               1.84,               0
+
+```
+Above image shows the logs of the load run, it processes and displays the output for each run. See Displaying the results section of the log for information about throughput, Number of pages it has retreived, average response time and errors if any.
+
+To run the load for multiple instances in case of openshift cluster follow [README.md](/galaxies/scripts/perf/README.md)
 
 # Cleanup
 `$ ./scripts/galaxies-cleanup.sh -c CLUSTER_TYPE[docker|minikube|openshift] [-n NAMESPACE]`

@@ -1,6 +1,6 @@
 # Test with multiple instances 
 
-`./scripts/perf/run_acmeair_openshift.sh  -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM]` 
+`./scripts/perf/run_acmeair_openshift.sh  -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [--env=ENV_VAR]` 
 
 - **BENCHMARK_SERVER_NAME** : Name of the cluster you are using
 - **RESULTS_DIR_PATH** : Location where you want to store the results
@@ -18,6 +18,7 @@
 - **MEM_REQ**: Memory request
 - **CPU_LIM**: CPU limit
 - **MEM_LIM**: Memory limit
+- **ENV_VAR**: Environment variable
 
 Example to test with multiple instances
 
