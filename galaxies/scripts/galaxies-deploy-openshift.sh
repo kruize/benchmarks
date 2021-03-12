@@ -31,7 +31,7 @@ function usage() {
 	echo
 	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-g GALAXIES_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
 	echo " "
-	echo "Example: $0 -s rouging.os.fyre.ibm.com  -i 2 -g dinogun/galaxies:1.1-jdk-11.0.10_9 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
+	echo "Example: $0 -s rouging.os.fyre.ibm.com  -i 2 -g dinogun/galaxies:1.2-jdk-11.0.10_9 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
 	exit -1
 }
 
@@ -72,16 +72,12 @@ do
 				;;
 			memreq=*)
 				MEM_REQ=${OPTARG#*=}
-				# check memory request for unit
-				check_memory_unit ${MEM_REQ}
 				;;
 			cpulim=*)
 				CPU_LIM=${OPTARG#*=}
 				;;
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
-				# check memory limit for unit
-				check_memory_unit ${MEM_LIM}
 				;;
 			*)
 		esac
@@ -117,6 +113,16 @@ fi
 
 if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="${DEFAULT_NAMESPACE}"
+fi
+
+# check memory limit for unit
+if [ ! -z "${MEM_LIM}" ]; then
+	check_memory_unit ${MEM_LIM}
+fi
+
+# check memory request for unit
+if [ ! -z "${MEM_REQ}" ]; then
+	check_memory_unit ${MEM_REQ}
 fi
 
 # Create multiple yamls based on instances and Update the template yamls with names and create multiple files
