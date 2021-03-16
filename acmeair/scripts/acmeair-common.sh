@@ -18,8 +18,8 @@
 #
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-pushd "${CURRENT_DIR}" >> setup.log
-pushd ".." >> setup.log
+pushd "${CURRENT_DIR}" >> /dev/null
+pushd ".." >> /dev/null
 
 # Set the defaults for the app
 JMX_FILE="${PWD}/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx"
@@ -70,7 +70,7 @@ function get_ip() {
 # output:build the application from scratch and create the acmeair docker image 
 function build_acmeair() {
 	# Build acmeair monolithic application docker image
-	pushd acmeair >>${LOGFILE}
+	pushd acmeair >> /dev/null
 	# Build the application
 	docker run --rm -v "${PWD}":/home/gradle/project -w /home/gradle/project dinogun/gradle:5.5.0-jdk8-openj9 gradle build 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: gradle build of acmeair monolithic application failed."
@@ -84,7 +84,7 @@ function build_acmeair() {
 # Build the acmeair driver application
 function build_acmeair_driver() {
 	# Build acmeair driver
-	pushd jmeter-driver >>${LOGFILE}
+	pushd jmeter-driver >> /dev/null
 	docker run --rm -v "${PWD}":/home/gradle/project -w /home/gradle/project dinogun/gradle:5.5.0-jdk8-openj9 gradle build 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: gradle build of acmeair driver failed."
 	popd >>${LOGFILE}

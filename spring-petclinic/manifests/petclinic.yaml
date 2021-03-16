@@ -24,6 +24,7 @@ spec:
       - name: petclinic-tomcat
         image: kruize/spring_petclinic:2.2.0-jdk-11.0.8-openj9-0.21.0
         imagePullPolicy: IfNotPresent
+        env:
         resources:
          requests:
          limits:
