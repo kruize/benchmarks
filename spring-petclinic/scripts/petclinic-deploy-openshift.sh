@@ -35,6 +35,32 @@ function usage() {
 	exit -1
 }
 
+# Check if the memory request/limit has unit. If not ask user to append the unit
+# input: Memory request/limit passed by user
+# output: Check memory request/limit for unit , if not specified suggest the user to specify the unit
+function check_memory_unit() {
+	MEM=$1
+	case "${MEM}" in
+		[0-9]*M)
+			;;
+		[0-9]*Mi)
+			;;
+		[0-9]*K)
+			;;
+		[0-9]*Ki)
+			;;
+		[0-9]*G)
+			;;
+		[0-9]*Gi)
+			;;
+		*)
+			echo "Error : Do specify the memory Unit"
+			echo "Example: ${MEM}K/Ki/M/Mi/G/Gi"
+			usage
+			;;
+	esac
+}
+
 # Iterate through the commandline options
 while getopts s:i:p:n:-: gopts
 do
@@ -72,7 +98,7 @@ do
 done
 
 if [ -z "${BENCHMARK_SERVER}" ]; then
-	echo "Do set the variable - BENCHMARK_SERVER "
+	echo "Do set the variable - BENCHMARK_SERVER"
 	usage
 	exit 1
 fi
@@ -89,38 +115,15 @@ if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="${DEFAULT_NAMESPACE}"
 fi
 
-# Check if the memory request/limit has unit. If not ask user to append the unit
-# input: Memory request/limit passed by user
-# output: Check memory request/limit for unit , if not specified suggest the user to specify the unit
-function check_memory_unit() {
-	MEM=$1
-	case "${MEM}" in
-		[0-9]*M)
-			;;
-		[0-9]*Mi)
-			;;
-		[0-9]*K)
-			;;
-		[0-9]*Ki)
-			;;
-		[0-9]*G)
-			;;
-		[0-9]*Gi)
-			;;
-		*)
-			echo "Error : Do specify the memory Unit"
-			echo "Example: ${MEM}K/Ki/M/Mi/G/Gi"
-			usage
-			;;
-	esac
-}
-
+# check memory limit for unit
+if [ ! -z "${MEM_LIM}" ]; then
+	check_memory_unit ${MEM_LIM}
+fi
 
 # check memory request for unit
-check_memory_unit ${MEM_REQ}
-
-# check memory limit for unit
-check_memory_unit ${MEM_LIM}
+if [ ! -z "${MEM_REQ}" ]; then
+	check_memory_unit ${MEM_REQ}
+fi
 
 set_port ${PETCLINIC_IMAGE}
 
