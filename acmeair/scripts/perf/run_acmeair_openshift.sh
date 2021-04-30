@@ -554,6 +554,7 @@ function runIterations() {
 	do
 		if [ ${RE_DEPLOY} == "true" ]; then
 			${SCRIPT_REPO}/acmeair-deploy-openshift.sh -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -a ${ACMEAIR_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} >> setup.log
+			err_exit "Error: acmeair deployment failed"
 		fi
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-${itr}

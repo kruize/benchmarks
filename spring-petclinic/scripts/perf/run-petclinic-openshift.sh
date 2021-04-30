@@ -32,7 +32,7 @@ function err_exit() {
 	if [ $? != 0 ]; then
 		printf "$*"
 		echo
-		echo "See ${LOGFILE} for more details"
+		echo "See setup.log for more details"
 		exit -1
 	fi
 }
@@ -522,8 +522,9 @@ function runIterations() {
 	USERS=${JMETER_LOAD_USERS}
 	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
 	do
-		if [ $RE_DEPLOY == "true" ]; then
+		if [ ${RE_DEPLOY} == "true" ]; then
 			${SCRIPT_REPO}/petclinic-deploy-openshift.sh -s ${BENCHMARK_SERVER} -i ${SCALING} -p ${PETCLINIC_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} >> setup.log
+			err_exit "Error: petclinic deployment failed"
 		fi
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-${itr}

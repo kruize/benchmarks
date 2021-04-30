@@ -28,8 +28,36 @@ CLUSTER_TYPE="openshift"
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 -s BENCHMARK_SERVER [-n NAMESPACE] [-i SERVER_INSTANCES] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo "Usage: $0 -s BENCHMARK_SERVER [-n NAMESPACE] [-i SERVER_INSTANCES] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM]"
+	echo " "
+	echo "Example: $0 -s rouging.os.fyre.ibm.com  -i 2 -a dinogun/acmeair-monolithic:latest --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
 	exit -1
+}
+
+# Check if the memory request/limit has unit. If not ask user to append the unit
+# input: Memory request/limit passed by user
+# output: Check memory request/limit for unit , if not specified suggest the user to specify the unit
+function check_memory_unit() {
+	MEM=$1
+	case "${MEM}" in
+		[0-9]*M)
+			;;
+		[0-9]*Mi)
+			;;
+		[0-9]*K)
+			;;
+		[0-9]*Ki)
+			;;
+		[0-9]*G)
+			;;
+		[0-9]*Gi)
+			;;
+		*)
+			echo "Error : Do specify the memory Unit"
+			echo "Example: ${MEM}K/Ki/M/Mi/G/Gi"
+			usage
+			;;
+	esac
 }
 
 # Iterate through the commandline options
@@ -84,6 +112,16 @@ fi
 
 if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="${DEFAULT_NAMESPACE}"
+fi
+
+# check memory limit for unit
+if [ ! -z "${MEM_LIM}" ]; then
+	check_memory_unit ${MEM_LIM}
+fi
+
+# check memory request for unit
+if [ ! -z "${MEM_REQ}" ]; then
+	check_memory_unit ${MEM_REQ}
 fi
 
 # Deploy the mongo db and acmeair application

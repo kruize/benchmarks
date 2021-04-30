@@ -26,11 +26,11 @@ RUN apt-get update \
 WORKDIR /opt/src/galaxies
 
 # Copy the pom.xml only and download the dependencies
-COPY pom.xml /opt/src/galaxies/
+COPY galaxies/pom.xml /opt/src/galaxies/
 RUN mvn -f /opt/src/galaxies/pom.xml install dependency:copy-dependencies
 
 # Now copy the sources and compile and package them
-COPY src /opt/src/galaxies/src/
+COPY galaxies/src /opt/src/galaxies/src/
 RUN mvn -f pom.xml clean package
 
 # Create a jlinked JRE specific to the App
