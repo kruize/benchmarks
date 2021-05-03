@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: quarkus-resteasy-sample
+  name: tfb-qrh-sample
   labels:
-    app: quarkus-resteasy-app
+    app: tfb-qrh-app
 spec:
   replicas: 1
   selector:
    matchLabels:
-     app: quarkus-resteasy-deployment
+     app: tfb-qrh-deployment
   template:
     metadata:
       labels:
-        name: quarkus-resteasy-deployment
-        app: quarkus-resteasy-deployment
+        name: tfb-qrh-deployment
+        app: tfb-qrh-deployment
         # Add label to the application which is used by kruize/autotune to monitor it
-        app.kubernetes.io/name: "quarkus-resteasy-deployment"
+        app.kubernetes.io/name: "tfb-qrh-deployment"
         app.kubernetes.io/layer: "quarkus"
         version: v1
     spec:
@@ -26,7 +26,7 @@ spec:
           type: ""
       containers:
       - name: tfb-server
-        image: kusumach/tfb.quarkus.resteasy.hibernate.mm
+        image: kusumach/tfb-qrh-mm:1.13.2.F
         imagePullPolicy: IfNotPresent
         env:
         ports:
@@ -41,17 +41,17 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: quarkus-resteasy-service
+  name: tfb-qrh-service
   annotations:
     prometheus.io/scrape: 'true'
     prometheus.io/path: '/metrics'
   labels:
-    app: quarkus-resteasy-app
+    app: tfb-qrh-app
 spec:
   type: NodePort
   ports:
     - port: 8080
       targetPort: 8080
-      name: quarkus-resteasy-port
+      name: tfb-qrh-port
   selector:
-    name: quarkus-resteasy-deployment
+    name: tfb-qrh-deployment
