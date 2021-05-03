@@ -1,7 +1,7 @@
 #!/bin/bash
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-source ${CURRENT_DIR}/../utils.sh
+source ${CURRENT_DIR}/../utils/common.sh
 
 # Parse CPU, memeory and cluster information
 # input:type of run(warmup|measure), total number of runs, iteration number

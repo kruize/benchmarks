@@ -1,7 +1,7 @@
 #/bin/sh
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-source ${CURRENT_DIR}/../utils.sh
+source ${CURRENT_DIR}/../utils/common.sh
 
 # Parse the result log files
 # input:Type of run(warmup|measure), total number of runs, total number of iteration
