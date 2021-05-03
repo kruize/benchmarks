@@ -367,7 +367,7 @@ echo "Instances ,  CPU_USAGE , CPU_REQ , CPU_LIM , CPU_REQ_IN_P , CPU_LIM_IN_P "
 echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
 echo "Run , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , Throughput , Responsetime , WEB_ERRORS , Responsetime_MAX , stdev_responsetime_max , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
 
-echo "SCALE ,  THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
+echo "SCALE ,  THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , REQUEST_COUNT_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
 echo "SCALE ,  MEM_RSS , MEM_USAGE " > ${RESULTS_DIR_ROOT}/Metrics-mem-prom.log
 echo "SCALE ,  CPU_USAGE" > ${RESULTS_DIR_ROOT}/Metrics-cpu-prom.log
 echo ", 50p , 95p , 98p , 99p , 99.9p" > ${RESULTS_DIR_ROOT}/Metrics-percentile-prom.log

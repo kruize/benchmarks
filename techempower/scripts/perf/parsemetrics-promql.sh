@@ -237,7 +237,7 @@ function parseResults() {
 	total_latency_ms_quan_98_avg=$(echo ${total_latency_seconds_quan_98_avg}*1000 | bc)
 	total_latency_ms_quan_99_avg=$(echo ${total_latency_seconds_quan_99_avg}*1000 | bc)
 	total_latency_ms_quan_999_avg=$(echo ${total_latency_seconds_quan_999_avg}*1000 | bc)
-	echo "${sca} ,  ${total_app_timer_thrpt_avg} , ${total_app_timer_rsp_time_avg} , ${total_app_timer_thrpt_rate_3m_avg} , ${total_app_timer_rsp_time_rate_3m_avg} , ${total_latency_milliseconds_max} , ${total_latency_ms_quan_50_avg} , ${total_latency_ms_quan_95_avg} , ${total_latency_ms_quan_98_avg} , ${total_latency_ms_quan_99_avg} , ${total_latency_ms_quan_999_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${ci_app_timer_thrpt} , ${ci_app_timer_rsp_time} " >> ${RESULTS_DIR_J}/../Metrics-prom.log
+	echo "${sca} ,  ${total_app_timer_thrpt_avg} , ${total_app_timer_rsp_time_avg} , ${total_app_timer_thrpt_rate_3m_avg} , ${total_app_timer_rsp_time_rate_3m_avg} , ${total_app_timer_count_rate_3m_avg} , ${total_latency_milliseconds_max} , ${total_latency_ms_quan_50_avg} , ${total_latency_ms_quan_95_avg} , ${total_latency_ms_quan_98_avg} , ${total_latency_ms_quan_99_avg} , ${total_latency_ms_quan_999_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${ci_app_timer_thrpt} , ${ci_app_timer_rsp_time} " >> ${RESULTS_DIR_J}/../Metrics-prom.log
 	echo "${sca} ,  ${total_mem_avg} , ${total_memusage_avg} " >> ${RESULTS_DIR_J}/../Metrics-mem-prom.log
 	echo "${sca} ,  ${total_cpu_avg} " >> ${RESULTS_DIR_J}/../Metrics-cpu-prom.log
 	echo ", ${total_latency_seconds_quan_50_avg} , ${total_latency_seconds_quan_95_avg} , ${total_latency_seconds_quan_98_avg} , ${total_latency_seconds_quan_99_avg} , ${total_latency_seconds_quan_999_avg}" >> ${RESULTS_DIR_J}/../Metrics-percentile-prom.log
@@ -263,7 +263,7 @@ WARMUPS=$4
 MEASURES=$5
 SCRIPT_REPO=$6
 
-#echo "SCALE ,  THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci" >> ${RESULTS_DIR_J}/../Metrics-prom.log
+#echo "SCALE ,  THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , REQUEST_COUNT_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci" >> ${RESULTS_DIR_J}/../Metrics-prom.log
 #echo "SCALE ,  MEM_RSS , MEM_USAGE " >> ${RESULTS_DIR_J}/../Metrics-mem-prom.log
 #echo "SCALE ,  CPU_USAGE" >> ${RESULTS_DIR_J}/../Metrics-cpu-prom.log
 #echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_J}/../app-calc-metrics-measure-raw.log
