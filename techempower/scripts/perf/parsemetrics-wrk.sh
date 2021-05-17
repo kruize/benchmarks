@@ -1,4 +1,20 @@
-#/bin/sh
+#!/bin/bash
+#
+# Copyright (c) 2020, 2021 IBM Corporation, RedHat and others.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+### Script to parse hyperfoil/wrk2 data###
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
 source ${CURRENT_DIR}/../utils/common.sh
@@ -55,7 +71,7 @@ function parseData() {
 function parseResults() {
 	TOTAL_ITR=$1
 	RESULTS_DIR_J=$2
-	sca=$3
+	SCALE=$3
 	for (( itr=0 ; itr<${TOTAL_ITR} ;itr++))
 	do
 		RESULTS_DIR_P=${RESULTS_DIR_J}/ITR-${itr}
@@ -88,9 +104,9 @@ function parseResults() {
 	done
 
 	## Update the responsetime as not usable if web-errors are non-zero
-	#echo "${sca} ,  ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_max} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime} ,  ${ci_mem} , ${ci_cpu} " >> ${RESULTS_DIR_J}/../Metrics.log
+	#echo "${SCALE} ,  ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_max} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime} ,  ${ci_mem} , ${ci_cpu} " >> ${RESULTS_DIR_J}/../Metrics.log
 	echo ", ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_max} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime}" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
-	#echo "${sca} , ${ci_throughput} , ${ci_responsetime} ,  ${ci_mem} , ${ci_cpu} , ${ci_weberror} " >> ${RESULTS_DIR_J}/../Metrics-ci.log
+	#echo "${SCALE} , ${ci_throughput} , ${ci_responsetime} ,  ${ci_mem} , ${ci_cpu} , ${ci_weberror} " >> ${RESULTS_DIR_J}/../Metrics-ci.log
 }
 
 throughputlogs=(throughput responsetime weberror responsetime_max stdev_resptime_max)
@@ -101,9 +117,9 @@ total_logs=(${throughputlogs[@]} ${podcpulogs[@]} ${podmemlogs[@]} cpu_min cpu_m
 
 TOTAL_ITR=$1
 RESULTS_SC=$2
-scale=$3
+SCALE=$3
 WARMUPS=$4
 MEASURES=$5
 SCRIPT_REPO=$6
 
-parseResults ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
+parseResults ${TOTAL_ITR} ${RESULTS_SC} ${SCALE} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}

@@ -80,20 +80,20 @@ do
 				MEM_LIM=${OPTARG#*=}
 				;;
 			maxinlinelevel=*)
-                                maxinlinelevel=${OPTARG#*=}
-                                ;;
-                        quarkustpcorethreads=*)
-                                quarkustpcorethreads=${OPTARG#*=}
-                                ;;
-                        quarkustpqueuesize=*)
-                                quarkustpqueuesize=${OPTARG#*=}
-                                ;;
-                        quarkusdatasourcejdbcminsize=*)
-                                quarkusdatasourcejdbcminsize=${OPTARG#*=}
-                                ;;
-                        quarkusdatasourcejdbcmaxsize=*)
-                                quarkusdatasourcejdbcmaxsize=${OPTARG#*=}
-                                ;;
+				maxinlinelevel=${OPTARG#*=}
+				;;
+			quarkustpcorethreads=*)
+				quarkustpcorethreads=${OPTARG#*=}
+				;;
+			quarkustpqueuesize=*)
+				quarkustpqueuesize=${OPTARG#*=}
+				;;
+			quarkusdatasourcejdbcminsize=*)
+				quarkusdatasourcejdbcminsize=${OPTARG#*=}
+				;;
+			quarkusdatasourcejdbcmaxsize=*)
+				quarkusdatasourcejdbcmaxsize=${OPTARG#*=}
+				;;
 			*)
 		esac
 		;;
@@ -185,7 +185,6 @@ function createInstances() {
 #			sed -i 's/test_jvm_args/-XX:MaxInlineLevel='${maxinlinelevel}' -Dquarkus.thread-pool.core-threads='${quarkustpcorethreads}' -Dquarkus.thread-pool.queue-size='${quarkustpqueuesize}' -Dquarkus.datasource.jdbc.min-size='${quarkusdatasourcejdbcminsize}' -Dquarkus.datasource.jdbc.max-size='${quarkusdatasourcejdbcmaxsize}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 
 		fi
-			
 		oc create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
 		#err_exit "Error: Issue in deploying tfb-qrh." >> setup.log
 
@@ -204,8 +203,8 @@ function createInstances() {
 		#err_exit " Error: Issue in exposing service" >> setup.log
 	done
 
-	## extra
-#	sleep 60
+	## extra sleep time
+	#sleep 60
 	
 	# Check if the application is running
 	#check_app >> setup.log
@@ -216,7 +215,7 @@ function stopAllInstances() {
 	${TFB_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} >> setup.log
 	sleep 30
 
-	##extra
+	##extra sleep time
 #	sleep 60
 }
 

@@ -50,7 +50,6 @@ if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="${DEFAULT_NAMESPACE}"
 fi
 
-
 # Removes the tfb-qrh instances from openshift
 # output: Removes the tfb-qrh and tfb-database deployments, services, service monitors and routes
 function remove_tfb_openshift() {

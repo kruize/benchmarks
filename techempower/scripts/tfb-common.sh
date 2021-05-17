@@ -89,21 +89,18 @@ function check_app() {
 	for status in "${CMD[@]}"
 	do
 		if [ -z "${status}" ]; then
-	#		echo "Application pod did not come up"
+			#echo "Application pod did not come up"
 			# Wait for 60sec more and check again before exiting
-                        sleep 120
-                        CMD=$(oc get pods --namespace=${NAMESPACE} | grep "tfb-qrh" | grep "Running" | cut -d " " -f1)
-                        status1=${CMD[@]}
-                        if [ -z "${status1}" ]; then
-                                echo "Application pod did not come up"
-                                exit -1;
-                        fi
-
-#			exit -1;
+			sleep 60
+			CMD=$(oc get pods --namespace=${NAMESPACE} | grep "tfb-qrh" | grep "Running" | cut -d " " -f1)
+			status1=${CMD[@]}
+			if [ -z "${status1}" ]; then
+				echo "Application pod did not come up"
+				exit -1;
+			fi
 		fi
 	done
 }
-
 
 # Parse the Throughput Results
 # input:result directory , Number of iterations of the wrk load
@@ -136,4 +133,3 @@ function load_setup(){
 	fi
 	pushd hyperfoil-0.13/bin > /dev/null
 }
-
