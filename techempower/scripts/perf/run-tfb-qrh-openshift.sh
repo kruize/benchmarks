@@ -35,10 +35,11 @@ function err_exit() {
 		printf "$*"
 		echo
 		echo "See setup.log for more details"
-		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
+		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 0 , 0 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 		echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 		paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 		cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
+		cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
 		exit -1
 	fi
 }
@@ -359,6 +360,7 @@ function runIterations() {
 
 #TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
 # Scale the instances and run the iterations
+
 echo "Instances , Throughput , Responsetime , RESPONSETIME_MAX , STDEV_RESPTIME_MAX , MEM_MEAN , CPU_MEAN , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , CLUSTER_MEM% , CLUSTER_CPU% , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , maxinlinelevel , quarkustpcorethreads , quarkustpqueuesize , quarkusdatasourcejdbcminsize , quarkusdatasourcejdbcmaxsize , WEB_ERRORS" > ${RESULTS_DIR_ROOT}/Metrics.log
 echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , maxinlinelevel , quarkustpcorethreads , quarkustpqueuesize , quarkusdatasourcejdbcminsize , quarkusdatasourcejdbcmaxsize" > ${RESULTS_DIR_ROOT}/Metrics-config.log
 echo ", Throughput , Responsetime , RESPONSETIME_MAX , STDEV_RESPTIME_MAX , WEB_ERRORS , thrp_wrk_ci , rsp_wrk_ci" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
@@ -367,11 +369,14 @@ echo "Instances ,  CPU_USAGE , CPU_REQ , CPU_LIM , CPU_REQ_IN_P , CPU_LIM_IN_P "
 echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
 echo "Run , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , Throughput , Responsetime , WEB_ERRORS , Responsetime_MAX , stdev_responsetime_max , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
 
-echo "SCALE ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT , RESPONSE_TIME , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
+echo "SCALE ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci , app_thrpt_prom_ci , app_rsp_prom_ci" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
+echo "SCALE ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT , RESPONSE_TIME , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci , app_thrpt_prom_ci , app_rsp_prom_ci" > ${RESULTS_DIR_ROOT}/Metrics-prom-all.log
 echo "SCALE ,  MEM_RSS , MEM_USAGE " > ${RESULTS_DIR_ROOT}/Metrics-mem-prom.log
 echo "SCALE ,  CPU_USAGE" > ${RESULTS_DIR_ROOT}/Metrics-cpu-prom.log
 echo ", 50p , 95p , 98p , 99p , 99.9p" > ${RESULTS_DIR_ROOT}/Metrics-percentile-prom.log
-echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
+echo "ITR , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
+echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/server_requests-metrics-measure-raw.log
+echo "THROUGHPUT_RATE_1m , RESPONSE_TIME_RATE_1m , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT_RATE_5m , RESPONSE_TIME_RATE_5m , THROUGHPUT_RATE_7m , RESPONSE_TIME_RATE_7m , THROUGHPUT_RATE_9m , RESPONSE_TIME_RATE_9m , THROUGHPUT_RATE_15m , RESPONSE_TIME_RATE_15m , THROUGHPUT_RATE_30m , RESPONSE_TIME_RATE_30m " > ${RESULTS_DIR_ROOT}/Metrics-rate-prom.log
 
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize}" >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 
@@ -391,4 +396,5 @@ done
 
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
-cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
+#cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
+#cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
