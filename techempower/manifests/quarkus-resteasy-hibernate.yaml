@@ -44,7 +44,7 @@ metadata:
   name: tfb-qrh-service
   annotations:
     prometheus.io/scrape: 'true'
-    prometheus.io/path: '/metrics'
+    prometheus.io/path: '/q/metrics'
   labels:
     app: tfb-qrh-app
 spec:

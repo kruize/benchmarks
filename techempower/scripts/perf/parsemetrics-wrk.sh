@@ -103,10 +103,8 @@ function parseResults() {
 		eval ci_${metric}=${metric_ci}
 	done
 
-	## Update the responsetime as not usable if web-errors are non-zero
-	#echo "${SCALE} ,  ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_max} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime} ,  ${ci_mem} , ${ci_cpu} " >> ${RESULTS_DIR_J}/../Metrics.log
+	## TODO Check for web-errors and update responsetime based on that
 	echo ", ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_max} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime}" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
-	#echo "${SCALE} , ${ci_throughput} , ${ci_responsetime} ,  ${ci_mem} , ${ci_cpu} , ${ci_weberror} " >> ${RESULTS_DIR_J}/../Metrics-ci.log
 }
 
 throughputlogs=(throughput responsetime weberror responsetime_max stdev_resptime_max)

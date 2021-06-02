@@ -45,13 +45,13 @@ function err_exit() {
 }
 
 # Run the benchmark as
-# SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH WRK_LOAD_USERS WRK_LOAD_DURATION WARMUPS MEASURES
-# Ex of ARGS : -s example.in.com -e /tfb/results -u 400 -d 300 -w 5 -m 3
+# SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH WARMUPS MEASURES TOTAL_INST TOTAL_ITR RE_DEPLOY
+# Ex of ARGS : -s example.in.com -e /tfb/results -w 5 -m 3 -i 1 --iter=1 -r
 
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u WRK_LOAD_USERS] [-d WRK_LOAD_DURATION] [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-t THREAD] [-R REQUEST_RATE] [-d DURATION] [--connection=CONNECTIONS]"
+	echo "Usage: $0 -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-t THREAD] [-R REQUEST_RATE] [-d DURATION] [--connection=CONNECTIONS]"
 	exit -1
 }
 
@@ -188,7 +188,7 @@ if [ -z "${TFB_IMAGE}" ]; then
 fi
 
 if [ -z "${NAMESPACE}" ]; then
-	NAMESPACE="openshift-monitoring"
+	NAMESPACE="default"
 fi
 
 if [ -z "${REQUEST_RATE}" ]; then
@@ -335,8 +335,6 @@ function runIterations() {
 	WARMUPS=$3
 	MEASURES=$4
 	RESULTS_DIR_ITR=$5
-	#IF we want to use array of users we can use this variable.
-	USERS=${WRK_LOAD_USERS}
 	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
 	do
 		if [ ${RE_DEPLOY} == "true" ]; then
@@ -345,10 +343,10 @@ function runIterations() {
 		fi
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-${itr}
-		echo "Running ${WARMUPS} warmups for ${USERS} users" >> setup.log
+		echo "Running ${WARMUPS} warmups" >> setup.log
 		# Perform warmup runs
 		runItr warmup ${WARMUPS} ${RESULTS_DIR_I}
-		echo "Running ${MEASURES} measures for ${USERS} users" >> setup.log
+		echo "Running ${MEASURES} measures" >> setup.log
 		# Perform measure runs
 		runItr measure ${MEASURES} ${RESULTS_DIR_I}
 		sleep 5
