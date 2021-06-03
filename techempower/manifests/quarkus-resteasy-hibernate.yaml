@@ -29,8 +29,6 @@ spec:
         image: kusumach/tfb-qrh:1.13.2.F_mm.v1
         imagePullPolicy: IfNotPresent
         env:
-          - name: "JAVA_OPTIONS"
-            value: "-server"
         ports:
           - containerPort: 8080
         resources:
