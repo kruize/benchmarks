@@ -396,3 +396,4 @@ done
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 #cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
 #cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
+#cat ${RESULTS_DIR_ROOT}/Metrics-raw.log

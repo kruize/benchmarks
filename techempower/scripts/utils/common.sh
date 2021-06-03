@@ -24,7 +24,9 @@ function calcAvg_inMB()
 	LOG=$1
 	if [ -s ${LOG} ]; then
 		sed -i '/^$/d' ${LOG}
-		awk '{sum+=$1} END { print "  Average =",sum/NR/1024/1024}' ${LOG} ;
+		if [ -s ${LOG} ]; then
+			awk '{sum+=$1} END { print "  Average =",sum/NR/1024/1024}' ${LOG} ;
+		fi
 	fi
 }
 
@@ -36,7 +38,9 @@ function calcAvg_in_p()
 	LOG=$1
 	if [ -s ${LOG} ]; then
 		sed -i '/^$/d' ${LOG}
-		awk '{sum+=$1} END { print " % Average =",sum/NR*100}' ${LOG} ;
+		if [ -s ${LOG} ]; then
+			awk '{sum+=$1} END { print " % Average =",sum/NR*100}' ${LOG} ;
+		fi
 	fi
 }
 
@@ -48,7 +52,9 @@ function calcAvg()
 	LOG=$1
 	if [ -s ${LOG} ]; then
 		sed -i '/^$/d' ${LOG}
-		awk '{sum+=$1} END { print "  Average =",sum/NR}' ${LOG} ;
+		if [ -s ${LOG} ]; then
+			awk '{sum+=$1} END { print "  Average =",sum/NR}' ${LOG} ;
+		fi
 	fi
 }
 

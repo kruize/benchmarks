@@ -26,7 +26,7 @@ function parseData() {
 	TYPE=$1
 	TOTAL_RUNS=$2
 	ITR=$3
-	echo "${TYPE} Runs" >> ${RESULTS_DIR_J}/Throughput-${itr}.log
+
 	for (( run=0 ; run<${TOTAL_RUNS} ;run++))
 	do
 		thrp_sum=0
@@ -38,6 +38,9 @@ function parseData() {
 		svc_apis=($(oc status --namespace=${NAMESPACE} | grep "tfb-qrh" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 		for svc_api  in "${svc_apis[@]}"
 		do
+			throughput=0
+			responsetime=0
+
 			RESULT_LOG=${RESULTS_DIR_P}/wrk-${svc_api}-${TYPE}-${run}.log
 			throughput=`cat ${RESULT_LOG} | grep "Requests" | cut -d ":" -f2 `
 			responsetime=`cat ${RESULT_LOG} | grep "Latency:" | cut -d ":" -f2 | tr -s " " | cut -d " " -f2 `
@@ -54,8 +57,12 @@ function parseData() {
 				stddev_responsetime=$(echo ${stddev_responsetime}*1000 | bc)
 			fi
 			weberrors=`cat ${RESULT_LOG} | grep "Non-2xx" | cut -d ":" -f2`
-			thrp_sum=$(echo ${thrp_sum}+${throughput} | bc)
-			resp_sum=$(echo ${resp_sum}+${responsetime} | bc)
+			if [ ! -z ${throughput} ]; then
+				thrp_sum=$(echo ${thrp_sum}+${throughput} | bc)
+			fi
+			if [ ! -z ${responsetime} ]; then
+				resp_sum=$(echo ${resp_sum}+${responsetime} | bc)
+			fi
 			if [ "${weberrors}" != "" ]; then
 				wer_sum=`expr ${wer_sum} + ${weberrors}`
 			fi

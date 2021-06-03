@@ -204,7 +204,7 @@ function createInstances() {
 	done
 
 	## extra sleep time
-	#sleep 60
+	sleep 60
 	
 	# Check if the application is running
 	#check_app >> setup.log

@@ -49,48 +49,55 @@ function parsePromMetrics()  {
 	done
 
 	## Calculate response time
-	total_seconds_sum=`cat ${RESULTS_DIR_J}/app_timer_sum-${TYPE}-${ITR}.log`
-	# Convert seconds to ms to avoid 0 as response time.
-	total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc)
-	total_seconds_count=`cat ${RESULTS_DIR_J}/app_timer_count-${TYPE}-${ITR}.log`
-	rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc)
-	throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc)
-	echo ${rsp_time} > ${RESULTS_DIR_J}/app_timer_rsp_time-${TYPE}-${ITR}.log
-	echo ${throughput} > ${RESULTS_DIR_J}/app_timer_thrpt-${TYPE}-${ITR}.log
+        if [ -s ${RESULTS_DIR_J}/app_timer_sum-${TYPE}-${ITR}.log ]; then
+                total_seconds_sum=`cat ${RESULTS_DIR_J}/app_timer_sum-${TYPE}-${ITR}.log`
+                # Convert seconds to ms to avoid 0 as response time.
+                total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc)
+                total_seconds_count=`cat ${RESULTS_DIR_J}/app_timer_count-${TYPE}-${ITR}.log`
+                rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc)
+                throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc)
+                echo ${rsp_time} > ${RESULTS_DIR_J}/app_timer_rsp_time-${TYPE}-${ITR}.log
+                echo ${throughput} > ${RESULTS_DIR_J}/app_timer_thrpt-${TYPE}-${ITR}.log
+        fi
 
-	## Calculate rsp_time_rate and thrpt_rate
-	app_sum_rate_3m=`cat ${RESULTS_DIR_J}/app_timer_sum_rate_3m-${TYPE}-${ITR}.log`
-	# Convert seconds to ms to avoid 0 as response time.
-	app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc)
-	app_count_rate_3m=`cat ${RESULTS_DIR_J}/app_timer_count_rate_3m-${TYPE}-${ITR}.log`
-	rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc)
-	throughput_rate_3m=$(echo ${app_count_rate_3m}| bc)
-	echo ${rsp_time_rate_3m} > ${RESULTS_DIR_J}/app_timer_rsp_time_rate_3m-${TYPE}-${ITR}.log
-	echo ${throughput_rate_3m} > ${RESULTS_DIR_J}/app_timer_thrpt_rate_3m-${TYPE}-${ITR}.log
+        ## Calculate rsp_time_rate and thrpt_rate
+        if [ -s ${RESULTS_DIR_J}/app_timer_sum_rate_3m-${TYPE}-${ITR}.log ]; then
+                app_sum_rate_3m=`cat ${RESULTS_DIR_J}/app_timer_sum_rate_3m-${TYPE}-${ITR}.log`
+                # Convert seconds to ms to avoid 0 as response time.
+                app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc)
+                app_count_rate_3m=`cat ${RESULTS_DIR_J}/app_timer_count_rate_3m-${TYPE}-${ITR}.log`
+                rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc)
+                throughput_rate_3m=$(echo ${app_count_rate_3m}| bc)
+                echo ${rsp_time_rate_3m} > ${RESULTS_DIR_J}/app_timer_rsp_time_rate_3m-${TYPE}-${ITR}.log
+                echo ${throughput_rate_3m} > ${RESULTS_DIR_J}/app_timer_thrpt_rate_3m-${TYPE}-${ITR}.log
+        fi
 
 	## Raw data
         echo "${ITR}, ${throughput} , ${rsp_time} , ${throughput_rate_3m} , ${rsp_time_rate_3m} " >> ${RESULTS_DIR_J}/../app-calc-metrics-${TYPE}-raw.log
 
 	## Calculate response time
-        total_seconds_sum=`cat ${RESULTS_DIR_J}/server_requests_sum-${TYPE}-${ITR}.log`
-        # Convert seconds to ms to avoid 0 as response time.
-        total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc)
-        total_seconds_count=`cat ${RESULTS_DIR_J}/server_requests_count-${TYPE}-${ITR}.log`
-        rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc)
-        throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc)
-        echo ${rsp_time} > ${RESULTS_DIR_J}/server_requests_rsp_time-${TYPE}-${ITR}.log
-        echo ${throughput} > ${RESULTS_DIR_J}/server_requests_thrpt-${TYPE}-${ITR}.log
+        if [ -s ${RESULTS_DIR_J}/server_requests_sum-${TYPE}-${ITR}.log ]; then
+                total_seconds_sum=`cat ${RESULTS_DIR_J}/server_requests_sum-${TYPE}-${ITR}.log`
+                # Convert seconds to ms to avoid 0 as response time.
+                total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc)
+                total_seconds_count=`cat ${RESULTS_DIR_J}/server_requests_count-${TYPE}-${ITR}.log`
+                rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc)
+                throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc)
+                echo ${rsp_time} > ${RESULTS_DIR_J}/server_requests_rsp_time-${TYPE}-${ITR}.log
+                echo ${throughput} > ${RESULTS_DIR_J}/server_requests_thrpt-${TYPE}-${ITR}.log
+        fi
 
         ## Calculate rsp_time_rate and thrpt_rate
-        app_sum_rate_3m=`cat ${RESULTS_DIR_J}/server_requests_sum_rate_3m-${TYPE}-${ITR}.log`
-        # Convert seconds to ms to avoid 0 as response time.
-        app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc)
-        app_count_rate_3m=`cat ${RESULTS_DIR_J}/server_requests_count_rate_3m-${TYPE}-${ITR}.log`
-        rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc)
-        throughput_rate_3m=$(echo ${app_count_rate_3m}| bc)
-        echo ${rsp_time_rate_3m} > ${RESULTS_DIR_J}/server_requests_rsp_time_rate_3m-${TYPE}-${ITR}.log
-        echo ${throughput_rate_3m} > ${RESULTS_DIR_J}/server_requests_thrpt_rate_3m-${TYPE}-${ITR}.log
-
+        if [ -s ${RESULTS_DIR_J}/server_requests_sum_rate_3m-${TYPE}-${ITR}.log ]; then
+                app_sum_rate_3m=`cat ${RESULTS_DIR_J}/server_requests_sum_rate_3m-${TYPE}-${ITR}.log`
+                # Convert seconds to ms to avoid 0 as response time.
+                app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc)
+                app_count_rate_3m=`cat ${RESULTS_DIR_J}/server_requests_count_rate_3m-${TYPE}-${ITR}.log`
+                rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc)
+                throughput_rate_3m=$(echo ${app_count_rate_3m}| bc)
+                echo ${rsp_time_rate_3m} > ${RESULTS_DIR_J}/server_requests_rsp_time_rate_3m-${TYPE}-${ITR}.log
+                echo ${throughput_rate_3m} > ${RESULTS_DIR_J}/server_requests_thrpt_rate_3m-${TYPE}-${ITR}.log
+        fi
 
 	## Raw data
 	echo "${ITR}, ${throughput} , ${rsp_time} , ${throughput_rate_3m} , ${rsp_time_rate_3m} " >> ${RESULTS_DIR_J}/../server_requests-metrics-${TYPE}-raw.log
@@ -115,18 +122,26 @@ function parsePodMicroMeterLog()
 		fi
 		
 		if [ ${MODE} == "app_timer_count" ] || [ ${MODE} == "app_timer_sum" ] || [ ${MODE} == "server_requests_count" ] || [ ${MODE} == "server_requests_sum" ]; then
-			cat ${RESULTS_DIR_P}/${MODE}-${TYPE}*.json | cut -d ";" -f4 | cut -d '"' -f1 | uniq | grep -v "^$" | sort -n  > ${RESULTS_DIR_P}/temp-data.log
-			start_counter=`cat ${RESULTS_DIR_P}/temp-data.log | head -1`
-			end_counter=`cat ${RESULTS_DIR_P}/temp-data.log | tail -1`
-			counter_val=$(echo ${end_counter}-${start_counter}| bc)
-			echo "${counter_val}" > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
-		elif [[ ${MODE} == *"app_timer_count_rate"* ]] || [[ ${MODE} == *"app_timer_sum_rate"* ]] || [[ ${MODE} == *"server_requests_count_rate"* ]] || [[ ${MODE} == *"server_requests_sum_rate"* ]]; then
-			cat ${RESULTS_DIR_P}/${MODE}-${TYPE}-${last_measure_number}.json | cut -d ";" -f4 | cut -d "\"" -f1 | tail -1 > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
-		elif [ ${MODE} == "latency_seconds_max" ] || [ ${MODE} == "server_requests_max" ]; then
-			cat ${RESULTS_DIR_P}/${MODE}-* | cut -d ";" -f4 | cut -d "\"" -f1 | uniq | grep -v "^$" | sort -n | tail -1 > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
-		elif [[ ${MODE} == *"latency_seconds_quan"* ]] ; then
-			cat ${RESULTS_DIR_P}/${MODE}-${TYPE}-${last_measure_number}.json | cut -d ";" -f4 | cut -d "\"" -f1 | uniq | grep -v "^$" | sort -n |  tail -1 > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
-		fi
+                        if [ -s "${RESULTS_DIR_P}/${MODE}-${TYPE}-0.json" ]; then
+                                cat ${RESULTS_DIR_P}/${MODE}-${TYPE}*.json | cut -d ";" -f4 | cut -d '"' -f1 | uniq | grep -v "^$" | sort -n  > ${RESULTS_DIR_P}/temp-data.log
+                                start_counter=`cat ${RESULTS_DIR_P}/temp-data.log | head -1`
+                                end_counter=`cat ${RESULTS_DIR_P}/temp-data.log | tail -1`
+                                counter_val=$(echo ${end_counter}-${start_counter}| bc)
+                                echo "${counter_val}" > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
+                        fi
+                elif [[ ${MODE} == *"app_timer_count_rate"* ]] || [[ ${MODE} == *"app_timer_sum_rate"* ]] || [[ ${MODE} == *"server_requests_count_rate"* ]] || [[ ${MODE} == *"server_requests_sum_rate"* ]]; then
+                        if [ -s "${RESULTS_DIR_P}/${MODE}-${TYPE}-${last_measure_number}.json" ]; then
+                                cat ${RESULTS_DIR_P}/${MODE}-${TYPE}-${last_measure_number}.json | cut -d ";" -f4 | cut -d "\"" -f1 | tail -1 > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
+                        fi
+                elif [ ${MODE} == "latency_seconds_max" ] || [ ${MODE} == "server_requests_max" ]; then
+                        if [ -s "${RESULTS_DIR_P}/${MODE}-${TYPE}-0.json" ]; then
+                                cat ${RESULTS_DIR_P}/${MODE}-* | cut -d ";" -f4 | cut -d "\"" -f1 | uniq | grep -v "^$" | sort -n | tail -1 > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
+                        fi
+                elif [[ ${MODE} == *"latency_seconds_quan"* ]] ; then
+                        if [ -s "${RESULTS_DIR_P}/${MODE}-${TYPE}-${last_measure_number}.json" ]; then
+                                cat ${RESULTS_DIR_P}/${MODE}-${TYPE}-${last_measure_number}.json | cut -d ";" -f4 | cut -d "\"" -f1 | uniq | grep -v "^$" | sort -n |  tail -1 > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
+                        fi
+                fi
 }
 
 # Parsing CPU logs for pod
@@ -146,13 +161,15 @@ function parsePodDataLog()
 	run_pods=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
 	for run_pod in "${run_pods[@]}"
 	do
-		cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
-		each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
-		each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
-		each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
-		data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc)
-		data_min=$(echo ${data_min}+${each_pod_data_min}| bc)
-		data_max=$(echo ${data_max}+${each_pod_data_max} | bc)
+		if [ -s "${DATA_LOG}" ]; then
+                        cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
+                        each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
+                        each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
+                        each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
+                        data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc)
+                        data_min=$(echo ${data_min}+${each_pod_data_min}| bc)
+                        data_max=$(echo ${data_max}+${each_pod_data_max} | bc)
+                fi
 	done
 	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
 	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
@@ -176,15 +193,17 @@ function parsePodMemLog()
 	mem_pods=($(cat ${MEM_LOG} | cut -d ";" -f2 | sort | uniq))
 	for mem_pod in "${mem_pods[@]}"
 	do
-		cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-mem.log
-		each_pod_mem_avg=$( echo `calcAvg_inMB ${RESULTS_DIR_P}/temp-mem.log | cut -d "=" -f2`  )
-		each_pod_mem_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-mem.log`  )
-		each_pod_mem_min_inMB=$(echo ${each_pod_mem_min}/1024/1024 | bc)
-		each_pod_mem_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-mem.log`  )
-		each_pod_mem_max_inMB=$(echo ${each_pod_mem_max}/1024/1024 | bc)
-		mem_sum=$(echo ${mem_sum}+${each_pod_mem_avg} | bc)
-		mem_min=$(echo ${mem_min}+${each_pod_mem_min_inMB} | bc)
-		mem_max=$(echo ${mem_max}+${each_pod_mem_max_inMB} | bc)
+		if [ -s "${MEM_LOG}" ]; then
+                        cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-mem.log
+                        each_pod_mem_avg=$( echo `calcAvg_inMB ${RESULTS_DIR_P}/temp-mem.log | cut -d "=" -f2`  )
+                        each_pod_mem_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-mem.log`  )
+                        each_pod_mem_min_inMB=$(echo ${each_pod_mem_min}/1024/1024 | bc)
+                        each_pod_mem_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-mem.log`  )
+                        each_pod_mem_max_inMB=$(echo ${each_pod_mem_max}/1024/1024 | bc)
+                        mem_sum=$(echo ${mem_sum}+${each_pod_mem_avg} | bc)
+                        mem_min=$(echo ${mem_min}+${each_pod_mem_min_inMB} | bc)
+                        mem_max=$(echo ${mem_max}+${each_pod_mem_max_inMB} | bc)
+                fi
 	done
 	echo "${run} , ${mem_sum}, ${mem_min} , ${mem_max} " >> ${RESULTS_DIR_J}/${RESULTS_LOG}
 	echo ", ${mem_sum} , ${mem_min} , ${mem_max} " >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
@@ -197,8 +216,10 @@ function parseClusterLog() {
 	MODE=$1
 	CLUSTER_LOG=$2
 	CLUSTER_RESULTS_LOG=$3
-	cat ${CLUSTER_LOG}| cut -d ";" -f2 | cut -d '"' -f1 | grep -Eo '[0-9\.]+' > C_temp.log
-	cluster_cpumem=$( echo `calcAvg_in_p C_temp.log | cut -d "=" -f2`  )
+	if [ -s ${CLUSTER_LOG} ]; then
+                cat ${CLUSTER_LOG}| cut -d ";" -f2 | cut -d '"' -f1 | grep -Eo '[0-9\.]+' > C_temp.log
+                cluster_cpumem=$( echo `calcAvg_in_p C_temp.log | cut -d "=" -f2`  )
+        fi
 	echo "${run} , ${cluster_cpumem}" >> ${RESULTS_DIR_J}/${CLUSTER_RESULTS_LOG}
 }
 
@@ -211,6 +232,7 @@ function parseResults() {
 	SCALE=$3
 	WARMUPS=$4
 	MEASURES=$5
+
 	for (( itr=0 ; itr<${TOTAL_ITR} ;itr++))
 	do
 		RESULTS_DIR_P=${RESULTS_DIR_J}/ITR-${itr}
@@ -219,28 +241,32 @@ function parseResults() {
 
 		for poddatalog in "${podcpulogs[@]}"
 		do
-			cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${poddatalog}-measure-temp.log
-			cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${poddatalog}_min-measure-temp.log
-			cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${poddatalog}_max-measure-temp.log
+			if [ -s "${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log" ]; then
+                                cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${poddatalog}-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${poddatalog}_min-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${poddatalog}_max-measure-temp.log
+                        fi
 		done
-
 		for podmemlog in "${podmemlogs[@]}"
 		do
-			cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podmemlog}-measure-temp.log
-			cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podmemlog}_min-measure-temp.log
-			cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podmemlog}_max-measure-temp.log
+			if [ -s "${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log" ]; then
+                                cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podmemlog}-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podmemlog}_min-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podmemlog}_max-measure-temp.log
+                        fi
 		done
-		
 		for podmmlog in "${micrometer_logs[@]}"
 		do
-			cat ${RESULTS_DIR_J}/${podmmlog}-measure-${itr}.log >> ${RESULTS_DIR_J}/${podmmlog}-measure-temp.log
+			if [ -s "${RESULTS_DIR_J}/${podmmlog}-measure-${itr}.log" ]; then
+                                cat ${RESULTS_DIR_J}/${podmmlog}-measure-${itr}.log >> ${RESULTS_DIR_J}/${podmmlog}-measure-temp.log
+                        fi
 		done
-
 		for podmetriclog in "${metric_logs[@]}"
 		do
-			cat ${RESULTS_DIR_J}/${podmetriclog}-measure-${itr}.log >> ${RESULTS_DIR_J}/${podmetriclog}-measure-temp.log
+			if [ -s "${RESULTS_DIR_J}/${podmetriclog}-measure-${itr}.log" ]; then
+                                cat ${RESULTS_DIR_J}/${podmetriclog}-measure-${itr}.log >> ${RESULTS_DIR_J}/${podmetriclog}-measure-temp.log
+                        fi
 		done
-
 		###### Add different raw logs we want to merge
 		#Cumulative raw data
 		paste ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >> ${RESULTS_DIR_J}/../Metrics-cpumem-raw.log
@@ -248,31 +274,58 @@ function parseResults() {
 
 	for metric in "${total_logs[@]}"
 	do
+		if [ -s ${RESULTS_DIR_J}/${metric}-measure-temp.log ]; then
 		if [ ${metric} == "cpu_min" ] || [ ${metric} == "mem_min" ]; then
 			minval=$(echo `calcMin ${RESULTS_DIR_J}/${metric}-measure-temp.log`)
-			eval total_${metric}=${minval}
+			if [ ! -z ${minval} ]; then
+				eval total_${metric}=${minval}
+			else
+				eval total_${metric}=0
+			fi
 		elif [ ${metric} == "cpu_max" ] || [ ${metric} == "mem_max" ] || [ ${metric} == "latency_seconds_max" ] || [ ${metric} == "server_requests_max" ]; then
 			maxval=$(echo `calcMax ${RESULTS_DIR_J}/${metric}-measure-temp.log`)
-			eval total_${metric}=${maxval}
+			if [ ! -z ${maxval} ]; then
+				eval total_${metric}=${maxval}
+			else
+				eval total_${metric}=0
+			fi
 		else
 			val=$(echo `calcAvg ${RESULTS_DIR_J}/${metric}-measure-temp.log | cut -d "=" -f2`)
-			eval total_${metric}_avg=${val}
+			if [ ! -z ${val} ]; then
+				eval total_${metric}_avg=${val}
+			else
+				eval total_${metric}_avg=0
+			fi
 		fi
 		# Calculate confidence interval
-		metric_ci=`php ${SCRIPT_REPO}/perf/ci.php ${RESULTS_DIR_J}/${metric}-measure-temp.log`
-		eval ci_${metric}=${metric_ci}	
+                        metric_ci=`php ${SCRIPT_REPO}/perf/ci.php ${RESULTS_DIR_J}/${metric}-measure-temp.log`
+			if [ ! -z ${metric_ci} ]; then
+	                        eval ci_${metric}=${metric_ci}
+			else
+				eval ci_${metric}=0
+			fi
+
+		## Convert latency_seconds_max into ms
+		if [ ${metric} == "latency_seconds_max" ]; then
+			total_latency_milliseconds_max=$(echo ${total_latency_seconds_max}*1000 | bc)
+		elif [ ${metric} == "latency_seconds_quan_50" ]; then
+			total_latency_ms_quan_50_avg=$(echo ${total_latency_seconds_quan_50_avg}*1000 | bc)
+		elif [ ${metric} == "latency_seconds_quan_95" ]; then
+                        total_latency_ms_quan_95_avg=$(echo ${total_latency_seconds_quan_95_avg}*1000 | bc)
+                elif [ ${metric} == "latency_seconds_quan_98" ]; then
+                        total_latency_ms_quan_98_avg=$(echo ${total_latency_seconds_quan_98_avg}*1000 | bc)
+                elif [ ${metric} == "latency_seconds_quan_99" ]; then
+                        total_latency_ms_quan_99_avg=$(echo ${total_latency_seconds_quan_99_avg}*1000 | bc)
+                elif [ ${metric} == "latency_seconds_quan_999" ]; then
+                        total_latency_ms_quan_999_avg=$(echo ${total_latency_seconds_quan_999_avg}*1000 | bc)
+                elif [ ${metric} == "server_requests_max" ]; then
+			total_server_requests_ms_max=$(echo ${total_server_requests_max}*1000 | bc)
+		fi
+			
+		fi
 	done
 
-	## Convert latency_seconds_max into ms
-	total_latency_milliseconds_max=$(echo ${total_latency_seconds_max}*1000 | bc)
-	total_latency_ms_quan_50_avg=$(echo ${total_latency_seconds_quan_50_avg}*1000 | bc)
-	total_latency_ms_quan_95_avg=$(echo ${total_latency_seconds_quan_95_avg}*1000 | bc)
-	total_latency_ms_quan_98_avg=$(echo ${total_latency_seconds_quan_98_avg}*1000 | bc)
-	total_latency_ms_quan_99_avg=$(echo ${total_latency_seconds_quan_99_avg}*1000 | bc)
-	total_latency_ms_quan_999_avg=$(echo ${total_latency_seconds_quan_999_avg}*1000 | bc)
-	total_server_requests_ms_max=$(echo ${total_server_requests_max}*1000 | bc)
-
-	echo "${SCALE} , ${total_server_requests_thrpt_rate_3m_avg} , ${total_server_requests_rsp_time_rate_3m_avg} , ${total_server_requests_ms_max} , ${total_app_timer_thrpt_rate_3m_avg} , ${total_app_timer_rsp_time_rate_3m_avg} , ${total_latency_milliseconds_max} , ${total_latency_ms_quan_50_avg} , ${total_latency_ms_quan_95_avg} , ${total_latency_ms_quan_98_avg} , ${total_latency_ms_quan_99_avg} , ${total_latency_ms_quan_999_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${ci_server_requests_thrpt} , ${ci_server_requests_rsp_time} , ${ci_app_timer_thrpt} , ${ci_app_timer_rsp_time} " >> ${RESULTS_DIR_J}/../Metrics-prom.log
+	echo "${SCALE} , ${total_server_requests_thrpt_rate_3m_avg} , ${total_server_requests_rsp_time_rate_3m_avg} , ${total_server_requests_ms_max} , ${total_app_timer_thrpt_rate_3m_avg} , ${total_app_timer_rsp_time_rate_3m_avg} , ${total_latency_milliseconds_max} , ${total_latency_ms_quan_50_avg} , ${total_latency_ms_quan_95_avg} , ${total_latency_ms_quan_98_avg} , ${total_latency_ms_quan_99_avg} , ${total_latency_ms_quan_999_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${ci_server_requests_thrpt_rate_3m} , ${ci_server_requests_rsp_time_rate_3m} , ${ci_app_timer_thrpt_rate_3m} , ${ci_app_timer_rsp_time_rate_3m} " >> ${RESULTS_DIR_J}/../Metrics-prom.log
 	echo "${SCALE} , ${total_server_requests_thrpt_rate_3m_avg} , ${total_server_requests_rsp_time_rate_3m_avg} , ${total_server_requests_thrpt_avg} , ${total_server_requests_rsp_time_avg} , ${total_server_requests_ms_max} , ${total_app_timer_thrpt_rate_3m_avg} , ${total_app_timer_rsp_time_rate_3m_avg} , ${total_app_timer_thrpt_avg} , ${total_app_timer_rsp_time_avg} , ${total_latency_milliseconds_max} , ${total_latency_ms_quan_50_avg} , ${total_latency_ms_quan_95_avg} , ${total_latency_ms_quan_98_avg} , ${total_latency_ms_quan_99_avg} , ${total_latency_ms_quan_999_avg} , ${total_mem_avg} , ${total_cpu_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${ci_server_requests_thrpt} , ${ci_server_requests_rsp_time} , ${ci_app_timer_thrpt} , ${ci_app_timer_rsp_time} " >> ${RESULTS_DIR_J}/../Metrics-prom-all.log
 	echo "${SCALE} ,  ${total_mem_avg} , ${total_memusage_avg} " >> ${RESULTS_DIR_J}/../Metrics-mem-prom.log
 	echo "${SCALE} ,  ${total_cpu_avg} " >> ${RESULTS_DIR_J}/../Metrics-cpu-prom.log
@@ -287,12 +340,12 @@ clusterlogs=(c_mem c_cpu)
 timer_rate_logs=(app_timer_count_rate_1m app_timer_count_rate_3m app_timer_count_rate_5m app_timer_count_rate_7m app_timer_count_rate_9m app_timer_count_rate_15m app_timer_count_rate_30m app_timer_sum_rate_1m app_timer_sum_rate_3m app_timer_sum_rate_5m app_timer_sum_rate_7m app_timer_sum_rate_9m app_timer_sum_rate_15m app_timer_sum_rate_30m)
 server_requests_rate_logs=(server_requests_count_rate_1m server_requests_count_rate_3m server_requests_count_rate_5m server_requests_count_rate_7m server_requests_count_rate_9m server_requests_count_rate_15m server_requests_count_rate_30m server_requests_sum_rate_1m server_requests_sum_rate_3m server_requests_sum_rate_5m server_requests_sum_rate_7m server_requests_sum_rate_9m server_requests_sum_rate_15m server_requests_sum_rate_30m)
 latency_p_logs=(latency_seconds_quan_50 latency_seconds_quan_95 latency_seconds_quan_98 latency_seconds_quan_99 latency_seconds_quan_999)
-#micrometer_logs=(app_timer_sum app_timer_count app_timer_sum_rate app_timer_count_rate latency_seconds_quan latency_seconds_max)
 micrometer_logs=(app_timer_sum app_timer_count ${timer_rate_logs[@]} server_requests_sum server_requests_count server_requests_max ${server_requests_rate_logs[@]} ${latency_p_logs[@]} latency_seconds_max)
 app_calc_metric_logs=(app_timer_rsp_time app_timer_thrpt app_timer_rsp_time_rate_3m app_timer_thrpt_rate_3m)
 server_requests_metric_logs=(server_requests_rsp_time server_requests_thrpt server_requests_rsp_time_rate_3m server_requests_thrpt_rate_3m)
 metric_logs=(${app_calc_metric_logs[@]} ${server_requests_metric_logs[@]})
 total_logs=(${podcpulogs[@]} ${podmemlogs[@]} ${micrometer_logs[@]} ${metric_logs[@]} cpu_min cpu_max mem_min mem_max)
+
 
 TOTAL_ITR=$1
 RESULTS_DIR_J=$2
