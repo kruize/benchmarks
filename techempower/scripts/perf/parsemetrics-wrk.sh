@@ -90,10 +90,11 @@ function parseResults() {
 		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/weberror-measure-temp.log
 		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f5 >> ${RESULTS_DIR_J}/responsetime_max-measure-temp.log
 		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f6 >> ${RESULTS_DIR_J}/stdev_resptime_max-measure-temp.log
-		###### Add different raw logs we want to merge
-		#Cumulative raw data
-		paste ${RESULTS_DIR_J}/Throughput-measure-raw.log ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >>  ${RESULTS_DIR_J}/../Metrics-raw.log
 	done
+	###### Add different raw logs we want to merge
+	#Cumulative raw data
+	paste ${RESULTS_DIR_J}/Throughput-measure-raw.log ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >>  ${RESULTS_DIR_J}/../Metrics-raw.log
+
 	for metric in "${throughputlogs[@]}"
 	do
 		if [ ${metric} == "cpu_min" ] || [ ${metric} == "mem_min" ]; then
