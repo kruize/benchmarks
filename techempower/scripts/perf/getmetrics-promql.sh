@@ -498,10 +498,10 @@ timeout ${TIMEOUT} bash -c  "get_mem_rss ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} 
 timeout ${TIMEOUT} bash -c  "get_mem_usage ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 #timeout ${TIMEOUT} bash -c  "get_receive_bandwidth ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 #timeout ${TIMEOUT} bash -c  "get_transmit_bandwidth ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-timeout ${TIMEOUT} bash -c  "get_app_timer_sum ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-timeout ${TIMEOUT} bash -c  "get_app_timer_count ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+#timeout ${TIMEOUT} bash -c  "get_app_timer_sum ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+#timeout ${TIMEOUT} bash -c  "get_app_timer_count ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 #timeout ${TIMEOUT} bash -c  "get_app_timer_secondspercount ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-timeout ${TIMEOUT} bash -c  "get_app_timer_max ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+#timeout ${TIMEOUT} bash -c  "get_app_timer_max ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 timeout ${TIMEOUT} bash -c  "get_server_errors ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 timeout ${TIMEOUT} bash -c  "get_server_requests_sum ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 timeout ${TIMEOUT} bash -c  "get_server_requests_count ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
@@ -512,12 +512,12 @@ timeout ${TIMEOUT} bash -c  "get_server_requests_max ${URL} ${TOKEN} ${RESULTS_D
 #timeout ${TIMEOUT} bash -c  "get_server_requests_method_sum ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 #timeout ${TIMEOUT} bash -c  "get_server_requests_method_count ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 #timeout ${TIMEOUT} bash -c  "get_server_requests_method_max ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-timeout ${TIMEOUT} bash -c  "get_latency_quantiles ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
-timeout ${TIMEOUT} bash -c  "get_latency_max ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+#timeout ${TIMEOUT} bash -c  "get_latency_quantiles ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+#timeout ${TIMEOUT} bash -c  "get_latency_max ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 sleep ${TIMEOUT}
 
 # Calculate the rate of metrics for the last 1,3,5,7,9,15,30 mins.
-get_app_timer_sum_rate ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} &
-get_app_timer_count_rate ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} &
+#get_app_timer_sum_rate ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} &
+#get_app_timer_count_rate ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} &
 get_server_requests_sum_rate ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} &
 get_server_requests_count_rate ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} &

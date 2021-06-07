@@ -267,9 +267,8 @@ function run_wrk_workload() {
 	echo "Running wrk load with the following parameters" >> setup.log
 	cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
 	echo "CMD = ${cmd}" >> setup.log
-	#sleep 30
 	${cmd} > ${RESULTS_LOG}
-	sleep 1
+	sleep 3
 }
 
 # Run the wrk load on each instace of the application
@@ -349,7 +348,7 @@ function runIterations() {
 		echo "Running ${MEASURES} measures" >> setup.log
 		# Perform measure runs
 		runItr measure ${MEASURES} ${RESULTS_DIR_I}
-		sleep 5
+		sleep 15
 		# get the kruize recommendation for tfb application
 		# commenting for now as it is not required in all cases
 		#get_recommendations_from_kruize ${RESULTS_DIR_I}
@@ -395,5 +394,5 @@ done
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 #cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
-#cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
-#cat ${RESULTS_DIR_ROOT}/Metrics-raw.log
+cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
+cat ${RESULTS_DIR_ROOT}/Metrics-raw.log
