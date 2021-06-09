@@ -147,17 +147,16 @@ function createInstances() {
 
 	# Deploy one instance of DB
 	oc create -f ${MANIFESTS_DIR}/postgres.yaml -n ${NAMESPACE}
-	#err_exit "Error: Issue in deploying postgres." >> setup.log
 	sleep 10
 
-	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
+	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
 		sed 's/name: tfb-qrh/name: tfb-qrh-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor.yaml > ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
 		sed -i 's/tfb-qrh-app/tfb-qrh-app-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
 		sed -i 's/tfb-qrh-port/tfb-qrh-port-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
 		oc create -f ${MANIFESTS_DIR}/service-monitor-${inst}.yaml -n ${NAMESPACE}
 	done
-	for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
+	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
 		sed 's/tfb-qrh-sample/tfb-qrh-sample-'${inst}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate.yaml > ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 		sed -i "s|${TFB_DEFAULT_IMAGE}|${TFB_IMAGE}|g" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
@@ -165,7 +164,7 @@ function createInstances() {
 		sed -i 's/tfb-qrh-app/tfb-qrh-app-'${inst}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 		sed -i 's/tfb-qrh-port/tfb-qrh-port-'${inst}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 	
-#		# Setting cpu/mem request limits
+		# Setting cpu/mem request limits
 		if [ ! -z  ${MEM_REQ} ]; then
 			sed -i '/requests:/a \ \ \ \ \ \ \ \ \ \ memory: '${MEM_REQ}'' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 		fi
@@ -180,13 +179,15 @@ function createInstances() {
 		fi
 	
 		if [ ! -z  ${maxinlinelevel} ] && [ ! -z  ${quarkustpcorethreads} ] && [ ! -z  ${quarkustpqueuesize} ] && [ ! -z  ${quarkusdatasourcejdbcminsize} ] && [ ! -z  ${quarkusdatasourcejdbcmaxsize} ]; then
-			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "-XX:MaxInlineLevel='${maxinlinelevel}' -Dquarkus.thread-pool.core-threads='${quarkustpcorethreads}' -Dquarkus.thread-pool.queue-size='${quarkustpqueuesize}' -Dquarkus.datasource.jdbc.min-size='${quarkusdatasourcejdbcminsize}' -Dquarkus.datasource.jdbc.max-size='${quarkusdatasourcejdbcmaxsize}'"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "-server -XX:MaxInlineLevel='${maxinlinelevel}' -Dquarkus.thread-pool.core-threads='${quarkustpcorethreads}' -Dquarkus.thread-pool.queue-size='${quarkustpqueuesize}' -Dquarkus.datasource.jdbc.min-size='${quarkusdatasourcejdbcminsize}' -Dquarkus.datasource.jdbc.max-size='${quarkusdatasourcejdbcmaxsize}'"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "JAVA_OPTIONS"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
-#			sed -i 's/test_jvm_args/-XX:MaxInlineLevel='${maxinlinelevel}' -Dquarkus.thread-pool.core-threads='${quarkustpcorethreads}' -Dquarkus.thread-pool.queue-size='${quarkustpqueuesize}' -Dquarkus.datasource.jdbc.min-size='${quarkusdatasourcejdbcminsize}' -Dquarkus.datasource.jdbc.max-size='${quarkusdatasourcejdbcmaxsize}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		else
+			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "-server"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+                        sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "JAVA_OPTIONS"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 
 		fi
 		oc create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
-		#err_exit "Error: Issue in deploying tfb-qrh." >> setup.log
+		#err_exit "Error: Issue in deploying tfb-qrh." >> ${LOGFILE}
 
 		((TFB_PORT=TFB_PORT+1))
 
@@ -196,23 +197,23 @@ function createInstances() {
 	sleep 20
 
 	#Expose the services
-	svc_list=($(oc get svc --namespace=${NAMESPACE} | grep "service" | grep "tfb-qrh" | cut -d " " -f1))
-	for sv in "${svc_list[@]}"
+	SVC_LIST=($(oc get svc --namespace=${NAMESPACE} | grep "service" | grep "tfb-qrh" | cut -d " " -f1))
+	for sv in "${SVC_LIST[@]}"
 	do
 		oc expose svc/${sv} --namespace=${NAMESPACE}
-		#err_exit " Error: Issue in exposing service" >> setup.log
+		#err_exit " Error: Issue in exposing service" >> ${LOGFILE}
 	done
 
 	## extra sleep time
 	sleep 60
 	
 	# Check if the application is running
-	#check_app >> setup.log
+	#check_app >> ${LOGFILE}
 }
 
 # Delete the tfb-qrh and tfb-database deployments,services and routes if it is already present 
 function stopAllInstances() {
-	${TFB_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} >> setup.log
+	${TFB_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} >> ${LOGFILE}
 	sleep 30
 
 	##extra sleep time
@@ -223,4 +224,3 @@ function stopAllInstances() {
 stopAllInstances
 # Deploying instances
 createInstances ${SERVER_INSTANCES}
-

@@ -10,4 +10,4 @@ spec:
         app: tfb-qrh-app
   endpoints:
     - port: tfb-qrh-port
-      path: '/metrics'
+      path: '/q/metrics'

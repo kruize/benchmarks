@@ -53,26 +53,26 @@ fi
 # Removes the tfb-qrh instances from openshift
 # output: Removes the tfb-qrh and tfb-database deployments, services, service monitors and routes
 function remove_tfb_openshift() {
-	tfb_deployments=($(oc get deployments --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
+	TFB_DEPLOYMENTS=($(oc get deployments --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
 
-	for de in "${tfb_deployments[@]}"
+	for de in "${TFB_DEPLOYMENTS[@]}"
 	do
 		oc delete deployment ${de} --namespace=${NAMESPACE}
 	done
 
 	#Delete the services and routes if any
-	tfb_services=($(oc get svc --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
-	for se in "${tfb_services[@]}"
+	TFB_SERVICES=($(oc get svc --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
+	for se in "${TFB_SERVICES[@]}"
 	do
 		oc delete svc ${se} --namespace=${NAMESPACE}
 	done
-	tfb_routes=($(oc get route --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
-	for ro in "${tfb_routes[@]}"
+	TFB_ROUTES=($(oc get route --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
+	for ro in "${TFB_ROUTES[@]}"
 	do
 		oc delete route ${ro} --namespace=${NAMESPACE}
 	done
-	tfb_service_monitors=($(oc get servicemonitor --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
-	for sm in "${tfb_service_monitors[@]}"
+	TFB_SERVICE_MONITORS=($(oc get servicemonitor --namespace=${NAMESPACE} | grep -e "tfb-qrh" -e "tfb-database" | cut -d " " -f1))
+	for sm in "${TFB_SERVICE_MONITORS[@]}"
 	do
 		oc delete servicemonitor ${sm} --namespace=${NAMESPACE}
 	done

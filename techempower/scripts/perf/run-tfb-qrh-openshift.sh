@@ -26,6 +26,7 @@ CLUSTER_TYPE="openshift"
 pushd ".." > /dev/null
 HYPERFOIL_DIR="${PWD}/hyperfoil-0.13/bin"
 TFB_DEFAULT_IMAGE="kusumach/tfb.quarkus.resteasy.hibernate.mm1"
+LOGFILE="${PWD}/setup.log"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -58,7 +59,7 @@ function usage() {
 # Check if java is installed and it is of version 11 or newer
 function check_load_prereq() {
 	echo
-	echo -n "Info: Checking prerequisites..." >> setup.log
+	echo -n "Info: Checking prerequisites..." >> ${LOGFILE}
 	# check if java exists
 	if [ ! `which java` ]; then
 		echo " "
@@ -68,7 +69,7 @@ function check_load_prereq() {
 		JAVA_VER=$(java -version 2>&1 >/dev/null | egrep "\S+\s+version" | awk '{print $3}' | tr -d '"')
 		case "${JAVA_VER}" in 
 			1[1-9].*.*)
-				echo "done" >> setup.log
+				echo "done" >> ${LOGFILE}
 				;;
 			*)
 				echo " "
@@ -207,6 +208,12 @@ if [ -z "${CONNECTIONS}" ]; then
 	CONNECTIONS="700"
 fi
 
+RESULTS_DIR_ROOT=${RESULTS_DIR_PATH}/tfb-$(date +%Y%m%d%H%M)
+mkdir -p ${RESULTS_DIR_ROOT}
+
+#Adding 5 secs buffer to retrieve CPU and MEM info
+CPU_MEM_DURATION=`expr ${DURATION} + 5`
+
 # Check if the dependencies required to apply the load is present 
 check_load_prereq 
 
@@ -217,42 +224,22 @@ function check_app() {
 	for status in "${CMD[@]}"
 	do
 		if [ -z "${status}" ]; then
-		#	echo "Application pod did not come up" 
-			# Wait for 60sec more and check again before exiting
-			sleep 60
-			CMD=$(oc get pods --namespace=${NAMESPACE} | grep "tfb-qrh" | grep "Running" | cut -d " " -f1)
-			status1=${CMD[@]}
-                	if [ -z "${status1}" ]; then
-	                	echo "Application pod did not come up" >> setup.log
-				echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
-				echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
-				paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log	
-				exit -1;
-        	        fi
-#			exit -1;
+                	echo "Application pod did not come up" >> ${LOGFILE}
+			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
+			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
+			paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log	
+			exit -1;
 		fi
 	done
 }
-
-RESULTS_DIR_ROOT=${RESULTS_DIR_PATH}/tfb-$(date +%Y%m%d%H%M)
-mkdir -p ${RESULTS_DIR_ROOT}
-
-#Adding 5 secs buffer to retrieve CPU and MEM info
-CPU_MEM_DURATION=`expr ${DURATION} + 5`
-
-throughputlogs=(throughput responsetime weberror responsetime_max stdev_resptime_max)
-podcpulogs=(cpu)
-podmemlogs=(mem memusage)
-clusterlogs=(c_mem c_cpu)
-total_logs=(${throughputlogs[@]} ${podcpulogs[@]} ${podmemlogs[@]} cpu_min cpu_max mem_min mem_max)
 
 # Download the required dependencies 
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
 	if [ ! -d "${PWD}/hyperfoil-0.13" ]; then
-		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.13/hyperfoil-0.13.zip >> setup.log 2>&1
-		err_exit "Error: Could not download the dependencies" >> setup.log
-		unzip hyperfoil-0.13.zip >> setup.log
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.13/hyperfoil-0.13.zip >> ${LOGFILE} 2>&1
+		err_exit "Error: Could not download the dependencies" >> ${LOGFILE}
+		unzip hyperfoil-0.13.zip >> ${LOGFILE}
 	fi
 }
 
@@ -264,9 +251,9 @@ function run_wrk_workload() {
 	IP_ADDR=$1
 	RESULTS_LOG=$2
 	# Run the wrk load
-	echo "Running wrk load with the following parameters" >> setup.log
+	echo "Running wrk load with the following parameters" >> ${LOGFILE}
 	cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
-	echo "CMD = ${cmd}" >> setup.log
+	echo "CMD = ${cmd}" >> ${LOGFILE}
 	${cmd} > ${RESULTS_LOG}
 	sleep 3
 }
@@ -276,14 +263,14 @@ function run_wrk_workload() {
 # output: call the run_wrk_workload for each application service
 function run_wrk_with_scaling()
 {	
-	RESULTS_DIR_J=$1
-	TYPE=$2
-	RUN=$3
-	svc_apis=($(oc status --namespace=${NAMESPACE} | grep "tfb-qrh" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+	TYPE=$1
+	RUN=$2
+	RESULTS_DIR_L=$3
+	SVC_APIS=($(oc status --namespace=${NAMESPACE} | grep "tfb-qrh" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 	load_setup
-	for svc_api  in "${svc_apis[@]}"
+	for svc_api  in "${SVC_APIS[@]}"
 	do
-		RESULT_LOG=${RESULTS_DIR_J}/wrk-${svc_api}-${TYPE}-${RUN}.log
+		RESULT_LOG=${RESULTS_DIR_L}/wrk-${svc_api}-${TYPE}-${RUN}.log
 		run_wrk_workload ${svc_api} ${RESULT_LOG} &
 	done
 }
@@ -295,16 +282,15 @@ function runItr()
 {
 	TYPE=$1
 	RUNS=$2
-	RESULTS_runItr=$3
-	for (( run=0; run<${RUNS}; run++ ))
+	RESULTS_DIR_L=$3
+	for (( run=0; run<"${RUNS}"; run++ ))
 	do
 		# Check if the application is running
 		check_app 
-		echo "##### ${TYPE} ${run}" >> setup.log
 		# Get CPU and MEM info through prometheus queries
-		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_runItr} ${BENCHMARK_SERVER} tfb-qrh &
+		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} tfb-qrh &
 		# Run the wrk workload
-		run_wrk_with_scaling ${RESULTS_runItr} ${TYPE} ${run}
+		run_wrk_with_scaling ${TYPE} ${run} ${RESULTS_DIR_L}
 		# Sleep till the wrk load completes
 		sleep ${DURATION}
 		sleep 1
@@ -317,11 +303,11 @@ function runItr()
 function get_recommendations_from_kruize()
 {
 	TOKEN=`oc whoami --show-token`
-	app_list=($(oc get deployments --namespace=${NAMESPACE} | grep "tfb-qrh" | cut -d " " -f1))
-	for app in "${app_list[@]}"
+	APP_LIST=($(oc get deployments --namespace=${NAMESPACE} | grep "tfb-qrh" | cut -d " " -f1))
+	for app in "${APP_LIST[@]}"
 	do
 		curl --silent -k -H "Authorization: Bearer ${TOKEN}" http://kruize-openshift-monitoring.apps.${BENCHMARK_SERVER}/recommendations?application_name=${app} > ${RESULTS_DIR_I}/${app}-recommendations.log
-		err_exit "Error: could not generate the recommendations for tfb-qrh" >> setup.log
+		err_exit "Error: could not generate the recommendations for tfb-qrh" >> ${LOGFILE}
 	done
 }
 
@@ -333,19 +319,19 @@ function runIterations() {
 	TOTAL_ITR=$2
 	WARMUPS=$3
 	MEASURES=$4
-	RESULTS_DIR_ITR=$5
-	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
+	RESULTS_DIR_L=$5
+	for (( itr=0; itr<"${TOTAL_ITR}"; itr++ ))
 	do
 		if [ ${RE_DEPLOY} == "true" ]; then
-			${SCRIPT_REPO}/tfb-qrh-deploy-openshift.sh -s ${BENCHMARK_SERVER} -i ${SCALING} -g ${TFB_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --maxinlinelevel=${maxinlinelevel} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} >> setup.log 
-			# err_exit "Error: tfb-qrh deployment failed" >> setup.log
+			${SCRIPT_REPO}/tfb-qrh-deploy-openshift.sh -s ${BENCHMARK_SERVER} -i ${SCALING} -g ${TFB_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --maxinlinelevel=${maxinlinelevel} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} >> ${LOGFILE}
+			# err_exit "Error: tfb-qrh deployment failed" >> ${LOGFILE}
 		fi
 		# Start the load
-		RESULTS_DIR_I=${RESULTS_DIR_ITR}/ITR-${itr}
-		echo "Running ${WARMUPS} warmups" >> setup.log
+		RESULTS_DIR_I=${RESULTS_DIR_L}/ITR-${itr}
+		echo "Running ${WARMUPS} warmups" >> ${LOGFILE}
 		# Perform warmup runs
 		runItr warmup ${WARMUPS} ${RESULTS_DIR_I}
-		echo "Running ${MEASURES} measures" >> setup.log
+		echo "Running ${MEASURES} measures" >> ${LOGFILE}
 		# Perform measure runs
 		runItr measure ${MEASURES} ${RESULTS_DIR_I}
 		sleep 15
@@ -355,21 +341,15 @@ function runIterations() {
 	done
 }
 
-#TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
-# Scale the instances and run the iterations
+echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI , APP_THRPT_PROM_CI , APP_RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
+echo ", THROUGHPUT , RESPONSETIME , RESPONSETIME_MAX , STDEV_RESPTIME , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
+echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , MAXINLINELEVEL , QRKS_TP_CORETHREADS , QRKS_TP_QUEUESIZE , QRKS_DS_JDBC_MINSIZE , QRKS_DS_JDBC_MAXSIZE" > ${RESULTS_DIR_ROOT}/Metrics-config.log
 
-echo "Instances , Throughput , Responsetime , RESPONSETIME_MAX , STDEV_RESPTIME_MAX , MEM_MEAN , CPU_MEAN , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , CLUSTER_MEM% , CLUSTER_CPU% , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , maxinlinelevel , quarkustpcorethreads , quarkustpqueuesize , quarkusdatasourcejdbcminsize , quarkusdatasourcejdbcmaxsize , WEB_ERRORS" > ${RESULTS_DIR_ROOT}/Metrics.log
-echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , maxinlinelevel , quarkustpcorethreads , quarkustpqueuesize , quarkusdatasourcejdbcminsize , quarkusdatasourcejdbcmaxsize" > ${RESULTS_DIR_ROOT}/Metrics-config.log
-echo ", Throughput , Responsetime , RESPONSETIME_MAX , STDEV_RESPTIME_MAX , WEB_ERRORS , thrp_wrk_ci , rsp_wrk_ci" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
-echo "Instances ,  MEM_RSS , MEM_USAGE , MEM_REQ , MEM_LIM , MEM_REQ_IN_P , MEM_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-mem.log
-echo "Instances ,  CPU_USAGE , CPU_REQ , CPU_LIM , CPU_REQ_IN_P , CPU_LIM_IN_P " > ${RESULTS_DIR_ROOT}/Metrics-cpu.log
-echo "Instances , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
-echo "Run , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , Throughput , Responsetime , WEB_ERRORS , Responsetime_MAX , stdev_responsetime_max , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
-
-echo "SCALE ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci , app_thrpt_prom_ci , app_rsp_prom_ci" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
-echo "SCALE ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT , RESPONSE_TIME , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , thrpt_prom_ci , rsp_prom_ci , app_thrpt_prom_ci , app_rsp_prom_ci" > ${RESULTS_DIR_ROOT}/Metrics-prom-all.log
-echo "SCALE ,  MEM_RSS , MEM_USAGE " > ${RESULTS_DIR_ROOT}/Metrics-mem-prom.log
-echo "SCALE ,  CPU_USAGE" > ${RESULTS_DIR_ROOT}/Metrics-cpu-prom.log
+echo "INSTANCES , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
+echo "RUN , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , Throughput , Responsetime , WEB_ERRORS , Responsetime_MAX , stdev_responsetime_max , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
+echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT , RESPONSE_TIME , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSP_PROM_CI , APP_THRPT_PROM_CI , APP_RSP_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom-all.log
+echo "INSTANCES ,  MEM_RSS , MEM_USAGE " > ${RESULTS_DIR_ROOT}/Metrics-mem-prom.log
+echo "INSTANCES ,  CPU_USAGE" > ${RESULTS_DIR_ROOT}/Metrics-cpu-prom.log
 echo ", 50p , 95p , 98p , 99p , 99.9p" > ${RESULTS_DIR_ROOT}/Metrics-percentile-prom.log
 echo "ITR , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
 echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/server_requests-metrics-measure-raw.log
@@ -377,14 +357,16 @@ echo "THROUGHPUT_RATE_1m , RESPONSE_TIME_RATE_1m , THROUGHPUT_RATE_3m , RESPONSE
 
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize}" >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 
+#TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
+# Scale the instances and run the iterations
 for (( scale=1; scale<=${TOTAL_INST}; scale++ ))
 do
 	RESULTS_SC=${RESULTS_DIR_ROOT}/scale_${scale}
-	echo "RESULTS DIRECTORY is " ${RESULTS_DIR_ROOT} >> setup.log  
-	echo "Running the benchmark with ${scale}  instances with ${TOTAL_ITR} iterations having ${WARMUPS} warmups and ${MEASURES} measurements" >> setup.log
+	echo "RESULTS DIRECTORY is " ${RESULTS_DIR_ROOT} >> ${LOGFILE}
+	echo "Running the benchmark with ${scale}  instances with ${TOTAL_ITR} iterations having ${WARMUPS} warmups and ${MEASURES} measurements" >> ${LOGFILE}
 	# Perform warmup and measure runs
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
-	echo "Parsing results for ${scale} instances" >> setup.log
+	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
 	# Parse the results
 	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
 	sleep 3
@@ -394,5 +376,5 @@ done
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 #cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
-cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
-cat ${RESULTS_DIR_ROOT}/Metrics-raw.log
+#cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
+#cat ${RESULTS_DIR_ROOT}/Metrics-raw.log

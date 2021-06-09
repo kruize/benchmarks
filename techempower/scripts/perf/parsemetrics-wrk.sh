@@ -27,7 +27,7 @@ function parseData() {
 	TOTAL_RUNS=$2
 	ITR=$3
 
-	for (( run=0 ; run<${TOTAL_RUNS} ;run++))
+	for (( run=0 ; run<"${TOTAL_RUNS}" ;run++))
 	do
 		thrp_sum=0
 		resp_sum=0
@@ -35,8 +35,8 @@ function parseData() {
 		responsetime=0
 		max_responsetime=0
 		stddev_responsetime=0
-		svc_apis=($(oc status --namespace=${NAMESPACE} | grep "tfb-qrh" | grep port | cut -d " " -f1 | cut -d "/" -f3))
-		for svc_api  in "${svc_apis[@]}"
+		SVC_APIS=($(oc status --namespace=${NAMESPACE} | grep "tfb-qrh" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+		for svc_api  in "${SVC_APIS[@]}"
 		do
 			throughput=0
 			responsetime=0
@@ -79,7 +79,7 @@ function parseResults() {
 	TOTAL_ITR=$1
 	RESULTS_DIR_J=$2
 	SCALE=$3
-	for (( itr=0 ; itr<${TOTAL_ITR} ;itr++))
+	for (( itr=0 ; itr<"${TOTAL_ITR}" ;itr++))
 	do
 		RESULTS_DIR_P=${RESULTS_DIR_J}/ITR-${itr}
 		parseData warmup ${WARMUPS} ${itr}
@@ -89,18 +89,18 @@ function parseResults() {
 		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/responsetime-measure-temp.log
 		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/weberror-measure-temp.log
 		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f5 >> ${RESULTS_DIR_J}/responsetime_max-measure-temp.log
-		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f6 >> ${RESULTS_DIR_J}/stdev_resptime_max-measure-temp.log
+		cat ${RESULTS_DIR_J}/Throughput-measure-${itr}.log | cut -d "," -f6 >> ${RESULTS_DIR_J}/stdev_resptime-measure-temp.log
 	done
 	###### Add different raw logs we want to merge
 	#Cumulative raw data
 	paste ${RESULTS_DIR_J}/Throughput-measure-raw.log ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >>  ${RESULTS_DIR_J}/../Metrics-raw.log
 
-	for metric in "${throughputlogs[@]}"
+	for metric in "${THROUGHPUT_LOGS[@]}"
 	do
 		if [ ${metric} == "cpu_min" ] || [ ${metric} == "mem_min" ]; then
 			minval=$(echo `calcMin ${RESULTS_DIR_J}/${metric}-measure-temp.log`)
 			eval total_${metric}=${minval}
-		elif [ ${metric} == "cpu_max" ] || [ ${metric} == "mem_max" ] || [ ${metric} == "responsetime_max" ] || [ ${metric} == "stdev_resptime_max" ]; then
+		elif [ ${metric} == "cpu_max" ] || [ ${metric} == "mem_max" ] || [ ${metric} == "responsetime_max" ]; then
 			maxval=$(echo `calcMax ${RESULTS_DIR_J}/${metric}-measure-temp.log`)
 			eval total_${metric}=${maxval}
 		else
@@ -112,14 +112,10 @@ function parseResults() {
 	done
 
 	## TODO Check for web-errors and update responsetime based on that
-	echo ", ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_max} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime}" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
+	echo ", ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime}" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
 }
 
-throughputlogs=(throughput responsetime weberror responsetime_max stdev_resptime_max)
-podcpulogs=(cpu)
-podmemlogs=(mem memusage)
-clusterlogs=(c_mem c_cpu)
-total_logs=(${throughputlogs[@]} ${podcpulogs[@]} ${podmemlogs[@]} cpu_min cpu_max mem_min mem_max)
+THROUGHPUT_LOGS=(throughput responsetime weberror responsetime_max stdev_resptime)
 
 TOTAL_ITR=$1
 RESULTS_SC=$2
