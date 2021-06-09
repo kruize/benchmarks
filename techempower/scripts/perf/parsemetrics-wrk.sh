@@ -112,7 +112,7 @@ function parseResults() {
 	done
 
 	## TODO Check for web-errors and update responsetime based on that
-	echo ", ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime}" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
+	echo ", ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_avg} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime}" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
 }
 
 THROUGHPUT_LOGS=(throughput responsetime weberror responsetime_max stdev_resptime)
