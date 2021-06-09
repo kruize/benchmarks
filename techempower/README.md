@@ -17,7 +17,7 @@ To deploy the benchmark use `tfb-qrh-deploy-openshift.sh`
 - **BENCHMARK_SERVER**: Name of the cluster you are using
 - **SERVER_INSTANCES**: Number of tfb-qrh instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **NAMESPACE**: Namespace in which tfb-qrh application is to be deployed. It is optional, if not specified then `default` will be considered as the namespace. 
-- **TFB_IMAGE**: TechEmpower Framework Quarkus image to deploy. It is optional, if is not specified then the default image `kusumach/tfb-qrh-mm:1.13.2.F` will be considered for the deployment.
+- **TFB_IMAGE**: TechEmpower Framework Quarkus image to deploy. It is optional, if is not specified then the default image `kruize/tfb-qrh:1.13.2.F_mm.v1` will be considered for the deployment.
 - **CPU_REQ**: CPU request
 - **MEM_REQ**: Memory request
 - **CPU_LIM**: CPU limit
@@ -31,7 +31,7 @@ To deploy and run the load with tfb application on openshift cluster to collect 
 - **RESULTS_DIR**: Directory to store results
 - **SERVER_INSTANCES**: Number of tfb-qrh instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
 - **NAMESPACE**: Namespace in which tfb-qrh application is to be deployed. It is optional, if not specified then `default` will be considered as the namespace.
-- **TFB_IMAGE**: TechEmpower Framework Quarkus image to deploy. It is optional, if is not specified then the default image `kusumach/tfb-qrh-mm:1.13.2.F` will be considered for the deployment.
+- **TFB_IMAGE**: TechEmpower Framework Quarkus image to deploy. It is optional, if is not specified then the default image `kruize/tfb-qrh:1.13.2.F_mm.v1` will be considered for the deployment.
 - **RE_DEPLOY**: Deploy the application in cluster. If application is already running, it deletes the old deployment and deploy again.
 - **DURATION**: Duration of each warmup and measurement run.
 - **WARMUPS**: No.of warmup runs.

@@ -25,7 +25,7 @@ SCRIPT_REPO=${PWD}
 CLUSTER_TYPE="openshift"
 pushd ".." > /dev/null
 HYPERFOIL_DIR="${PWD}/hyperfoil-0.13/bin"
-TFB_DEFAULT_IMAGE="kusumach/tfb.quarkus.resteasy.hibernate.mm1"
+TFB_DEFAULT_IMAGE="kruize/tfb-qrh:1.13.2.F_mm.v1"
 LOGFILE="${PWD}/setup.log"
 
 # checks if the previous command is executed successfully

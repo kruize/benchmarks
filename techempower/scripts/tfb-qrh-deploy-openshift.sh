@@ -22,7 +22,7 @@ source ${CURRENT_DIR}/tfb-common.sh
 
 # Run the benchmark as
 # SCRIPT BENCHMARK_SERVER 
-# Ex of ARGS :  -s example.in.com -i 2 -g kusumach/tfb.quarkus.resteasy.hibernate.mm1
+# Ex of ARGS :  -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1
 
 CLUSTER_TYPE="openshift"
 
@@ -31,7 +31,7 @@ function usage() {
 	echo
 	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
 	echo " "
-	echo "Example: $0 -s example.in.com -i 2 -g kusumach/tfb.quarkus.resteasy.hibernate.mm1 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
+	echo "Example: $0 -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
 	exit -1
 }
 

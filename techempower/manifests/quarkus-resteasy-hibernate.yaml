@@ -26,7 +26,7 @@ spec:
           type: ""
       containers:
       - name: tfb-server
-        image: kusumach/tfb-qrh:1.13.2.F_mm.v1
+        image: kruize/tfb-qrh:1.13.2.F_mm.v1
         imagePullPolicy: IfNotPresent
         env:
         ports:
