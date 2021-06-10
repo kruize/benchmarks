@@ -36,7 +36,7 @@ function err_exit() {
 		printf "$*"
 		echo
 		echo "See setup.log for more details"
-		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 0 , 0 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
+		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 		echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 		paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 		cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
@@ -225,7 +225,7 @@ function check_app() {
 	do
 		if [ -z "${status}" ]; then
                 	echo "Application pod did not come up" >> ${LOGFILE}
-			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
+			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 			paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log	
 			exit -1;
@@ -341,7 +341,7 @@ function runIterations() {
 	done
 }
 
-echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI , APP_THRPT_PROM_CI , APP_RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
+echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
 echo ", THROUGHPUT , RESPONSETIME , RESPONSETIME_MAX , RESPONSETIME_STDEV , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , MAXINLINELEVEL , QRKS_TP_CORETHREADS , QRKS_TP_QUEUESIZE , QRKS_DS_JDBC_MINSIZE , QRKS_DS_JDBC_MAXSIZE" > ${RESULTS_DIR_ROOT}/Metrics-config.log
 
@@ -369,9 +369,13 @@ do
 	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
 	# Parse the results
 	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
-	sleep 3
+	sleep 5
 	${SCRIPT_REPO}/perf/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO}
 done
+
+## Cleanup all the deployments
+${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
+sleep 10
 
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
