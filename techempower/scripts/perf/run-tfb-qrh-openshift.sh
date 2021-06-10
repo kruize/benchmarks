@@ -319,15 +319,16 @@ function runIterations() {
 	TOTAL_ITR=$2
 	WARMUPS=$3
 	MEASURES=$4
-	RESULTS_DIR_L=$5
+	RESULTS_DIR_R=$5
 	for (( itr=0; itr<"${TOTAL_ITR}"; itr++ ))
 	do
+		echo "Running iteration ${itr}" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
 			${SCRIPT_REPO}/tfb-qrh-deploy-openshift.sh -s ${BENCHMARK_SERVER} -i ${SCALING} -g ${TFB_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --maxinlinelevel=${maxinlinelevel} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} >> ${LOGFILE}
 			# err_exit "Error: tfb-qrh deployment failed" >> ${LOGFILE}
 		fi
 		# Start the load
-		RESULTS_DIR_I=${RESULTS_DIR_L}/ITR-${itr}
+		RESULTS_DIR_I=${RESULTS_DIR_R}/ITR-${itr}
 		echo "Running ${WARMUPS} warmups" >> ${LOGFILE}
 		# Perform warmup runs
 		runItr warmup ${WARMUPS} ${RESULTS_DIR_I}
