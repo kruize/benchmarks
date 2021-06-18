@@ -35,7 +35,7 @@ function err_exit() {
 	if [ $? != 0 ]; then
 		printf "$*"
 		echo
-		echo "See setup.log for more details"
+		echo "The run failed. See setup.log for more details"
 		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 		echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 		paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
@@ -225,6 +225,7 @@ function check_app() {
 	do
 		if [ -z "${status}" ]; then
                 	echo "Application pod did not come up" >> ${LOGFILE}
+			echo "The run failed. See setup.log for more details"
 			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 			paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log	
@@ -322,8 +323,11 @@ function runIterations() {
 	RESULTS_DIR_R=$5
 	for (( itr=0; itr<"${TOTAL_ITR}"; itr++ ))
 	do
-		echo "Running iteration ${itr}" >> ${LOGFILE}
+		echo "***************************************" >> ${LOGFILE}
+		echo "Starting iteration ${itr}" >> ${LOGFILE}
+		echo "***************************************" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
+			echo "Deploying the application..." >> ${LOGFILE}
 			${SCRIPT_REPO}/tfb-qrh-deploy-openshift.sh -s ${BENCHMARK_SERVER} -i ${SCALING} -g ${TFB_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --maxinlinelevel=${maxinlinelevel} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} >> ${LOGFILE}
 			# err_exit "Error: tfb-qrh deployment failed" >> ${LOGFILE}
 		fi
@@ -339,11 +343,14 @@ function runIterations() {
 		# get the kruize recommendation for tfb application
 		# commenting for now as it is not required in all cases
 		#get_recommendations_from_kruize ${RESULTS_DIR_I}
+		echo "***************************************" >> ${LOGFILE}
+		echo "Completed iteration ${itr}..." >> ${LOGFILE}
+		echo "***************************************" >> ${LOGFILE}
 	done
 }
 
 echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
-echo ", THROUGHPUT , RESPONSETIME , RESPONSETIME_MAX , RESPONSETIME_STDEV , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
+echo ", THROUGHPUT_WRK , RESPONSETIME_WRK , RESPONSETIME_MAX_WRK , RESPONSETIME_STDEV_WRK , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , MAXINLINELEVEL , QRKS_TP_CORETHREADS , QRKS_TP_QUEUESIZE , QRKS_DS_JDBC_MINSIZE , QRKS_DS_JDBC_MAXSIZE" > ${RESULTS_DIR_ROOT}/Metrics-config.log
 
 echo "INSTANCES , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
@@ -363,7 +370,9 @@ echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , 
 for (( scale=1; scale<=${TOTAL_INST}; scale++ ))
 do
 	RESULTS_SC=${RESULTS_DIR_ROOT}/scale_${scale}
-	echo "RESULTS DIRECTORY is " ${RESULTS_DIR_ROOT} >> ${LOGFILE}
+	echo "***************************************" >> ${LOGFILE}
+	echo "RESULTS are placed at... " ${RESULTS_DIR_ROOT} >> ${LOGFILE}
+	echo "***************************************" >> ${LOGFILE}
 	echo "Running the benchmark with ${scale}  instances with ${TOTAL_ITR} iterations having ${WARMUPS} warmups and ${MEASURES} measurements" >> ${LOGFILE}
 	# Perform warmup and measure runs
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
@@ -372,6 +381,7 @@ do
 	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
 	sleep 5
 	${SCRIPT_REPO}/perf/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO}
+	
 done
 
 ## Cleanup all the deployments
