@@ -370,8 +370,9 @@ echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , 
 for (( scale=1; scale<=${TOTAL_INST}; scale++ ))
 do
 	RESULTS_SC=${RESULTS_DIR_ROOT}/scale_${scale}
+	echo "Run in progress..."
 	echo "***************************************" >> ${LOGFILE}
-	echo "RESULTS are placed at... " ${RESULTS_DIR_ROOT} >> ${LOGFILE}
+	echo "Run logs are placed at... " ${RESULTS_DIR_ROOT} >> ${LOGFILE}
 	echo "***************************************" >> ${LOGFILE}
 	echo "Running the benchmark with ${scale}  instances with ${TOTAL_ITR} iterations having ${WARMUPS} warmups and ${MEASURES} measurements" >> ${LOGFILE}
 	# Perform warmup and measure runs

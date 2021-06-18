@@ -112,6 +112,9 @@ function parseResults() {
 	done
 
 	## TODO Check for web-errors and update responsetime based on that
+	if [ ${total_weberror_avg} != 0 ]; then
+		echo "There are web_errors during the load run. For more details check in the results directory mentioned in setup.log"
+	fi
 	echo ", ${total_throughput_avg} , ${total_responsetime_avg} , ${total_responsetime_max} , ${total_stdev_resptime_avg} , ${total_weberror_avg} , ${ci_throughput} , ${ci_responsetime}" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
 }
 
