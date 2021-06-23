@@ -147,7 +147,7 @@ function createInstances() {
 
 	# Deploy one instance of DB
 	oc create -f ${MANIFESTS_DIR}/postgres.yaml -n ${NAMESPACE}
-	sleep 10
+	sleep 15
 
 	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
