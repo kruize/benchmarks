@@ -32,7 +32,7 @@ spec:
         lifecycle:
           postStart:
             exec:
-              command: ["/bin/sh", "-c", "sleep 10 && psql -a hello_world < /tmp/create-postgres.sql"]        
+              command: ["/bin/sh", "-c", "sleep 10 && psql -a hello_world < /tmp/create-postgres-data.sql"]        
         ports:
           - containerPort: 5432
         resources:
