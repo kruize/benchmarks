@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tfb-qrh-sample
+  name: tfb-qrh-sample-0
   labels:
-    app: tfb-qrh-app
+    app: tfb-qrh-app-0
 spec:
   replicas: 1
   selector:
@@ -29,6 +29,8 @@ spec:
         image: kruize/tfb-qrh:1.13.2.F_mm.v1
         imagePullPolicy: IfNotPresent
         env:
+          - name: "JAVA_OPTIONS"
+            value: "-server"
         ports:
           - containerPort: 8080
         resources:
@@ -41,18 +43,18 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: tfb-qrh-service
+  name: tfb-qrh-service-0
   annotations:
     prometheus.io/scrape: 'true'
     prometheus.io/path: '/q/metrics'
   labels:
-    app: tfb-qrh-app
+    app: tfb-qrh-app-0
 spec:
   type: NodePort
   ports:
     - port: 8080
       nodePort: 32334
       targetPort: 8080
-      name: tfb-qrh-port
+      name: tfb-qrh-port-0
   selector:
     name: tfb-qrh-deployment

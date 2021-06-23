@@ -1,13 +1,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: tfb-qrh
+  name: tfb-qrh-0
   labels:
     team: tfb-qrh-frontend
 spec:
   selector:
     matchLabels:
-        app: tfb-qrh-app
+        app: tfb-qrh-app-0
   endpoints:
-    - port: tfb-qrh-port
+    - port: tfb-qrh-port-0
       path: '/q/metrics'
