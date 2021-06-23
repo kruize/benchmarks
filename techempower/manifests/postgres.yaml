@@ -27,7 +27,7 @@ spec:
             value: benchmarkdbuser
           - name: POSTGRESQL_PASSWORD
             value: benchmarkdbpass
-          - name: POSTGRESQL_PASSWORD
+          - name: POSTGRESQL_DATABASE
             value: hello_world
         lifecycle:
           postStart:
