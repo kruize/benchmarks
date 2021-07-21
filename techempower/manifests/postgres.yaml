@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: tfb-database
-        image: kusumach/postgres:latest
+        image: kruize/tfb-postgres:latest
         imagePullPolicy: IfNotPresent
         env:
           - name: POSTGRES_USER
