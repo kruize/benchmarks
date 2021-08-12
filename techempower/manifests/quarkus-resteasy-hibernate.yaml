@@ -21,9 +21,6 @@ spec:
     spec:
       volumes:
       - name: test-volume
-        hostPath:
-          path: "/root/icp/jLogs"
-          type: ""
       containers:
       - name: tfb-server
         image: kruize/tfb-qrh:1.13.2.F_mm.v1

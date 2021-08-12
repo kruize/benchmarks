@@ -147,7 +147,7 @@ function createInstances() {
 
 	# Deploy one instance of DB
 	oc create -f ${MANIFESTS_DIR}/postgres.yaml -n ${NAMESPACE}
-	sleep 10
+	sleep 15
 
 	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
@@ -213,7 +213,7 @@ function createInstances() {
 
 # Delete the tfb-qrh and tfb-database deployments,services and routes if it is already present 
 function stopAllInstances() {
-	${TFB_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} >> ${LOGFILE}
+	${TFB_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE}>> ${LOGFILE}
 	sleep 30
 
 	##extra sleep time
