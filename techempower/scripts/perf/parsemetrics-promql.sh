@@ -51,10 +51,10 @@ function parsePromMetrics()  {
         if [ -s ${RESULTS_DIR_J}/app_timer_sum-${TYPE}-${ITR}.log ]; then
                 total_seconds_sum=`cat ${RESULTS_DIR_J}/app_timer_sum-${TYPE}-${ITR}.log`
                 # Convert seconds to ms to avoid 0 as response time.
-                total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc)
+                total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc -l)
                 total_seconds_count=`cat ${RESULTS_DIR_J}/app_timer_count-${TYPE}-${ITR}.log`
-                rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc)
-                throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc)
+                rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc -l)
+                throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc -l)
                 echo ${rsp_time} > ${RESULTS_DIR_J}/app_timer_rsp_time-${TYPE}-${ITR}.log
                 echo ${throughput} > ${RESULTS_DIR_J}/app_timer_thrpt-${TYPE}-${ITR}.log
         fi
@@ -63,10 +63,10 @@ function parsePromMetrics()  {
         if [ -s ${RESULTS_DIR_J}/app_timer_sum_rate_3m-${TYPE}-${ITR}.log ]; then
                 app_sum_rate_3m=`cat ${RESULTS_DIR_J}/app_timer_sum_rate_3m-${TYPE}-${ITR}.log`
                 # Convert seconds to ms to avoid 0 as response time.
-                app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc)
+                app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc -l)
                 app_count_rate_3m=`cat ${RESULTS_DIR_J}/app_timer_count_rate_3m-${TYPE}-${ITR}.log`
-                rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc)
-                throughput_rate_3m=$(echo ${app_count_rate_3m}| bc)
+                rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc -l)
+                throughput_rate_3m=$(echo ${app_count_rate_3m}| bc -l)
                 echo ${rsp_time_rate_3m} > ${RESULTS_DIR_J}/app_timer_rsp_time_rate_3m-${TYPE}-${ITR}.log
                 echo ${throughput_rate_3m} > ${RESULTS_DIR_J}/app_timer_thrpt_rate_3m-${TYPE}-${ITR}.log
         fi
@@ -78,10 +78,10 @@ function parsePromMetrics()  {
         if [ -s ${RESULTS_DIR_J}/server_requests_sum-${TYPE}-${ITR}.log ]; then
                 total_seconds_sum=`cat ${RESULTS_DIR_J}/server_requests_sum-${TYPE}-${ITR}.log`
                 # Convert seconds to ms to avoid 0 as response time.
-                total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc)
+                total_milliseconds_sum=$(echo ${total_seconds_sum}*1000 | bc -l)
                 total_seconds_count=`cat ${RESULTS_DIR_J}/server_requests_count-${TYPE}-${ITR}.log`
-                rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc)
-                throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc)
+                rsp_time=$(echo ${total_milliseconds_sum}/${total_seconds_count}| bc -l)
+                throughput=$(echo ${total_seconds_count}/${total_seconds_sum}| bc -l)
                 echo ${rsp_time} > ${RESULTS_DIR_J}/server_requests_rsp_time-${TYPE}-${ITR}.log
                 echo ${throughput} > ${RESULTS_DIR_J}/server_requests_thrpt-${TYPE}-${ITR}.log
         fi
@@ -90,10 +90,10 @@ function parsePromMetrics()  {
         if [ -s ${RESULTS_DIR_J}/server_requests_sum_rate_3m-${TYPE}-${ITR}.log ]; then
                 app_sum_rate_3m=`cat ${RESULTS_DIR_J}/server_requests_sum_rate_3m-${TYPE}-${ITR}.log`
                 # Convert seconds to ms to avoid 0 as response time.
-                app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc)
+                app_sum_rate_3m_inms=$(echo ${app_sum_rate_3m}*1000 | bc -l)
                 app_count_rate_3m=`cat ${RESULTS_DIR_J}/server_requests_count_rate_3m-${TYPE}-${ITR}.log`
-                rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc)
-                throughput_rate_3m=$(echo ${app_count_rate_3m}| bc)
+                rsp_time_rate_3m=$(echo ${app_sum_rate_3m_inms}/${app_count_rate_3m}| bc -l)
+                throughput_rate_3m=$(echo ${app_count_rate_3m}| bc -l)
                 echo ${rsp_time_rate_3m} > ${RESULTS_DIR_J}/server_requests_rsp_time_rate_3m-${TYPE}-${ITR}.log
                 echo ${throughput_rate_3m} > ${RESULTS_DIR_J}/server_requests_thrpt_rate_3m-${TYPE}-${ITR}.log
         fi
@@ -125,7 +125,7 @@ function parsePodMicroMeterLog()
                                 cat ${RESULTS_DIR_P}/${MODE}-${TYPE}*.json | cut -d ";" -f4 | cut -d '"' -f1 | uniq | grep -v "^$" | sort -n  > ${RESULTS_DIR_P}/temp-data.log
                                 start_counter=`cat ${RESULTS_DIR_P}/temp-data.log | head -1`
                                 end_counter=`cat ${RESULTS_DIR_P}/temp-data.log | tail -1`
-                                counter_val=$(echo ${end_counter}-${start_counter}| bc)
+                                counter_val=$(echo ${end_counter}-${start_counter}| bc -l)
                                 echo "${counter_val}" > ${RESULTS_DIR_J}/${MODE}-${TYPE}-${ITR}.log
                         fi
                 elif [[ ${MODE} == *"app_timer_count_rate"* ]] || [[ ${MODE} == *"app_timer_sum_rate"* ]] || [[ ${MODE} == *"server_requests_count_rate"* ]] || [[ ${MODE} == *"server_requests_sum_rate"* ]]; then
@@ -165,9 +165,9 @@ function parsePodDataLog()
                         each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
                         each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
                         each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
-                        data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc)
-                        data_min=$(echo ${data_min}+${each_pod_data_min}| bc)
-                        data_max=$(echo ${data_max}+${each_pod_data_max} | bc)
+                        data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
+                        data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
+                        data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
                 fi
 	done
 	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
@@ -306,19 +306,19 @@ function parseResults() {
 
 		## Convert latency_seconds_max into ms
 		if [ ${metric} == "latency_seconds_max" ]; then
-			total_latency_milliseconds_max=$(echo ${total_latency_seconds_max}*1000 | bc)
+			total_latency_milliseconds_max=$(echo ${total_latency_seconds_max}*1000 | bc -l)
 		elif [ ${metric} == "latency_seconds_quan_50" ]; then
-			total_latency_ms_quan_50_avg=$(echo ${total_latency_seconds_quan_50_avg}*1000 | bc)
+			total_latency_ms_quan_50_avg=$(echo ${total_latency_seconds_quan_50_avg}*1000 | bc -l)
 		elif [ ${metric} == "latency_seconds_quan_95" ]; then
-                        total_latency_ms_quan_95_avg=$(echo ${total_latency_seconds_quan_95_avg}*1000 | bc)
+                        total_latency_ms_quan_95_avg=$(echo ${total_latency_seconds_quan_95_avg}*1000 | bc -l)
                 elif [ ${metric} == "latency_seconds_quan_98" ]; then
-                        total_latency_ms_quan_98_avg=$(echo ${total_latency_seconds_quan_98_avg}*1000 | bc)
+                        total_latency_ms_quan_98_avg=$(echo ${total_latency_seconds_quan_98_avg}*1000 | bc -l)
                 elif [ ${metric} == "latency_seconds_quan_99" ]; then
-                        total_latency_ms_quan_99_avg=$(echo ${total_latency_seconds_quan_99_avg}*1000 | bc)
+                        total_latency_ms_quan_99_avg=$(echo ${total_latency_seconds_quan_99_avg}*1000 | bc -l)
                 elif [ ${metric} == "latency_seconds_quan_999" ]; then
-                        total_latency_ms_quan_999_avg=$(echo ${total_latency_seconds_quan_999_avg}*1000 | bc)
+                        total_latency_ms_quan_999_avg=$(echo ${total_latency_seconds_quan_999_avg}*1000 | bc -l)
                 elif [ ${metric} == "server_requests_max" ]; then
-			total_server_requests_ms_max=$(echo ${total_server_requests_max}*1000 | bc)
+			total_server_requests_ms_max=$(echo ${total_server_requests_max}*1000 | bc -l)
 		fi
 			
 		fi

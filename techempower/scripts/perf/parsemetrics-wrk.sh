@@ -50,21 +50,36 @@ function parseData() {
 			isms_max_responsetime=`cat ${RESULT_LOG} | grep "Latency:" | cut -d ":" -f2 | tr -s " " | cut -d " " -f7 `
 			isms_stddev_responsetime=`cat ${RESULT_LOG} | grep "Latency:" | cut -d ":" -f2 | tr -s " " | cut -d " " -f5 `
 			if [ "${isms_responsetime}" == "s" ]; then
-				responsetime=$(echo ${responsetime}*1000 | bc)
-			elif [ "${isms_max_responsetime}" == "s" ]; then
-				max_responsetime=$(echo ${max_responsetime}*1000 | bc)
-			elif [ "${isms_stddev_responsetime}" == "s" ]; then
-				stddev_responsetime=$(echo ${stddev_responsetime}*1000 | bc)
+				responsetime=$(echo ${responsetime}*1000 | bc -l)
+			elif [ "${isms_responsetime}" != "ms" ]; then
+                                responsetime=$(echo ${responsetime}/1000 | bc -l)
 			fi
+
+			if [ "${isms_max_responsetime}" == "s" ]; then
+				max_responsetime=$(echo ${max_responsetime}*1000 | bc -l)
+			elif [ "${isms_max_responsetime}" != "ms" ]; then
+                                max_responsetime=$(echo ${max_responsetime}/1000 | bc -l)
+			fi
+
+			if [ "${isms_stddev_responsetime}" == "s" ]; then
+				stddev_responsetime=$(echo ${stddev_responsetime}*1000 | bc -l)
+			elif [ "${isms_stddev_responsetime}" != "ms" ]; then
+                                stddev_responsetime=$(echo ${stddev_responsetime}/1000 | bc -l)
+                        fi
+			
 			weberrors=`cat ${RESULT_LOG} | grep "Non-2xx" | cut -d ":" -f2`
 			if [ ! -z ${throughput} ]; then
-				thrp_sum=$(echo ${thrp_sum}+${throughput} | bc)
+				thrp_sum=$(echo ${thrp_sum}+${throughput} | bc -l)
 			fi
 			if [ ! -z ${responsetime} ]; then
-				resp_sum=$(echo ${resp_sum}+${responsetime} | bc)
+				resp_sum=$(echo ${resp_sum}+${responsetime} | bc -l)
 			fi
 			if [ "${weberrors}" != "" ]; then
 				wer_sum=`expr ${wer_sum} + ${weberrors}`
+			fi
+			if [ ${total_weberror_avg} -ge 50 ]; then
+				echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_J}/../Metrics-prom.log
+        			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
 			fi
 		done
 		echo "${run},${thrp_sum},${resp_sum},${wer_sum},${max_responsetime},${stddev_responsetime}" >> ${RESULTS_DIR_J}/Throughput-${TYPE}-${itr}.log
