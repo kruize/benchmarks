@@ -36,6 +36,9 @@ function err_exit() {
 		printf "$*"
 		echo
 		echo "The run failed. See setup.log for more details"
+		oc get pods -n ${NAMESPACE} >> ${LOGFILE}
+		oc get events -n ${NAMESPACE} >> ${LOGFILE}
+		oc logs pod/`oc get pods | grep "tfb-qrh" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
 		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 		echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 		paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
@@ -103,11 +106,11 @@ do
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
 				;;
+			usertunables=*)
+                                OPTIONS_VAR=${OPTARG#*=}
+                                ;;
 			connection=*)
 				CONNECTIONS=${OPTARG#*=}
-				;;
-			maxinlinelevel=*)
-				maxinlinelevel=${OPTARG#*=}
 				;;
 			quarkustpcorethreads=*)
 				quarkustpcorethreads=${OPTARG#*=}
@@ -121,7 +124,81 @@ do
 			quarkusdatasourcejdbcmaxsize=*)
 				quarkusdatasourcejdbcmaxsize=${OPTARG#*=}
                                 ;;
-
+			FreqInlineSize=*)
+                                FreqInlineSize=${OPTARG#*=}
+                                ;;
+                        MaxInlineLevel=*)
+                                MaxInlineLevel=${OPTARG#*=}
+                                ;;
+                        MinInliningThreshold=*)
+                                MinInliningThreshold=${OPTARG#*=}
+                                ;;
+                        CompileThreshold=*)
+                                CompileThreshold=${OPTARG#*=}
+                                ;;
+                        CompileThresholdScaling=*)
+                                CompileThresholdScaling=${OPTARG#*=}
+                                ;;
+                        InlineSmallCode=*)
+                                InlineSmallCode=${OPTARG#*=}
+                                ;;
+                        LoopUnrollLimit=*)
+                                LoopUnrollLimit=${OPTARG#*=}
+                                ;;
+                        LoopUnrollMin=*)
+                                LoopUnrollMin=${OPTARG#*=}
+                                ;;
+                        MinSurvivorRatio=*)
+                                MinSurvivorRatio=${OPTARG#*=}
+                                ;;
+                        NewRatio=*)
+                                NewRatio=${OPTARG#*=}
+                                ;;
+                        TieredStopAtLevel=*)
+                                TieredStopAtLevel=${OPTARG#*=}
+                                ;;
+                        ConcGCThreads=*)
+                                ConcGCThreads=${OPTARG#*=}
+                                ;;
+                        TieredCompilation=*)
+                                TieredCompilation=${OPTARG#*=}
+                                ;;
+                        AllowParallelDefineClass=*)
+                                AllowParallelDefineClass=${OPTARG#*=}
+                                ;;
+                        AllowVectorizeOnDemand=*)
+                                AllowVectorizeOnDemand=${OPTARG#*=}
+				;;
+                        AlwaysCompileLoopMethods=*)
+                                AlwaysCompileLoopMethods=${OPTARG#*=}
+                                ;;
+                        AlwaysPreTouch=*)
+                                AlwaysPreTouch=${OPTARG#*=}
+                                ;;
+                        AlwaysTenure=*)
+                                AlwaysTenure=${OPTARG#*=}
+                                ;;
+                        BackgroundCompilation=*)
+                                BackgroundCompilation=${OPTARG#*=}
+                                ;;
+                        DoEscapeAnalysis=*)
+                                DoEscapeAnalysis=${OPTARG#*=}
+                                ;;
+                        UseInlineCaches=*)
+                                UseInlineCaches=${OPTARG#*=}
+                                ;;
+                        UseLoopPredicate=*)
+                                UseLoopPredicate=${OPTARG#*=}
+                                ;;
+                        UseStringDeduplication=*)
+                                UseStringDeduplication=${OPTARG#*=}
+                                ;;
+                        UseSuperWord=*)
+                                UseSuperWord=${OPTARG#*=}
+                                ;;
+                        UseTypeSpeculation=*)
+                                UseTypeSpeculation=${OPTARG#*=}
+                                ;;
 			*)
 		esac
 		;;
@@ -219,6 +296,13 @@ CPU_MEM_DURATION=`expr ${DURATION} + 5`
 # Check if the dependencies required to apply the load is present 
 check_load_prereq 
 
+# Add any debug logs required
+function debug_logs() {
+        for i in 0 1; do
+                oc exec -n openshift-user-workload-monitoring prometheus-user-workload-${i} -c prometheus -- curl -s http://localhost:9090/api/v1/targets > ${RESULTS_DIR_ROOT}/targets.${i}.json
+        done
+}
+
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
@@ -227,6 +311,9 @@ function check_app() {
 	do
 		if [ -z "${status}" ]; then
                 	echo "Application pod did not come up" >> ${LOGFILE}
+			oc get pods -n ${NAMESPACE} >> ${LOGFILE}
+			oc get events -n ${NAMESPACE} >> ${LOGFILE}
+			oc logs pod/`oc get pods | grep "tfb-qrh" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
 			echo "The run failed. See setup.log for more details"
 			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
@@ -257,7 +344,8 @@ function run_wrk_workload() {
 	RESULTS_LOG=$2
 	# Run the wrk load
 	echo "Running wrk load with the following parameters" >> ${LOGFILE}
-	cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
+#	cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
+	cmd="${HYPERFOIL_DIR}/wrk.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s http://${IP_ADDR}/db"
 	echo "CMD = ${cmd}" >> ${LOGFILE}
 	${cmd} > ${RESULTS_LOG}
 	sleep 3
@@ -332,9 +420,16 @@ function runIterations() {
 		echo "***************************************" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
 			echo "Deploying the application..." >> ${LOGFILE}
-			${SCRIPT_REPO}/tfb-qrh-deploy-openshift.sh -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${TFB_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --maxinlinelevel=${maxinlinelevel} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} >> ${LOGFILE}
+			${SCRIPT_REPO}/tfb-qrh-deploy-openshift.sh -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${TFB_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --usertunables=${OPTIONS_VAR} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} --FreqInlineSize=${FreqInlineSize} --MaxInlineLevel=${MaxInlineLevel} --MinInliningThreshold=${MinInliningThreshold} --CompileThreshold=${CompileThreshold} --CompileThresholdScaling=${CompileThresholdScaling} --ConcGCThreads=${ConcGCThreads} --InlineSmallCode=${InlineSmallCode} --LoopUnrollLimit=${LoopUnrollLimit} --LoopUnrollMin=${LoopUnrollMin} --MinSurvivorRatio=${MinSurvivorRatio} --NewRatio=${NewRatio} --TieredStopAtLevel=${TieredStopAtLevel} --TieredCompilation=${TieredCompilation} --AllowParallelDefineClass=${AllowParallelDefineClass} --AllowVectorizeOnDemand=${AllowVectorizeOnDemand} --AlwaysCompileLoopMethods=${AlwaysCompileLoopMethods} --AlwaysPreTouch=${AlwaysPreTouch} --AlwaysTenure=${AlwaysTenure} --BackgroundCompilation=${BackgroundCompilation} --DoEscapeAnalysis=${DoEscapeAnalysis} --UseInlineCaches=${UseInlineCaches} --UseLoopPredicate=${UseLoopPredicate} --UseStringDeduplication=${UseStringDeduplication} --UseSuperWord=${UseSuperWord} --UseTypeSpeculation=${UseTypeSpeculation} >> ${LOGFILE}
 			# err_exit "Error: tfb-qrh deployment failed" >> ${LOGFILE}
 		fi
+		# Add extra sleep time for the deployment to complete as few machines takes longer time.
+		sleep 180
+		
+		##Debug
+		#Extra sleep time
+		#sleep 600
+		
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_R}/ITR-${itr}
 		echo "Running ${WARMUPS} warmups" >> ${LOGFILE}
@@ -383,9 +478,9 @@ do
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
 	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
 	# Parse the results
-	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
-	sleep 5
 	${SCRIPT_REPO}/perf/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO}
+	sleep 5
+	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
 	
 done
 

@@ -79,8 +79,8 @@ do
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
 				;;
-			maxinlinelevel=*)
-				maxinlinelevel=${OPTARG#*=}
+			usertunables=*)
+				OPTIONS_VAR=${OPTARG#*=}
 				;;
 			quarkustpcorethreads=*)
 				quarkustpcorethreads=${OPTARG#*=}
@@ -94,6 +94,81 @@ do
 			quarkusdatasourcejdbcmaxsize=*)
 				quarkusdatasourcejdbcmaxsize=${OPTARG#*=}
 				;;
+                        FreqInlineSize=*)
+                                FreqInlineSize=${OPTARG#*=}
+                                ;;
+                        MaxInlineLevel=*)
+                                MaxInlineLevel=${OPTARG#*=}
+                                ;;
+                        MinInliningThreshold=*)
+                                MinInliningThreshold=${OPTARG#*=}
+                                ;;
+                        CompileThreshold=*)
+                                CompileThreshold=${OPTARG#*=}
+                                ;;
+                        CompileThresholdScaling=*)
+                                CompileThresholdScaling=${OPTARG#*=}
+                                ;;
+                        InlineSmallCode=*)
+                                InlineSmallCode=${OPTARG#*=}
+                                ;;
+                        LoopUnrollLimit=*)
+                                LoopUnrollLimit=${OPTARG#*=}
+                                ;;
+                        LoopUnrollMin=*)
+                                LoopUnrollMin=${OPTARG#*=}
+                                ;;
+                        MinSurvivorRatio=*)
+                                MinSurvivorRatio=${OPTARG#*=}
+                                ;;
+                        NewRatio=*)
+                                NewRatio=${OPTARG#*=}
+                                ;;
+                        TieredStopAtLevel=*)
+                                TieredStopAtLevel=${OPTARG#*=}
+                                ;;
+                        ConcGCThreads=*)
+                                ConcGCThreads=${OPTARG#*=}
+                                ;;
+                        TieredCompilation=*)
+                                TieredCompilation=${OPTARG#*=}
+                                ;;
+                        AllowParallelDefineClass=*)
+                                AllowParallelDefineClass=${OPTARG#*=}
+                                ;;
+                        AllowVectorizeOnDemand=*)
+                                AllowVectorizeOnDemand=${OPTARG#*=}
+				;;
+                        AlwaysCompileLoopMethods=*)
+                                AlwaysCompileLoopMethods=${OPTARG#*=}
+                                ;;
+                        AlwaysPreTouch=*)
+                                AlwaysPreTouch=${OPTARG#*=}
+                                ;;
+                        AlwaysTenure=*)
+                                AlwaysTenure=${OPTARG#*=}
+                                ;;
+                        BackgroundCompilation=*)
+                                BackgroundCompilation=${OPTARG#*=}
+                                ;;
+                        DoEscapeAnalysis=*)
+                                DoEscapeAnalysis=${OPTARG#*=}
+                                ;;
+                        UseInlineCaches=*)
+                                UseInlineCaches=${OPTARG#*=}
+                                ;;
+                        UseLoopPredicate=*)
+                                UseLoopPredicate=${OPTARG#*=}
+                                ;;
+                        UseStringDeduplication=*)
+                                UseStringDeduplication=${OPTARG#*=}
+                                ;;
+                        UseSuperWord=*)
+                                UseSuperWord=${OPTARG#*=}
+                                ;;
+                        UseTypeSpeculation=*)
+                                UseTypeSpeculation=${OPTARG#*=}
+                                ;;
 			*)
 		esac
 		;;
@@ -147,7 +222,7 @@ function createInstances() {
 
 	# Deploy one instance of DB
 	oc create -f ${MANIFESTS_DIR}/postgres.yaml -n ${NAMESPACE}
-	sleep 15
+	sleep 10
 
 	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
@@ -177,15 +252,56 @@ function createInstances() {
 		if [ ! -z  ${CPU_LIM} ]; then
 			sed -i '/limits:/a \ \ \ \ \ \ \ \ \ \ cpu: '${CPU_LIM}'' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 		fi
-	
-		if [ ! -z  ${maxinlinelevel} ] && [ ! -z  ${quarkustpcorethreads} ] && [ ! -z  ${quarkustpqueuesize} ] && [ ! -z  ${quarkusdatasourcejdbcminsize} ] && [ ! -z  ${quarkusdatasourcejdbcmaxsize} ]; then
-			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "-server -XX:MaxInlineLevel='${maxinlinelevel}' -Dquarkus.thread-pool.core-threads='${quarkustpcorethreads}' -Dquarkus.thread-pool.queue-size='${quarkustpqueuesize}' -Dquarkus.datasource.jdbc.min-size='${quarkusdatasourcejdbcminsize}' -Dquarkus.datasource.jdbc.max-size='${quarkusdatasourcejdbcmaxsize}'"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
-			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "JAVA_OPTIONS"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
-		else
-			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "-server"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
-                        sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "JAVA_OPTIONS"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 
-		fi
+		tunables_jvm_boolean=(TieredCompilation AllowParallelDefineClass AllowVectorizeOnDemand AlwaysCompileLoopMethods AlwaysPreTouch AlwaysTenure BackgroundCompilation DoEscapeAnalysis UseInlineCaches UseLoopPredicate UseStringDeduplication UseSuperWord UseTypeSpeculation)
+		tunables_jvm_values=(FreqInlineSize MaxInlineLevel MinInliningThreshold CompileThreshold CompileThresholdScaling ConcGCThreads InlineSmallCode LoopUnrollLimit LoopUnrollMin MinSurvivorRatio NewRatio TieredStopAtLevel)
+		tunables_quarkus=(quarkustpcorethreads quarkustpqueuesize quarkusdatasourcejdbcminsize quarkusdatasourcejdbcmaxsize)
+
+		user_options=$(echo ${OPTIONS_VAR} | tr ";" "\n")
+
+		OPTIONS_VAR=""
+		for useroption in ${user_options}
+		do
+			OPTIONS_VAR="${OPTIONS_VAR} ${useroption}"
+		done
+
+		for btunable in "${tunables_jvm_boolean[@]}"
+                do
+                        if [ ! -z ${!btunable} ]; then
+                                if [ ${!btunable} == "true" ]; then
+                                        OPTIONS_VAR="${OPTIONS_VAR} -XX:+${btunable}"
+                                else
+                                        OPTIONS_VAR="${OPTIONS_VAR} -XX:-${btunable}"
+                                fi
+                        fi
+                done
+
+		for jvtunable in "${tunables_jvm_values[@]}"
+                do
+                        if [ ! -z ${!jvtunable} ]; then
+				OPTIONS_VAR="${OPTIONS_VAR} -XX:${jvtunable}=${!jvtunable}"
+                        fi
+                done
+		
+		for qtunable in "${tunables_quarkus[@]}"
+                do
+                        if [ ! -z ${!qtunable} ]; then
+				if [ ${qtunable} == "quarkustpcorethreads" ]; then
+	                                OPTIONS_VAR="${OPTIONS_VAR} -Dquarkus.thread-pool.core-threads=${!qtunable}"
+				elif [ ${qtunable} == "quarkustpqueuesize" ]; then
+                                        OPTIONS_VAR="${OPTIONS_VAR} -Dquarkus.thread-pool.queue-size=${!qtunable}"
+				elif [ ${qtunable} == "quarkusdatasourcejdbcminsize" ]; then
+                                        OPTIONS_VAR="${OPTIONS_VAR} -Dquarkus.datasource.jdbc.min-size=${!qtunable}"
+				elif [ ${qtunable} == "quarkusdatasourcejdbcmaxsize" ]; then
+                                        OPTIONS_VAR="${OPTIONS_VAR} -Dquarkus.datasource.jdbc.max-size=${!qtunable}"
+				fi
+                        fi
+
+                done
+
+                sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"${OPTIONS_VAR}\" " ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+                sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "JAVA_OPTIONS"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+
 		oc create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
 		#err_exit "Error: Issue in deploying tfb-qrh." >> ${LOGFILE}
 
@@ -206,14 +322,14 @@ function createInstances() {
 
 	## extra sleep time
 	sleep 60
-	
+			
 	# Check if the application is running
 	#check_app >> ${LOGFILE}
 }
 
 # Delete the tfb-qrh and tfb-database deployments,services and routes if it is already present 
 function stopAllInstances() {
-	${TFB_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE}>> ${LOGFILE}
+	${TFB_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 	sleep 30
 
 	##extra sleep time
