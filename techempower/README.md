@@ -13,7 +13,7 @@ Example to deploy and run multiple tfb-qrh application instances using default i
 
 To run the benchmark on openshift cluster to collect performance metrics
 
-`./scripts/perf/run-tfb-qrh-openshift.sh -s BENCHMARK_SERVER -e RESULTS_DIR [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--maxinlinelevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
+`./scripts/perf/run-tfb-qrh-openshift.sh -s BENCHMARK_SERVER -e RESULTS_DIR [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
 
 - **BENCHMARK_SERVER**: Name of the cluster you are using
 - **RESULTS_DIR**: Directory to store results
@@ -32,6 +32,7 @@ To run the benchmark on openshift cluster to collect performance metrics
 - **MEM_REQ**: Memory request
 - **CPU_LIM**: CPU limit
 - **MEM_LIM**: Memory limit
+- **USER_TUNABLES**: Any specific tunable user want to mention. If there are multiple entires, it should be separated by ; and enclosed with ""
 - **MAXINLINELEVEL**: Maxinline level tunable for JVM.
 - **QUARKUS_THREADPOOL_CORETHREADS**: quarkus.thread-pool.core.threads property for Quarkus.
 - **QUARKUS_THREADPOOL_QUEUESIZE**: quarkus.thread-pool.queue.size property for Quarkus.Memory limit
