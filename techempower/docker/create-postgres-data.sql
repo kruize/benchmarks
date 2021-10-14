@@ -63,3 +63,4 @@ INSERT INTO "Fortune" (id, message) VALUES (11, '<script>alert("This should not 
 INSERT INTO "Fortune" (id, message) VALUES (12, 'フレームワークのベンチマーク');
 
 COMMIT;
+
