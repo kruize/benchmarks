@@ -4,9 +4,9 @@ metadata:
   name: "galaxies-autotune"
   namespace: "default"
 spec:
-  sla:
+  slo:
     objective_function: "request_count"
-    sla_class: "throughput"
+    slo_class: "throughput"
     direction: "maximize"
     function_variables:
     - name: "request_count"

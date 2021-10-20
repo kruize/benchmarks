@@ -4,9 +4,9 @@ metadata:
   name: "quarkus-resteasy-autotune"
   namespace: "default"
 spec:
-  sla:
+  slo:
     objective_function: "request_sum/request_count"
-    sla_class: "response_time"
+    slo_class: "response_time"
     direction: "minimize"
     function_variables:
     - name: "request_sum"
