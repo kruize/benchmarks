@@ -1,12 +1,12 @@
 apiVersion: "recommender.com/v1"
 kind: Autotune
 metadata:
-  name: "galaxies-autotune"
+  name: "galaxies-autotune-max-app-throughput"
   namespace: "default"
 spec:
-  sla:
+  slo:
     objective_function: "app_getop_count"
-    sla_class: "throughput"
+    slo_class: "throughput"
     direction: "maximize"
     function_variables:
     - name: "app_getop_count"

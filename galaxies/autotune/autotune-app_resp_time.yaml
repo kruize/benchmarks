@@ -1,12 +1,12 @@
 apiVersion: "recommender.com/v1"
 kind: Autotune
 metadata:
-  name: "galaxies-autotune"
+  name: "galaxies-autotune-min-app-response-time"
   namespace: "default"
 spec:
-  sla:
+  slo:
     objective_function: "app_getop_sum/app_getop_count"
-    sla_class: "response_time"
+    slo_class: "response_time"
     direction: "minimize"
     function_variables:
     - name: "app_getop_sum"
