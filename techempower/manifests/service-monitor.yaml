@@ -1,13 +1,13 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: quarkus-resteasy
+  name: tfb-qrh
   labels:
-    team: quarkus-resteasy-frontend
+    team: tfb-qrh-frontend
 spec:
   selector:
     matchLabels:
-        app: quarkus-resteasy-app
+        app: tfb-qrh-app
   endpoints:
-    - port: quarkus-resteasy-port
-      path: '/metrics'
+    - port: tfb-qrh-port
+      path: '/q/metrics'

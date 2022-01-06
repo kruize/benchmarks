@@ -20,15 +20,19 @@ spec:
     spec:
       containers:
       - name: tfb-database
-        image: kusumach/postgres:latest
+        image: docker.io/kruize/tfb-postgres-openshift:latest
         imagePullPolicy: IfNotPresent
         env:
-          - name: POSTGRES_USER
+          - name: POSTGRESQL_USER
             value: benchmarkdbuser
-          - name: POSTGRES_PASSWORD
+          - name: POSTGRESQL_PASSWORD
             value: benchmarkdbpass
-          - name: POSTGRES_DB
+          - name: POSTGRESQL_DATABASE
             value: hello_world
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10 && psql -a hello_world < /tmp/create-postgres-data.sql"]        
         ports:
           - containerPort: 5432
         resources:
