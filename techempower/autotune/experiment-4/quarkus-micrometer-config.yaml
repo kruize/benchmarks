@@ -1,0 +1,52 @@
+apiVersion: "recommender.com/v1"
+kind: "AutotuneConfig"
+metadata:
+  name: "quarkus"
+layer_name: quarkus
+layer_level: 2
+details: quarkus tunables
+layerPresence:
+  label:
+  - name: app.kubernetes.io/layer
+    value: quarkus
+tunables:
+- name: quarkus.thread-pool.core-threads
+  description: 'The core thread pool size. This number of threads will always be kept alive. Default is 1'
+  value_type: integer
+  upper_bound: '256'
+  lower_bound: '3'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+- name: quarkus.thread-pool.queue-size
+  idescription: 'The queue size. Default is unbounded.'
+  value_type: integer
+  upper_bound: '10000'
+  lower_bound: '0'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  - resource_usage
+- name: quarkus.datasource.jdbc.min-size
+  description: 'minimum size of jdbc datasource. Default is 0'
+  value_type: integer
+  upper_bound: '31'
+  lower_bound: '2'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  - resource_usage
+- name: quarkus.datasource.jdbc.max-size
+  description: 'maximum size of jdbc datasource. Default is 20'
+  value_type: integer
+  upper_bound: '100'
+  lower_bound: '32'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  - resource_usage
+
