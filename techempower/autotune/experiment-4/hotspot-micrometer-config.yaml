@@ -1,0 +1,238 @@
+apiVersion: "recommender.com/v1"
+kind: "AutotuneConfig"
+metadata:
+  name: "hotspot"
+layer_name: hotspot
+layer_level: 1
+details: hotspot tunables
+layerPresence:
+  query:
+    datasource:
+    - name: prometheus
+      query: 'jvm_memory_used_bytes{area="heap",}'
+      key: pod
+tunables:
+- name: FreqInlineSize
+  description: 'The maximum bytecode size of a frequent method to be inlined. Default is 325'
+  value_type: integer
+  lower_bound: '325'
+  upper_bound: '1000'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+
+
+- name: MaxInlineLevel
+  description: 'The maximum number of nested calls that are inlined. Default is 9'
+  value_type: integer
+  lower_bound: '9'
+  upper_bound: '50'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: MinInliningThreshold
+  description: 'The minimum invocation count a method needs to have to be inlined. Default is 250'
+  value_type: integer
+  lower_bound: '0'
+  upper_bound: '500'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: CompileThreshold
+  description: 'number of interpreted method invocations before (re-)compiling. Default is 1500'
+  value_type: integer
+  lower_bound: '1000'
+  upper_bound: '20000'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+
+- name: CompileThresholdScaling
+  description: 'Factor to control when first compilation happens. Default is 1.0'
+  value_type: double
+  lower_bound: '1'
+  upper_bound: '20'
+  step: 0.01
+  slo_class:
+  - response_time
+  - throughput
+
+- name: ConcGCThreads
+  description: 'Number of threads concurrent gc will use. Defaults 0'
+  value_type: integer
+  lower_bound: '0'
+  upper_bound: '32'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: InlineSmallCode
+  description: 'Only inline already compiled methods if their code size is less than this. Default is 1000'
+  value_type: integer
+  lower_bound: '500'
+  upper_bound: '5000'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+
+- name: LoopUnrollLimit
+  description: 'Unroll loop bodies with node count less than this. Default is 50'
+  value_type: integer
+  lower_bound: '20'
+  upper_bound: '250'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+
+- name: LoopUnrollMin
+  description: 'Minimum number of unroll loop bodies before checking progress of rounds of unroll,optimize,..Default is 4'
+  value_type: integer
+  lower_bound: '0'
+  upper_bound: '20'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: MinSurvivorRatio
+  description: 'Minimum ratio of young generation/survivor space size. Default is 3'
+  value_type: integer
+  lower_bound: '3'
+  upper_bound: '48'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+      
+- name: NewRatio
+  description: 'Ratio of old/new generation sizes. Default is 2'
+  value_type: integer
+  lower_bound: '1'
+  upper_bound: '20'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: TieredStopAtLevel
+  description: 'Stop at given compilation level. Default is 4'
+  value_type: integer
+  lower_bound: '0'
+  upper_bound: '4'
+  step: 1
+  slo_class:
+  - response_time
+  - throughput
+      
+- name: TieredCompilation
+  description: 'Enable tiered compilation. Default is false'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: AllowParallelDefineClass
+  description: 'Allow parallel defineClass requests for class loaders registering as parallel capable. Default is false'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: AllowVectorizeOnDemand
+  description: 'Globally supress vectorization set in VectorizeMethod. Default is true'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: AlwaysCompileLoopMethods
+  description: 'When using recompilation, never interpret methods containing loops. Default is false'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+
+- name: AlwaysPreTouch
+  description: 'Force all freshly committed pages to be pre-touched. Default is false'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: AlwaysTenure
+  description: 'Always tenure objects in eden (ParallelGC only). Default is false'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: BackgroundCompilation
+  description: 'A thread requesting compilation is not blocked during compilation. Default is true'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: DoEscapeAnalysis
+  description: 'Perform escape analysis. Default is true'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: UseInlineCaches
+  description: 'Use Inline Caches for virtual calls. Default is true'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: UseLoopPredicate
+  description: 'Generate a predicate to select fast/slow loop versions. Default is true'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: UseStringDeduplication
+  description: 'Use string deduplication. Default is false'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: UseSuperWord
+  description: 'Transform scalar operations into superword operations. Default is true'
+  value_type: categorical
+  choices: ["true", "false"] 
+  slo_class:
+  - response_time
+  - throughput
+  
+- name: UseTypeSpeculation
+  description: 'Speculatively propagate types from profiles. Default is true'
+  value_type: categorical
+  choices: ["true", "false"]
+  slo_class:
+  - response_time
+  - throughput
