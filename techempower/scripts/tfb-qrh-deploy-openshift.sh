@@ -299,7 +299,7 @@ function createInstances() {
 
                 done
 
-		sed -i "s/\"-server\"/\"${OPTIONS_VAR}\" " ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		sed -i "s/\"-server\"/\"${OPTIONS_VAR}\"/" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 
 		oc create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
 		#err_exit "Error: Issue in deploying tfb-qrh." >> ${LOGFILE}
