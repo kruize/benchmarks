@@ -82,7 +82,7 @@ service/acmeair-service-1 created
 # Openshift
 To deploy the benchmark use `acmeair-deploy-openshift.sh`
 
-`./scripts/acmeair-deploy-openshift.sh -s BENCHMARK_SERVER [-n NAMESPACE] [-i SERVER_INSTANCES] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM]`
+`./scripts/acmeair-deploy-openshift.sh -s BENCHMARK_SERVER [-n NAMESPACE] [-i SERVER_INSTANCES] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [--env=ENV_VAR]`
 
 - **BENCHMARK_SERVER**: Name of the cluster you are using
 - **SERVER_INSTANCES**: Number of acmeair instances to be deployed. It is optional, if is not specified then by default it will be considered as 1 instance.
@@ -92,6 +92,7 @@ To deploy the benchmark use `acmeair-deploy-openshift.sh`
 - **MEM_REQ**: Memory request
 - **CPU_LIM**: CPU limit
 - **MEM_LIM**: Memory limit
+- **ENV_VAR**: Environment variable
 
 Example to deploy and run acmeair application on openshift cluster
 

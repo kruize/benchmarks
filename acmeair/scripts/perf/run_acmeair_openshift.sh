@@ -21,10 +21,10 @@
 # Ex of ARGS :  -s wobbled.os.fyre.ibm.com default -e /acmeair/results -u 400 -d 300 -w 5 -m 3
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-pushd "${CURRENT_DIR}" >> setup.log
-pushd ".." >> setup.log
+pushd "${CURRENT_DIR}" >> /dev/null
+pushd ".." >> /dev/null
 SCRIPT_REPO=${PWD}
-pushd ".." >> setup.log
+pushd ".." >> /dev/null
 JMX_FILE="${PWD}/jmeter-driver/acmeair-jmeter/scripts/AcmeAir.jmx"
 ACMEAIR_DEFAULT_IMAGE="dinogun/acmeair-monolithic"
 LOG_FILE="${PWD}/logs/jmeter.log"
@@ -33,7 +33,7 @@ LOGFILE="${PWD}/logs/setup.log"
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo "Usage: $0 -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-u JMETER_LOAD_USERS] [-d JMETER_LOAD_DURATION] [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-a ACMEAIR_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [--env=ENV_VAR]"
 	exit -1
 }
 
@@ -57,6 +57,9 @@ do
 				;;
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
+				;;
+			env=*)
+				ENV_VAR=${OPTARG#*=}
 				;;
 			*)
 		esac
@@ -553,7 +556,7 @@ function runIterations() {
 	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
 	do
 		if [ ${RE_DEPLOY} == "true" ]; then
-			${SCRIPT_REPO}/acmeair-deploy-openshift.sh -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -a ${ACMEAIR_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} >> setup.log
+			${SCRIPT_REPO}/acmeair-deploy-openshift.sh -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -a ${ACMEAIR_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --env=${ENV_VAR} >> setup.log
 			err_exit "Error: acmeair deployment failed"
 		fi
 		# Start the load
