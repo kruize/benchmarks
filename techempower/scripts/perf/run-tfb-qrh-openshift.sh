@@ -467,6 +467,7 @@ echo ", 50p , 95p , 98p , 99p , 99.9p" > ${RESULTS_DIR_ROOT}/Metrics-percentile-
 echo "ITR , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
 echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/server_requests-metrics-measure-raw.log
 echo "THROUGHPUT_RATE_1m , RESPONSE_TIME_RATE_1m , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT_RATE_5m , RESPONSE_TIME_RATE_5m , THROUGHPUT_RATE_7m , RESPONSE_TIME_RATE_7m , THROUGHPUT_RATE_9m , RESPONSE_TIME_RATE_9m , THROUGHPUT_RATE_15m , RESPONSE_TIME_RATE_15m , THROUGHPUT_RATE_30m , RESPONSE_TIME_RATE_30m " > ${RESULTS_DIR_ROOT}/Metrics-rate-prom.log
+echo "50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 999p_HISTO , 9999p_HISTO , 99999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-histogram-prom.log
 
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize}" >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 
