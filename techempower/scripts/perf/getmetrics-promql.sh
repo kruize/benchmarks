@@ -276,7 +276,6 @@ function get_server_errors_rate()
 	# Processing curl output "timestamp value" using jq tool.
 	curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(http_server_errors_total[3m])) by (pod)' ${URL} | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/server_errors-rate-${ITER}.json
         err_exit "Error: could not get server error details of the pod" >>setup.log
-        done
 }
 
 
