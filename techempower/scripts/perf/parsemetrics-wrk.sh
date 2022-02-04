@@ -77,7 +77,7 @@ function parseData() {
 			if [ "${weberrors}" != "" ]; then
 				wer_sum=`expr ${wer_sum} + ${weberrors}`
 			fi
-			if [ ${total_weberror_avg} -ge 50 ]; then
+			if [[ ${total_weberror_avg} -ge 500 ]]; then
 				echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_J}/../Metrics-prom.log
         			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_J}/../Metrics-wrk.log
 			fi
