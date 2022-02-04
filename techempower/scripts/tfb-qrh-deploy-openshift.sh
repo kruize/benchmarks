@@ -230,7 +230,7 @@ fi
 function createInstances() {
 	#Create the deployments and services
 
-	if [ ${DB_TYPE} == "docker" ]; then
+	if [[ ${DB_TYPE} == "docker" || ${DB_TYPE} == "DOCKER" ]]; then
 		# Deploy one instance of DB
 		oc create -f ${MANIFESTS_DIR}/postgres.yaml -n ${NAMESPACE}
 		sleep 10
@@ -313,8 +313,8 @@ function createInstances() {
 
 		sed -i "s/\"-server\"/\"${OPTIONS_VAR}\"/" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 
-		if [ ${DB_TYPE} == "standalone" ]; then
-			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "jdbc:postgresql://${DB_HOST}/techempower?loggerLevel=OFF&disableColumnSanitiser=true&assumeMinServerVersion=12&sslmode=disable"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		if [[ ${DB_TYPE} == "standalone" || ${DB_TYPE} == "STANDALONE" ]]; then
+			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"jdbc:postgresql://${DB_HOST}/techempower?loggerLevel=OFF&disableColumnSanitiser=true&assumeMinServerVersion=12&sslmode=disable\"" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
                         sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "QUARKUS_DATASOURCE_JDBC_URL"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 
 			sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "techempower"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
