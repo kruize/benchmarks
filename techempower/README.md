@@ -83,3 +83,15 @@ INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RE
 **QRKS_DS_JDBC_MAXSIZE**: Configuration value of quarkus.data-source.jdbc.max.size tunable of Quarkus if set
 ```
 **Note:** If the run fails, the output values would be **99999**. This is added for the convenience of experiments with autotune. For more details, look into setup.log as mentioned at the end of the run.
+
+## Scripts Details
+
+| Script Name                   |       What it does?                                                                                                                                           |
+|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| perf/run-tfb-qrh-openshift.sh |       Main script to run the benchmark - which internally calls other scripts to deploy and run the load and collecting the metrics and parsing the data.     |
+| tfb-qrh-deploy-openshift.sh   |       Deploy the benchmark with tunables                                                                                                                      |
+| perf/getmetrics-promql.sh     |       Has prometheus queries that are required calculate the metrics required for objective function and the benchmark.                                       |
+| perf/parsemetrics-promql.sh   |       Parse the prometheus metrics data to calculate the average , max and min values as per the requirement of the benchmark.                                |
+| perf/ci.php			|	Use to measure confidence interval of data.														|
+| perf/parsemetrics-wrk.sh      |       Parse the metrics data from hyperfoil/wrk load simulator.                                                                                               |
+
