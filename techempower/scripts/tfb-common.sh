@@ -28,6 +28,7 @@ TFB_REPO="${CURRENT_DIR}"
 TFB_DEFAULT_IMAGE="kruize/tfb-qrh:1.13.2.F_mm.v1"
 TFB_CUSTOM_IMAGE="tfb-qrh:latest"
 DEFAULT_NAMESPACE="default"
+DEFAULT_DB_TYPE="docker"
 MANIFESTS_DIR="manifests/"
 
 # checks if the previous command is executed successfully
