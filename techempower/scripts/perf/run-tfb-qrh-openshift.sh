@@ -39,7 +39,7 @@ function err_exit() {
 		oc get pods -n ${NAMESPACE} >> ${LOGFILE}
 		oc get events -n ${NAMESPACE} >> ${LOGFILE}
 		oc logs pod/`oc get pods | grep "tfb-qrh" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
-		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
+		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 		echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 		paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 		cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
@@ -321,7 +321,7 @@ function check_app() {
 			oc get events -n ${NAMESPACE} >> ${LOGFILE}
 			oc logs pod/`oc get pods | grep "tfb-qrh" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
 			echo "The run failed. See setup.log for more details"
-			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
+			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 			paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log	
 			## Cleanup all the deployments
@@ -454,19 +454,20 @@ function runIterations() {
 	done
 }
 
-echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
+echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_97p , RESPONSE_TIME_99p , RESPONSE_TIME_99.9p , RESPONSE_TIME_99.99p , RESPONSE_TIME_99.999p , RESPONSE_TIME_100p , CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
 echo ", THROUGHPUT_WRK , RESPONSETIME_WRK , RESPONSETIME_MAX_WRK , RESPONSETIME_STDEV_WRK , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , QRKS_TP_CORETHREADS , QRKS_TP_QUEUESIZE , QRKS_DS_JDBC_MINSIZE , QRKS_DS_JDBC_MAXSIZE , FreqInlineSize , MaxInlineLevel , MinInliningThreshold , CompileThreshold , CompileThresholdScaling , ConcGCThreads , InlineSmallCode , LoopUnrollLimit , LoopUnrollMin  , MinSurvivorRatio , NewRatio , TieredStopAtLevel , TieredCompilation , AllowParallelDefineClass , AllowVectorizeOnDemand , AlwaysCompileLoopMethods , AlwaysPreTouch , AlwaysTenure , BackgroundCompilation , DoEscapeAnalysis , UseInlineCaches , UseLoopPredicate , UseStringDeduplication , UseSuperWord , UseTypeSpeculation" > ${RESULTS_DIR_ROOT}/Metrics-config.log
 
 echo "INSTANCES , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
 echo "RUN , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , THROUGHPUT , RESPONSETIME , WEB_ERRORS , RESPONSETIME_MAX , RESPONSETIME_STDEV , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
-echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT , RESPONSE_TIME , MAX_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_98p , RESPONSE_TIME_99p , RESPONSE_TIME_999p , MEM_USAGE , CPU_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSP_PROM_CI , APP_THRPT_PROM_CI , APP_RSP_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom-all.log
 echo "INSTANCES ,  MEM_RSS , MEM_USAGE " > ${RESULTS_DIR_ROOT}/Metrics-mem-prom.log
 echo "INSTANCES ,  CPU_USAGE" > ${RESULTS_DIR_ROOT}/Metrics-cpu-prom.log
 echo ", 50p , 95p , 98p , 99p , 99.9p" > ${RESULTS_DIR_ROOT}/Metrics-percentile-prom.log
-echo "ITR , APP_THROUGHPUT , APP_RESPONSE_TIME , APP_THROUGHPUT_RATE_3m , APP_RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
 echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/server_requests-metrics-measure-raw.log
-echo "THROUGHPUT_RATE_1m , RESPONSE_TIME_RATE_1m , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT_RATE_5m , RESPONSE_TIME_RATE_5m , THROUGHPUT_RATE_7m , RESPONSE_TIME_RATE_7m , THROUGHPUT_RATE_9m , RESPONSE_TIME_RATE_9m , THROUGHPUT_RATE_15m , RESPONSE_TIME_RATE_15m , THROUGHPUT_RATE_30m , RESPONSE_TIME_RATE_30m " > ${RESULTS_DIR_ROOT}/Metrics-rate-prom.log
+echo "THROUGHPUT_RATE_1m , RESPONSE_TIME_RATE_1m , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT_RATE_5m , RESPONSE_TIME_RATE_5m , THROUGHPUT_RATE_6m , RESPONSE_TIME_RATE_6m " > ${RESULTS_DIR_ROOT}/Metrics-rate-prom.log
+echo "INSTANCES , 50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO , 99.999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
+echo "INSTANCES , CPU_MAXSPIKE , MEM_MAXSPIKE "  >> ${RESULTS_DIR_ROOT}/Metrics-spikes-prom.log
+echo "50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO , 99.999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-histogram-prom.log
 
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize}" >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 
@@ -496,6 +497,4 @@ sleep 10
 
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
-#cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
-#cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
-#cat ${RESULTS_DIR_ROOT}/Metrics-raw.log
+paste ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
