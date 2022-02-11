@@ -128,9 +128,9 @@ function parse_tfb_results() {
 # Download the required dependencies
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
-	if [ ! -d "${PWD}/hyperfoil-0.13" ]; then
-		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.13/hyperfoil-0.13.zip >> ${LOGFILE} 2>&1
-		unzip hyperfoil-0.13.zip 
+	if [ ! -d "${PWD}/hyperfoil-0.16" ]; then
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.16/hyperfoil-0.16.zip >> ${LOGFILE} 2>&1
+		unzip hyperfoil-0.16.zip 
 	fi
-	pushd hyperfoil-0.13/bin > /dev/null
+	pushd hyperfoil-0.16/bin > /dev/null
 }
