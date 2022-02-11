@@ -494,7 +494,7 @@ done
 ## Cleanup all the deployments
 ${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
 sleep 10
-
+echo " "
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 paste ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
