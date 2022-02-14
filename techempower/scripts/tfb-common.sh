@@ -31,6 +31,7 @@ DEFAULT_NAMESPACE="default"
 DEFAULT_DB_TYPE="docker"
 MANIFESTS_DIR="manifests/"
 HYPERFOIL_VERSION="0.16"
+HYPERFOIL_DIR="${PWD}/hyperfoil-${HYPERFOIL_VERSION}/bin"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command

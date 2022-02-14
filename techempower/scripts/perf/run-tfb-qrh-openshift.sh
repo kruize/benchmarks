@@ -21,13 +21,10 @@ CURRENT_DIR="$(dirname "$(realpath "$0")")"
 pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
 SCRIPT_REPO=${PWD}
-
-CLUSTER_TYPE="openshift"
+source ${SCRIPT_REPO}/tfb-common.sh
 pushd ".." > /dev/null
-HYPERFOIL_VERSION="0.16"
-HYPERFOIL_DIR="${PWD}/hyperfoil-${HYPERFOIL_VERSION}/bin"
-TFB_DEFAULT_IMAGE="kruize/tfb-qrh:1.13.2.F_mm.v1"
 LOGFILE="${PWD}/setup.log"
+CLUSTER_TYPE="openshift"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
