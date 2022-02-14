@@ -24,7 +24,8 @@ SCRIPT_REPO=${PWD}
 
 CLUSTER_TYPE="openshift"
 pushd ".." > /dev/null
-HYPERFOIL_DIR="${PWD}/hyperfoil-0.16/bin"
+HYPERFOIL_VERSION="0.16"
+HYPERFOIL_DIR="${PWD}/hyperfoil-${HYPERFOIL_VERSION}/bin"
 TFB_DEFAULT_IMAGE="kruize/tfb-qrh:1.13.2.F_mm.v1"
 LOGFILE="${PWD}/setup.log"
 
@@ -334,10 +335,10 @@ function check_app() {
 # Download the required dependencies 
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
-	if [ ! -d "${PWD}/hyperfoil-0.16" ]; then
-		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.16/hyperfoil-0.16.zip >> ${LOGFILE} 2>&1
+	if [ ! -d "${PWD}/hyperfoil-${HYPERFOIL_VERSION}" ]; then
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
 		err_exit "Error: Could not download the dependencies" >> ${LOGFILE}
-		unzip hyperfoil-0.16.zip >> ${LOGFILE}
+		unzip hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE}
 	fi
 }
 
