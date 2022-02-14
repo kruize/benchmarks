@@ -2,7 +2,34 @@
 **The scripts written supports**
 - [Openshift](#Openshift)
 
-Pre-requisites: java11 , git , wget , zip , unzip , php , bc , jq on client machine.
+## Prerequisites
+- Enable monitoring for user-defined projects.
+- Packages required on client machine : php java11 git wget zip bc jq.
+
+To enable monitring for user-defined projects on openshift:
+
+1. Edit the cluster-monitoring-config ConfigMap object:
+   ```
+        $ oc -n openshift-monitoring edit configmap cluster-monitoring-config
+   ```
+2. Add enableUserWorkload: true under data/config.yaml:
+   ```
+    apiVersion: v1
+    kind: ConfigMap
+    metadata:
+      name: cluster-monitoring-config
+      namespace: openshift-monitoring
+    data:
+      config.yaml: |
+        enableUserWorkload: true
+   ```
+3. Save the file to apply the changes. Monitoring for user-defined projects is then enabled automatically.
+4. Check that the prometheus-operator, prometheus-user-workload and thanos-ruler-user-workload pods are running in the openshift-user-workload-monitoring project. It might take a short while for the pods to start:
+   ```
+        oc -n openshift-user-workload-monitoring get pod
+   ```
+For more details on enabling monitoring, check [this](https://docs.openshift.com/container-platform/4.6/monitoring/enabling-monitoring-for-user-defined-projects.html)
+
 
 tfb-qrh represents TechEmpower Framework benchmark - [Quarkus resteasy-hibernate](https://github.com/TechEmpower/FrameworkBenchmarks/tree/master/frameworks/Java/quarkus)
 

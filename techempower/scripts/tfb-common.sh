@@ -30,6 +30,8 @@ TFB_CUSTOM_IMAGE="tfb-qrh:latest"
 DEFAULT_NAMESPACE="default"
 DEFAULT_DB_TYPE="docker"
 MANIFESTS_DIR="manifests/"
+HYPERFOIL_VERSION="0.16"
+HYPERFOIL_DIR="${PWD}/hyperfoil-${HYPERFOIL_VERSION}/bin"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -128,9 +130,9 @@ function parse_tfb_results() {
 # Download the required dependencies
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
-	if [ ! -d "${PWD}/hyperfoil-0.13" ]; then
-		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.13/hyperfoil-0.13.zip >> ${LOGFILE} 2>&1
-		unzip hyperfoil-0.13.zip 
+	if [ ! -d "${PWD}/hyperfoil-${HYPERFOIL_DIR}" ]; then
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
+		unzip hyperfoil-${HYPERFOIL_VERSION}.zip 
 	fi
-	pushd hyperfoil-0.13/bin > /dev/null
+	pushd hyperfoil-${HYPERFOIL_VERSION}/bin > /dev/null
 }

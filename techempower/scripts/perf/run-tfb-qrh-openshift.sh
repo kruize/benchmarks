@@ -21,12 +21,10 @@ CURRENT_DIR="$(dirname "$(realpath "$0")")"
 pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
 SCRIPT_REPO=${PWD}
-
-CLUSTER_TYPE="openshift"
+source ${SCRIPT_REPO}/tfb-common.sh
 pushd ".." > /dev/null
-HYPERFOIL_DIR="${PWD}/hyperfoil-0.13/bin"
-TFB_DEFAULT_IMAGE="kruize/tfb-qrh:1.13.2.F_mm.v1"
 LOGFILE="${PWD}/setup.log"
+CLUSTER_TYPE="openshift"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -334,10 +332,10 @@ function check_app() {
 # Download the required dependencies 
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
-	if [ ! -d "${PWD}/hyperfoil-0.13" ]; then
-		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.13/hyperfoil-0.13.zip >> ${LOGFILE} 2>&1
+	if [ ! -d "${PWD}/hyperfoil-${HYPERFOIL_VERSION}" ]; then
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
 		err_exit "Error: Could not download the dependencies" >> ${LOGFILE}
-		unzip hyperfoil-0.13.zip >> ${LOGFILE}
+		unzip hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE}
 	fi
 }
 
@@ -494,7 +492,7 @@ done
 ## Cleanup all the deployments
 ${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
 sleep 10
-
+echo " "
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 paste ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
