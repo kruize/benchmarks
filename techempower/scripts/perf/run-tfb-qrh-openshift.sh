@@ -18,10 +18,10 @@
 #
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
+source ${CURRENT_DIR}/../tfb-common.sh
 pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
 SCRIPT_REPO=${PWD}
-source ${SCRIPT_REPO}/tfb-common.sh
 pushd ".." > /dev/null
 LOGFILE="${PWD}/setup.log"
 CLUSTER_TYPE="openshift"
