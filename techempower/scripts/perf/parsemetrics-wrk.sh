@@ -108,7 +108,7 @@ function parseResults() {
 	done
 	###### Add different raw logs we want to merge
 	#Cumulative raw data
-	paste ${RESULTS_DIR_J}/Throughput-measure-raw.log ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >>  ${RESULTS_DIR_J}/../Metrics-raw.log
+	paste ${RESULTS_DIR_J}/Throughput-measure-raw.log >>  ${RESULTS_DIR_J}/../Metrics-raw.log
 
 	for metric in "${THROUGHPUT_LOGS[@]}"
 	do
