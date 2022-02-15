@@ -467,8 +467,6 @@ echo "INSTANCES , 50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 
 echo "INSTANCES , CPU_MAXSPIKE , MEM_MAXSPIKE "  >> ${RESULTS_DIR_ROOT}/Metrics-spikes-prom.log
 echo "50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO , 99.999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-histogram-prom.log
 
-echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${maxinlinelevel} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize}" >> ${RESULTS_DIR_ROOT}/Metrics-config.log
-
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize} , ${FreqInlineSize} , ${MaxInlineLevel} , ${MinInliningThreshold} , ${CompileThreshold} , ${CompileThresholdScaling} , ${ConcGCThreads} , ${InlineSmallCode} , ${LoopUnrollLimit} , ${LoopUnrollMin} , ${MinSurvivorRatio} , ${NewRatio} , ${TieredStopAtLevel} , ${TieredCompilation} , ${AllowParallelDefineClass} , ${AllowVectorizeOnDemand} , ${AlwaysCompileLoopMethods} , ${AlwaysPreTouch} , ${AlwaysTenure} , ${BackgroundCompilation} , ${DoEscapeAnalysis} , ${UseInlineCaches} , ${UseLoopPredicate} , ${UseStringDeduplication} , ${UseSuperWord} , ${UseTypeSpeculation} " >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 
 #TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
