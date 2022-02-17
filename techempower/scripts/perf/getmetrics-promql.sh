@@ -491,7 +491,7 @@ if [ ${CLUSTER_TYPE} == "openshift" ]; then
 	TOKEN=`oc whoami --show-token`
 elif [ ${CLUSTER_TYPE} == "minikube" ]; then
 	#QUERY_IP=`minikibe ip`
-	QUERY_APP="localhost:9090"
+	QUERY_APP="${BENCHMARK_SERVER}:9090"
 	URL=http://${QUERY_APP}/api/v1/query
 	TOKEN=TOKEN
 fi
