@@ -1,10 +1,12 @@
 # Instructions to run the TechEmpower Framework (Quarkus) application using scripts 
-**The scripts written supports**
-- [Openshift](#Openshift)
+**The scripts written supports openshift and minikube**
 
 ## Prerequisites
-- Enable monitoring for user-defined projects.
 - Packages required on client machine : php java11 git wget zip bc jq.
+- On minikube:
+	- Prometheus ( To install prometheus, use script available [here](https://github.com/kruize/autotune/tree/master/scripts) )
+- On openshift:
+	- Enable monitoring for user-defined projects.
 
 To enable monitring for user-defined projects on openshift:
 
@@ -36,12 +38,11 @@ tfb-qrh represents TechEmpower Framework benchmark - [Quarkus resteasy-hibernate
 Example to deploy and run multiple tfb-qrh application instances using default image
 
 ```
-## Openshift
+To run the benchmark on kubernetes cluster to collect performance metrics
 
-To run the benchmark on openshift cluster to collect performance metrics
+`./scripts/perf/run-tfb-qrh.sh --cluster_type [CLUSTER_TYPE] -s BENCHMARK_SERVER -e RESULTS_DIR [--dbtype=DB_TYPE] [--dbhost=DB_HOST] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
 
-`./scripts/perf/run-tfb-qrh-openshift.sh -s BENCHMARK_SERVER -e RESULTS_DIR [--dbtype=DB_TYPE] [--dbhost=DB_HOST] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
-
+- **CLUSTER_TYPE**: Type of cluster. Supports openshift , minikube.
 - **BENCHMARK_SERVER**: Name of the cluster you are using
 - **RESULTS_DIR**: Directory to store results
 - **DB_TYPE**: Supports only options : DOCKER , STANDALONE. Default is DOCKER.
@@ -69,7 +70,7 @@ To run the benchmark on openshift cluster to collect performance metrics
 - **QUARKUS_DATASOURCE_JDBC_MAXSIZE**: quarkus.data-source.jdbc.min.size property for Quarkus.
 
 Example:
-`./scripts/perf/run-tfb-qrh-openshift.sh -s <example.com> -e results -r -d 60 -w 20 -m 3 -i 1 --iter=5 -n default -t 3 -R 200 --connection=200 --cpureq=1.31 --memreq=648M --cpulim=1.3 --memlim=648M --maxinlinelevel=44 --quarkustpcorethreads=22 --quarkustpqueuesize=950 --quarkusdatasourcejdbcminsize=8 --quarkusdatasourcejdbcmaxsize=36`
+`./scripts/perf/run-tfb-qrh-openshift.sh --clustertype=openshift -s <example.com> -e results -r -d 60 -w 20 -m 3 -i 1 --iter=5 -n default -t 3 -R 200 --connection=200 --cpureq=1.31 --memreq=648M --cpulim=1.3 --memlim=648M --maxinlinelevel=44 --quarkustpcorethreads=22 --quarkustpqueuesize=950 --quarkusdatasourcejdbcminsize=8 --quarkusdatasourcejdbcmaxsize=36`
 ```
 
 **Sample Output and Description:**

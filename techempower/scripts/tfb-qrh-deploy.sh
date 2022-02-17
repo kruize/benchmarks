@@ -24,7 +24,7 @@ source ${CURRENT_DIR}/tfb-common.sh
 # SCRIPT BENCHMARK_SERVER 
 # Ex of ARGS :  -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1
 
-CLUSTER_TYPE="openshift"
+#CLUSTER_TYPE="openshift"
 
 # Describes the usage of the script
 function usage() {
@@ -67,6 +67,9 @@ do
 	case ${gopts} in
 	-)
 		case "${OPTARG}" in
+			clustertype=*)
+				CLUSTER_TYPE=${OPTARG#*=}
+				;;
 			dbtype=*)
 				DB_TYPE=${OPTARG#*=}
 				;;
@@ -225,6 +228,12 @@ if [ ! -z "${MEM_REQ}" ]; then
 	check_memory_unit ${MEM_REQ}
 fi
 
+if [ ${CLUSTER_TYPE} == "openshift" ]; then
+	K_EXEC="oc"
+elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+	K_EXEC="kubectl"
+fi
+
 # Create multiple yamls based on instances and Update the template yamls with names and create multiple files
 # input:quarkus-resteasy-hibernate , postgres and service-monitor yaml file
 function createInstances() {
@@ -232,7 +241,7 @@ function createInstances() {
 
 	if [[ ${DB_TYPE} == "docker" || ${DB_TYPE} == "DOCKER" ]]; then
 		# Deploy one instance of DB
-		oc create -f ${MANIFESTS_DIR}/postgres.yaml -n ${NAMESPACE}
+		${K_EXEC} create -f ${MANIFESTS_DIR}/postgres.yaml -n ${NAMESPACE}
 		sleep 10
 	fi
 
@@ -241,7 +250,7 @@ function createInstances() {
 		sed 's/name: tfb-qrh/name: tfb-qrh-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor.yaml > ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
 		sed -i 's/tfb-qrh-app/tfb-qrh-app-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
 		sed -i 's/tfb-qrh-port/tfb-qrh-port-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
-		oc create -f ${MANIFESTS_DIR}/service-monitor-${inst}.yaml -n ${NAMESPACE}
+		${K_EXEC} create -f ${MANIFESTS_DIR}/service-monitor-${inst}.yaml -n ${NAMESPACE}
 	done
 	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
@@ -325,7 +334,7 @@ function createInstances() {
 
 		fi
 
-		oc create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
+		${K_EXEC} create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
 		#err_exit "Error: Issue in deploying tfb-qrh." >> ${LOGFILE}
 
 	done
@@ -334,10 +343,10 @@ function createInstances() {
 	sleep 20
 
 	#Expose the services
-	SVC_LIST=($(oc get svc --namespace=${NAMESPACE} | grep "service" | grep "tfb-qrh" | cut -d " " -f1))
+	SVC_LIST=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "service" | grep "tfb-qrh" | cut -d " " -f1))
 	for sv in "${SVC_LIST[@]}"
 	do
-		oc expose svc/${sv} --namespace=${NAMESPACE}
+		${K_EXEC} expose svc/${sv} --namespace=${NAMESPACE}
 		#err_exit " Error: Issue in exposing service" >> ${LOGFILE}
 	done
 

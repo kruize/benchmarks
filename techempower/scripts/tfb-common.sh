@@ -134,3 +134,25 @@ function load_setup(){
 	fi
 	pushd hyperfoil-${HYPERFOIL_VERSION}/bin > /dev/null
 }
+
+# Start/Stop the minikube
+function reload_minikube(){
+	cpus=$1
+	memory=$2
+	is_running=`minikube status | grep "host" | cut -d ":" -f2`
+	echo "is it running ? .." ${is_running}
+	if [[ ${is_running} == *"Running"* ]]; then
+	echo "is it running ? .." ${is_running}
+		minikube stop
+		err_exit "Error: Unable to stop the minikube."
+	fi
+	minikube delete
+	echo "starting with --cpus ${cpus} --memory ${memory}"
+	minikube start --driver=kvm2 --cpus ${cpus} --memory ${memory}
+	err_exit "Unable to start minikube with ${cpus} cpus and ${memory} memory"
+}
+
+## Forward the prometheus port to collect the metrics
+function fwd_prometheus_port_minikube() {
+	kubectl port-forward pod/prometheus-k8s-0 9090:9090 -n monitoring >> ${LOGFILE} 2>&1 &
+}
