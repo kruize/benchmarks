@@ -328,8 +328,6 @@ function createInstances() {
 		oc create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
 		#err_exit "Error: Issue in deploying tfb-qrh." >> ${LOGFILE}
 
-		((TFB_PORT=TFB_PORT+1))
-
 	done
 
 	#Wait till tfb-qrh starts
