@@ -21,7 +21,7 @@ pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
 
 # Set the defaults for the app
-export TFB_PORT="32000"
+export TFB_PORT="32434"
 export NETWORK="kruize-network"
 LOGFILE="${PWD}/setup.log"
 TFB_REPO="${CURRENT_DIR}"

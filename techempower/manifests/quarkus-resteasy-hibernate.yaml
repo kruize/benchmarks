@@ -50,7 +50,7 @@ spec:
   type: NodePort
   ports:
     - port: 8080
-      nodePort: 32334
+      nodePort: 32434
       targetPort: 8080
       name: tfb-qrh-port
   selector:
