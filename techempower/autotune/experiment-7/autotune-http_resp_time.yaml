@@ -25,7 +25,7 @@ spec:
   mode: "show"
   selector:
     matchLabel: "app.kubernetes.io/name"
-    matchLabelValue: "quarkus-resteasy-deployment"
+    matchLabelValue: "tfb-qrh-deployment"
     matchRoute: ""
     matchURI: ""
     matchService: ""
