@@ -21,12 +21,10 @@ pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
 
 # Set the defaults for the app
-export TFB_PORT="32000"
 export NETWORK="kruize-network"
 LOGFILE="${PWD}/setup.log"
 TFB_REPO="${CURRENT_DIR}"
 TFB_DEFAULT_IMAGE="kruize/tfb-qrh:1.13.2.F_mm.v1"
-TFB_CUSTOM_IMAGE="tfb-qrh:latest"
 DEFAULT_NAMESPACE="default"
 DEFAULT_DB_TYPE="docker"
 MANIFESTS_DIR="manifests/"
