@@ -385,7 +385,8 @@ function run_wrk_with_scaling()
 	do
 		RESULT_LOG=${RESULTS_DIR_L}/wrk-${svc_api}-${TYPE}-${RUN}.log
 		if [[ ${CLUSTER_TYPE} == "minikube" ]]; then
-			minikube_ip=`minikube ip`
+			minikube_ip=$(minikube ip)
+			TFB_PORT=$(kubectl -n ${NAMESPACE} get svc | grep ${APP_NAME} | tr -s " " | cut -d " " -f5 | cut -d ":" -f2 | cut -d "/" -f1)
 			svc_api="${minikube_ip}:${TFB_PORT}"
 		fi
 		run_wrk_workload ${svc_api} ${RESULT_LOG} &
