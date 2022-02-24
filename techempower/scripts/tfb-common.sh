@@ -140,9 +140,7 @@ function reload_minikube(){
 	cpus=$1
 	memory=$2
 	is_running=`minikube status | grep "host" | cut -d ":" -f2`
-	echo "is it running ? .." ${is_running}
 	if [[ ${is_running} == *"Running"* ]]; then
-	echo "is it running ? .." ${is_running}
 		minikube stop
 		err_exit "Error: Unable to stop the minikube."
 	fi
