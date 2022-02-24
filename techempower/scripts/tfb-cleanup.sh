@@ -50,9 +50,9 @@ if [ -z "${NAMESPACE}" ]; then
 	NAMESPACE="${DEFAULT_NAMESPACE}"
 fi
 
-# Removes the tfb-qrh instances from openshift
+# Removes the tfb-qrh instances
 # output: Removes the tfb-qrh and tfb-database deployments, services, service monitors and routes
-function remove_tfb_openshift() {
+function remove_tfb() {
 	TFB_DEPLOYMENTS=($(${K_EXEC} get deployments --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
 
 	for de in "${TFB_DEPLOYMENTS[@]}"
@@ -66,24 +66,28 @@ function remove_tfb_openshift() {
 	do
 		${K_EXEC} delete svc ${se} --namespace=${NAMESPACE}
 	done
-	TFB_ROUTES=($(${K_EXEC} get route --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
-	for ro in "${TFB_ROUTES[@]}"
-	do
-		${K_EXEC} delete route ${ro} --namespace=${NAMESPACE}
-	done
+
 	TFB_SERVICE_MONITORS=($(${K_EXEC} get servicemonitor --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
 	for sm in "${TFB_SERVICE_MONITORS[@]}"
 	do
 		${K_EXEC} delete servicemonitor ${sm} --namespace=${NAMESPACE}
 	done
+
+	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
+		TFB_ROUTES=($(${K_EXEC} get route --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
+		for ro in "${TFB_ROUTES[@]}"
+		do
+			${K_EXEC} delete route ${ro} --namespace=${NAMESPACE}
+		done
+	fi
 }
 
-if [ ${CLUSTER_TYPE} == "openshift" ]; then
+if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 	K_EXEC="oc"
-elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 	K_EXEC="kubectl"
 fi
 
 echo -n "Removing the tfb instances..."
-remove_tfb_openshift >> ${LOGFILE}
+remove_tfb >> ${LOGFILE}
 echo "done"

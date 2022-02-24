@@ -35,9 +35,9 @@ function parseData() {
 		responsetime=0
 		max_responsetime=0
 		stddev_responsetime=0
-		if [ ${CLUSTER_TYPE} == "openshift" ]; then
+		if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 			SVC_APIS=($(oc status --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep port | cut -d " " -f1 | cut -d "/" -f3))
-		elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+		elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 			SVC_APIS=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "${APP_NAME}" | cut -d " " -f1))
 		fi
 		for svc_api  in "${SVC_APIS[@]}"
@@ -148,9 +148,9 @@ NAMESPACE=$6
 SCRIPT_REPO=$7
 CLUSTER_TYPE=$8
 
-if [ ${CLUSTER_TYPE} == "openshift" ]; then
+if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
         K_EXEC="oc"
-elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
         K_EXEC="kubectl"
 fi
 

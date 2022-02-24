@@ -485,11 +485,11 @@ CLUSTER_TYPE=$6
 
 mkdir -p ${RESULTS_DIR}
 #QUERY_APP=prometheus-k8s-openshift-monitoring.apps
-if [ ${CLUSTER_TYPE} == "openshift" ]; then
+if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 	QUERY_APP=thanos-querier-openshift-monitoring.apps
 	URL=https://${QUERY_APP}.${BENCHMARK_SERVER}/api/v1/query
 	TOKEN=`oc whoami --show-token`
-elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 	#QUERY_IP=`minikibe ip`
 	QUERY_APP="${BENCHMARK_SERVER}:9090"
 	URL=http://${QUERY_APP}/api/v1/query

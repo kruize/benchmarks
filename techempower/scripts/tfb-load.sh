@@ -22,7 +22,7 @@ source ${CURRENT_DIR}/tfb-common.sh
 
 function usage() {
         echo
-        echo "Usage: -c CLUSTER_TYPE[minikube|openshift] [-i SERVER_INSTANCES] [--iter=MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR]"
+        echo "Usage: --clustertype=CLUSTER_TYPE[minikube|openshift] [-i SERVER_INSTANCES] [--iter=MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR]"
         exit -1
 }
 
@@ -38,13 +38,13 @@ do
         case ${gopts} in
         -)
                 case "${OPTARG}" in
+			clustertype=*)
+                                CLUSTER_TYPE=${OPTARG#*=}
+                                ;;
                         iter=*)
                                 MAX_LOOP=${OPTARG#*=}
                                 ;;
                 esac
-                ;;
-        c)
-                CLUSTER_TYPE=${OPTARG}
                 ;;
         i)
                 SERVER_INSTANCES="${OPTARG}"
@@ -67,7 +67,7 @@ minikube)
         if [ -z "${IP_ADDR}" ]; then
                 IP_ADDR=$(minikube ip)
         fi
-	TECHEMPOWER_PORT=$(kubectl -n ${NAMESPACE} get svc ${APP_NAME} --no-headers -o=custom-columns=PORT:.spec.ports[*].nodePort)
+	TECHEMPOWER_PORT=($(kubectl -n ${NAMESPACE} get svc | grep ${APP_NAME} | tr -s " " | cut -d " " -f5 | cut -d ":" -f2 | cut -d "/" -f1))
         ;;
 openshift)
         if [ -z "${IP_ADDR}" ]; then
@@ -80,8 +80,11 @@ openshift)
 esac
 
 
-LOG_DIR="${PWD}/logs/${APP_NAME}-$(date +%Y%m%d%H%M)"
+LOG_DIR="${PWD}/results/${APP_NAME}-$(date +%Y%m%d%H%M)"
 mkdir -p ${LOG_DIR}
+
+## Set-up the load simulator
+load_setup
 
 for(( inst=0; inst<${SERVER_INSTANCES}; inst++ ))
 do
@@ -96,13 +99,13 @@ do
 
                 echo
                 echo "#########################################################################################"
-                echo "                             Running with Connections ${connection}                      "
+                echo "                             Running with iteration ${iter}                              "
                 echo "#########################################################################################"
                 echo
 
                # Run the wrk load
                 echo "Running wrk load for ${APP_NAME} instance ${inst} with the following parameters"
-		if [ "${CLUSTER_TYPE}" == "openshift" ]; then
+		if [[ "${CLUSTER_TYPE}" == "openshift" ]]; then
 			cmd="${HYPERFOIL_DIR}/wrk.sh --latency --threads=${THREADS} --connections=${CONNECTION} --duration=${DURATION}s http://${IP_ADDR}/${END_POINT}"
 		else
 			cmd="${HYPERFOIL_DIR}/wrk.sh --latency --threads=${THREADS} --connections=${CONNECTION} --duration=${DURATION}s http://${IP_ADDR}:${SERVER_INSTANCE_PORT}/${END_POINT}"
@@ -119,4 +122,8 @@ do
         echo "#########################################################################################"
         cat ${LOG_DIR}/Throughput.log
 done
+echo 
+echo "To cleanup the deployments, run"
+echo "${PWD}/scripts/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE}"
+echo
 

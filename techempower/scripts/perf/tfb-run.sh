@@ -24,7 +24,6 @@ pushd ".." > /dev/null
 SCRIPT_REPO=${PWD}
 pushd ".." > /dev/null
 LOGFILE="${PWD}/setup.log"
-CLUSTER_TYPE="openshift"
 K_CPU=6
 K_MEM=8192
 
@@ -45,7 +44,7 @@ function err_exit() {
 		cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
 		cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
 		## Cleanup all the deployments
-		${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
+		${SCRIPT_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 		exit -1
 	fi
 }
@@ -247,8 +246,8 @@ do
 	esac
 done
 
-if [[ -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH}" ]]; then
-	echo "Do set the variables - BENCHMARK_SERVER and RESULTS_DIR_PATH "
+if [[ -z "${CLUSTER_TYPE}" -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH}" ]]; then
+	echo "Do set the variables - CLUSTER_TYPE, BENCHMARK_SERVER and RESULTS_DIR_PATH "
 	usage
 fi
 
@@ -296,9 +295,9 @@ if [ -z "${CONNECTIONS}" ]; then
 	CONNECTIONS="512"
 fi
 
-if [ ${CLUSTER_TYPE} == "openshift" ]; then
+if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
         K_EXEC="oc"
-elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
         K_EXEC="kubectl"
 fi
 
@@ -314,7 +313,7 @@ check_load_prereq
 # Add any debug logs required
 function debug_logs() {
         for i in 0 1; do
-        	if [ ${CLUSTER_TYPE} == "openshift" ]; then
+        	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 			${K_EXEC} exec -n openshift-user-workload-monitoring prometheus-user-workload-${i} -c prometheus -- curl -s http://localhost:9090/api/v1/targets > ${RESULTS_DIR_ROOT}/targets.${i}.json
 		fi
         done
@@ -323,23 +322,23 @@ function debug_logs() {
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
-	CMD=$(${K_EXEC} get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
-	for status in "${CMD[@]}"
-	do
-		if [ -z "${status}" ]; then
-                	echo "Application pod did not come up" >> ${LOGFILE}
-			${K_EXEC} get pods -n ${NAMESPACE} >> ${LOGFILE}
-			${K_EXEC} get events -n ${NAMESPACE} >> ${LOGFILE}
-			${K_EXEC} logs pod/`${K_EXEC} get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
-			echo "The run failed. See setup.log for more details"
-			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
-			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
-			paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log	
-			## Cleanup all the deployments
-			${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
-			exit -1;
-		fi
-	done
+	if [ "${CLUSTER_TYPE}" == "openshift" ]; then
+                K_EXEC="oc"
+        elif [ "${CLUSTER_TYPE}" == "minikube" ]; then
+                K_EXEC="kubectl"
+        fi
+        CMD=$(${K_EXEC} get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
+        for status in "${CMD[@]}"
+        do
+                if [ -z "${status}" ]; then
+                        echo "Application pod did not come up" >> ${LOGFILE}
+                        ${K_EXEC} get pods -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} get events -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} logs pod/`${K_EXEC} get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
+                        echo "The run failed. See setup.log for more details"
+                        exit -1;
+                fi
+        done
 }
 
 # Download the required dependencies 
@@ -376,16 +375,16 @@ function run_wrk_with_scaling()
 	TYPE=$1
 	RUN=$2
 	RESULTS_DIR_L=$3
-	if [ ${CLUSTER_TYPE} == "openshift" ]; then
+	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 		SVC_APIS=($(${K_EXEC} status --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep port | cut -d " " -f1 | cut -d "/" -f3))
-	elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+	elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 		SVC_APIS=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "${APP_NAME}" | cut -d " " -f1))
 	fi
 	load_setup
 	for svc_api  in "${SVC_APIS[@]}"
 	do
 		RESULT_LOG=${RESULTS_DIR_L}/wrk-${svc_api}-${TYPE}-${RUN}.log
-		if [ ${CLUSTER_TYPE} == "minikube" ]; then
+		if [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 			minikube_ip=`minikube ip`
 			svc_api="${minikube_ip}:${TFB_PORT}"
 		fi
@@ -420,7 +419,7 @@ function runItr()
 # output: kruize recommendations for tfb
 function get_recommendations_from_kruize()
 {
-	if [ ${CLUSTER_TYPE} == "openshift" ]; then
+	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 		TOKEN=`${K_EXEC} whoami --show-token`
 	fi
 	APP_LIST=($(${K_EXEC} get deployments --namespace=${NAMESPACE} | grep "${APP_NAME}" | cut -d " " -f1))
@@ -447,7 +446,7 @@ function runIterations() {
 		echo "***************************************" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
 			echo "Deploying the application..." >> ${LOGFILE}
-			${SCRIPT_REPO}/${APP_NAME}-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${TFB_IMAGE} --dbtype=${DB_TYPE} --dbhost=${DB_HOST} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --usertunables=${OPTIONS_VAR} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} --FreqInlineSize=${FreqInlineSize} --MaxInlineLevel=${MaxInlineLevel} --MinInliningThreshold=${MinInliningThreshold} --CompileThreshold=${CompileThreshold} --CompileThresholdScaling=${CompileThresholdScaling} --ConcGCThreads=${ConcGCThreads} --InlineSmallCode=${InlineSmallCode} --LoopUnrollLimit=${LoopUnrollLimit} --LoopUnrollMin=${LoopUnrollMin} --MinSurvivorRatio=${MinSurvivorRatio} --NewRatio=${NewRatio} --TieredStopAtLevel=${TieredStopAtLevel} --TieredCompilation=${TieredCompilation} --AllowParallelDefineClass=${AllowParallelDefineClass} --AllowVectorizeOnDemand=${AllowVectorizeOnDemand} --AlwaysCompileLoopMethods=${AlwaysCompileLoopMethods} --AlwaysPreTouch=${AlwaysPreTouch} --AlwaysTenure=${AlwaysTenure} --BackgroundCompilation=${BackgroundCompilation} --DoEscapeAnalysis=${DoEscapeAnalysis} --UseInlineCaches=${UseInlineCaches} --UseLoopPredicate=${UseLoopPredicate} --UseStringDeduplication=${UseStringDeduplication} --UseSuperWord=${UseSuperWord} --UseTypeSpeculation=${UseTypeSpeculation} >> ${LOGFILE}
+			${SCRIPT_REPO}/tfb-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${TFB_IMAGE} --dbtype=${DB_TYPE} --dbhost=${DB_HOST} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --usertunables=${OPTIONS_VAR} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} --FreqInlineSize=${FreqInlineSize} --MaxInlineLevel=${MaxInlineLevel} --MinInliningThreshold=${MinInliningThreshold} --CompileThreshold=${CompileThreshold} --CompileThresholdScaling=${CompileThresholdScaling} --ConcGCThreads=${ConcGCThreads} --InlineSmallCode=${InlineSmallCode} --LoopUnrollLimit=${LoopUnrollLimit} --LoopUnrollMin=${LoopUnrollMin} --MinSurvivorRatio=${MinSurvivorRatio} --NewRatio=${NewRatio} --TieredStopAtLevel=${TieredStopAtLevel} --TieredCompilation=${TieredCompilation} --AllowParallelDefineClass=${AllowParallelDefineClass} --AllowVectorizeOnDemand=${AllowVectorizeOnDemand} --AlwaysCompileLoopMethods=${AlwaysCompileLoopMethods} --AlwaysPreTouch=${AlwaysPreTouch} --AlwaysTenure=${AlwaysTenure} --BackgroundCompilation=${BackgroundCompilation} --DoEscapeAnalysis=${DoEscapeAnalysis} --UseInlineCaches=${UseInlineCaches} --UseLoopPredicate=${UseLoopPredicate} --UseStringDeduplication=${UseStringDeduplication} --UseSuperWord=${UseSuperWord} --UseTypeSpeculation=${UseTypeSpeculation} >> ${LOGFILE}
 			# err_exit "Error: ${APP_NAME} deployment failed" >> ${LOGFILE}
 		fi
 		# Add extra sleep time for the deployment to complete as few machines takes longer time.

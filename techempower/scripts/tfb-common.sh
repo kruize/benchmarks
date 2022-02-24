@@ -87,22 +87,22 @@ function get_ip() {
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
 	if [ "${CLUSTER_TYPE}" == "openshift" ]; then
-		CMD=$(oc get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
+		K_EXEC="oc"
+	elif [ "${CLUSTER_TYPE}" == "minikube" ]; then
+                K_EXEC="kubectl"
 	fi
-	for status in "${CMD[@]}"
-	do
-		if [ -z "${status}" ]; then
-			#echo "Application pod did not come up"
-			# Wait for 60sec more and check again before exiting
-			sleep 60
-			CMD=$(oc get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
-			status1=${CMD[@]}
-			if [ -z "${status1}" ]; then
-				echo "Application pod did not come up"
-				exit -1;
-			fi
-		fi
-	done
+	CMD=$(${K_EXEC} get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
+        for status in "${CMD[@]}"
+        do
+                if [ -z "${status}" ]; then
+                        echo "Application pod did not come up" >> ${LOGFILE}
+                        ${K_EXEC} get pods -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} get events -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} logs pod/`${K_EXEC} get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
+                        echo "The run failed. See setup.log for more details"
+                        exit -1;
+                fi
+        done
 }
 
 # Parse the Throughput Results
@@ -116,9 +116,9 @@ function parse_tfb_results() {
 	do
 		RESULT_LOG=${RESULTS_DIR}/wrk-${inst}-${iteration}.log
 		throughput=`cat ${RESULT_LOG} | grep "Requests" | cut -d ":" -f2 `
-		responsetime=`cat ${RESULT_LOG} | grep "Latency" | cut -d ":" -f2 | tr -s " " | cut -d " " -f2 `
-		max_responsetime=`cat ${RESULT_LOG} | grep "Latency" | cut -d ":" -f2 | tr -s " " | cut -d " " -f6 `
-		stddev_responsetime=`cat ${RESULT_LOG} | grep "Latency" | cut -d ":" -f2 | tr -s " " | cut -d " " -f4 `
+		responsetime=`cat ${RESULT_LOG} | grep "Latency:" | cut -d ":" -f2 | tr -s " " | cut -d " " -f2 `
+		max_responsetime=`cat ${RESULT_LOG} | grep "Latency:" | cut -d ":" -f2 | tr -s " " | cut -d " " -f6 `
+		stddev_responsetime=`cat ${RESULT_LOG} | grep "Latency:" | cut -d ":" -f2 | tr -s " " | cut -d " " -f4 `
 		weberrors=`cat ${RESULT_LOG} | grep "Non-2xx" | cut -d ":" -f2`
 		if [ "${weberrors}" == "" ]; then
 			weberrors="0"
@@ -130,7 +130,7 @@ function parse_tfb_results() {
 # Download the required dependencies
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
-	if [ ! -d "${PWD}/hyperfoil-${HYPERFOIL_DIR}" ]; then
+	if [ ! -d "${PWD}/hyperfoil-${HYPERFOIL_VERSION}" ]; then
 		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
 		unzip hyperfoil-${HYPERFOIL_VERSION}.zip 
 	fi

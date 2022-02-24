@@ -20,21 +20,21 @@
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
 source ${CURRENT_DIR}/tfb-common.sh
 
-# Run the benchmark as
-# SCRIPT BENCHMARK_SERVER 
-# Ex of ARGS :  -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1
-
 SERVER_INSTANCES=1
 DB_TYPE=${DEFAULT_DB_TYPE}
 TFB_IMAGE="${TFB_DEFAULT_IMAGE}"
 NAMESPACE="${DEFAULT_NAMESPACE}"
 
+# Run the benchmark as
+# SCRIPT BENCHMARK_SERVER
+# Ex of ARGS :  --clustertype=openshift -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1
+
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 -s BENCHMARK_SERVER [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo "Usage: $0 --clustertype=CLUSTER_TYPE [-s BENCHMARK_SERVER] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
 	echo " "
-	echo "Example: $0 -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
+	echo "Example: $0 --clustertype=openshift -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
 	exit -1
 }
 
@@ -199,8 +199,8 @@ do
 	esac
 done
 
-if [ -z "${BENCHMARK_SERVER}" ]; then
-	echo "Do set the variable - BENCHMARK_SERVER "
+if [ -z "${CLUSTER_TYPE}" ]; then
+	echo "Do set the variable - CLUSTER_TYPE "
 	usage
 	exit 1
 fi
@@ -215,9 +215,9 @@ if [ ! -z "${MEM_REQ}" ]; then
 	check_memory_unit ${MEM_REQ}
 fi
 
-if [ ${CLUSTER_TYPE} == "openshift" ]; then
+if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 	K_EXEC="oc"
-elif [ ${CLUSTER_TYPE} == "minikube" ]; then
+elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 	K_EXEC="kubectl"
 fi
 
@@ -239,6 +239,7 @@ function createInstances() {
 		sed -i "s/${APP_NAME}-port/${APP_NAME}-port-${inst}/g" ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
 		${K_EXEC} create -f ${MANIFESTS_DIR}/service-monitor-${inst}.yaml -n ${NAMESPACE}
 	done
+
 	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
 		sed "s/${APP_NAME}-sample/${APP_NAME}-sample-${inst}/g" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate.yaml > ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
@@ -330,12 +331,14 @@ function createInstances() {
 	sleep 20
 
 	#Expose the services
-	SVC_LIST=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "service" | grep "${APP_NAME}" | cut -d " " -f1))
-	for sv in "${SVC_LIST[@]}"
-	do
-		${K_EXEC} expose svc/${sv} --namespace=${NAMESPACE}
-		#err_exit " Error: Issue in exposing service" >> ${LOGFILE}
-	done
+	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
+		SVC_LIST=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "service" | grep "${APP_NAME}" | cut -d " " -f1))
+		for sv in "${SVC_LIST[@]}"
+		do
+			${K_EXEC} expose svc/${sv} --namespace=${NAMESPACE}
+			#err_exit " Error: Issue in exposing service" >> ${LOGFILE}
+		done
+	fi
 
 	## extra sleep time
 	sleep 60
