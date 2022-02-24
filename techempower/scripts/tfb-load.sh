@@ -22,14 +22,13 @@ source ${CURRENT_DIR}/tfb-common.sh
 
 function usage() {
         echo
-        echo "Usage: -c CLUSTER_TYPE[minikube|openshift] [-i SERVER_INSTANCES] [-n NAMESPACE] [-a IP_ADDR]"
+        echo "Usage: -c CLUSTER_TYPE[minikube|openshift] [-i SERVER_INSTANCES] [--iter=MAX_LOOP] [-n NAMESPACE] [-a IP_ADDR]"
         exit -1
 }
 
 SERVER_INSTANCES=1
 MAX_LOOP=4
 NAMESPACE=${DEFAULT_NAMESPACE}
-APP_NAME="tfb-qrh"
 END_POINT="db"
 THREADS=48
 DURATION=20

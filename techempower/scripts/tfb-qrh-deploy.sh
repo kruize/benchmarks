@@ -24,7 +24,10 @@ source ${CURRENT_DIR}/tfb-common.sh
 # SCRIPT BENCHMARK_SERVER 
 # Ex of ARGS :  -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1
 
-#CLUSTER_TYPE="openshift"
+SERVER_INSTANCES=1
+DB_TYPE=${DEFAULT_DB_TYPE}
+TFB_IMAGE="${TFB_DEFAULT_IMAGE}"
+NAMESPACE="${DEFAULT_NAMESPACE}"
 
 # Describes the usage of the script
 function usage() {
@@ -202,22 +205,6 @@ if [ -z "${BENCHMARK_SERVER}" ]; then
 	exit 1
 fi
 
-if [ -z "${DB_TYPE}" ]; then
-        DB_TYPE=${DEFAULT_DB_TYPE}
-fi
-
-if [ -z "${SERVER_INSTANCES}" ]; then
-	SERVER_INSTANCES=1
-fi
-
-if [ -z "${TFB_IMAGE}" ]; then
-	TFB_IMAGE="${TFB_DEFAULT_IMAGE}"
-fi
-
-if [ -z "${NAMESPACE}" ]; then
-	NAMESPACE="${DEFAULT_NAMESPACE}"
-fi
-
 # check memory limit for unit
 if [ ! -z "${MEM_LIM}" ]; then
 	check_memory_unit ${MEM_LIM}
@@ -247,18 +234,18 @@ function createInstances() {
 
 	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
-		sed 's/name: tfb-qrh/name: tfb-qrh-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor.yaml > ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
-		sed -i 's/tfb-qrh-app/tfb-qrh-app-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
-		sed -i 's/tfb-qrh-port/tfb-qrh-port-'${inst}'/g' ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
+		sed "s/name: ${APP_NAME}/name: ${APP_NAME}-${inst}/g" ${MANIFESTS_DIR}/service-monitor.yaml > ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
+		sed -i "s/${APP_NAME}-app/${APP_NAME}-app-${inst}/g" ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
+		sed -i "s/${APP_NAME}-port/${APP_NAME}-port-${inst}/g" ${MANIFESTS_DIR}/service-monitor-${inst}.yaml
 		${K_EXEC} create -f ${MANIFESTS_DIR}/service-monitor-${inst}.yaml -n ${NAMESPACE}
 	done
 	for(( inst=0; inst<"${SERVER_INSTANCES}"; inst++ ))
 	do
-		sed 's/tfb-qrh-sample/tfb-qrh-sample-'${inst}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate.yaml > ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		sed "s/${APP_NAME}-sample/${APP_NAME}-sample-${inst}/g" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate.yaml > ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 		sed -i "s|${TFB_DEFAULT_IMAGE}|${TFB_IMAGE}|g" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
-		sed -i 's/tfb-qrh-service/tfb-qrh-service-'${inst}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
-		sed -i 's/tfb-qrh-app/tfb-qrh-app-'${inst}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
-		sed -i 's/tfb-qrh-port/tfb-qrh-port-'${inst}'/g' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		sed -i "s/${APP_NAME}-service/${APP_NAME}-service-${inst}/g" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		sed -i "s/${APP_NAME}-app/${APP_NAME}-app-${inst}/g" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		sed -i "s/${APP_NAME}-port/${APP_NAME}-port-${inst}/g" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
 	
 		# Setting cpu/mem request limits
 		if [ ! -z  ${MEM_REQ} ]; then
@@ -335,15 +322,15 @@ function createInstances() {
 		fi
 
 		${K_EXEC} create -f ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml -n ${NAMESPACE}
-		#err_exit "Error: Issue in deploying tfb-qrh." >> ${LOGFILE}
+		#err_exit "Error: Issue in deploying ${APP_NAME}." >> ${LOGFILE}
 
 	done
 
-	#Wait till tfb-qrh starts
+	#Wait till ${APP_NAME} starts
 	sleep 20
 
 	#Expose the services
-	SVC_LIST=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "service" | grep "tfb-qrh" | cut -d " " -f1))
+	SVC_LIST=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "service" | grep "${APP_NAME}" | cut -d " " -f1))
 	for sv in "${SVC_LIST[@]}"
 	do
 		${K_EXEC} expose svc/${sv} --namespace=${NAMESPACE}

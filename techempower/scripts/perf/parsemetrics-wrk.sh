@@ -36,9 +36,9 @@ function parseData() {
 		max_responsetime=0
 		stddev_responsetime=0
 		if [ ${CLUSTER_TYPE} == "openshift" ]; then
-			SVC_APIS=($(oc status --namespace=${NAMESPACE} | grep "tfb-qrh" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+			SVC_APIS=($(oc status --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep port | cut -d " " -f1 | cut -d "/" -f3))
 		elif [ ${CLUSTER_TYPE} == "minikube" ]; then
-			SVC_APIS=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "tfb-qrh" | cut -d " " -f1))
+			SVC_APIS=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "${APP_NAME}" | cut -d " " -f1))
 		fi
 		for svc_api  in "${SVC_APIS[@]}"
 		do

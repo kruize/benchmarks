@@ -30,6 +30,8 @@ DEFAULT_DB_TYPE="docker"
 MANIFESTS_DIR="manifests/"
 HYPERFOIL_VERSION="0.16"
 HYPERFOIL_DIR="${PWD}/hyperfoil-${HYPERFOIL_VERSION}/bin"
+APP_NAME="tfb-qrh"
+APP_DB="tfb-database"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -85,7 +87,7 @@ function get_ip() {
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
 	if [ "${CLUSTER_TYPE}" == "openshift" ]; then
-		CMD=$(oc get pods --namespace=${NAMESPACE} | grep "tfb-qrh" | grep "Running" | cut -d " " -f1)
+		CMD=$(oc get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
 	fi
 	for status in "${CMD[@]}"
 	do
@@ -93,7 +95,7 @@ function check_app() {
 			#echo "Application pod did not come up"
 			# Wait for 60sec more and check again before exiting
 			sleep 60
-			CMD=$(oc get pods --namespace=${NAMESPACE} | grep "tfb-qrh" | grep "Running" | cut -d " " -f1)
+			CMD=$(oc get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
 			status1=${CMD[@]}
 			if [ -z "${status1}" ]; then
 				echo "Application pod did not come up"
