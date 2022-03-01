@@ -246,7 +246,7 @@ do
 	esac
 done
 
-if [[ -z "${CLUSTER_TYPE}" -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH}" ]]; then
+if [[ -z "${CLUSTER_TYPE}" || -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH}" ]]; then
 	echo "Do set the variables - CLUSTER_TYPE, BENCHMARK_SERVER and RESULTS_DIR_PATH "
 	usage
 fi
