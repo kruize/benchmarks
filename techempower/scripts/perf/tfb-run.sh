@@ -14,7 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-### Script to perform load test on multiple instances of tfb-qrh on openshift###
+### Script to perform load test on multiple instances of techempower Quarkus benchmarks on openshift###
 #
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
@@ -24,7 +24,8 @@ pushd ".." > /dev/null
 SCRIPT_REPO=${PWD}
 pushd ".." > /dev/null
 LOGFILE="${PWD}/setup.log"
-CLUSTER_TYPE="openshift"
+K_CPU=6
+K_MEM=8192
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -36,14 +37,14 @@ function err_exit() {
 		echo "The run failed. See setup.log for more details"
 		oc get pods -n ${NAMESPACE} >> ${LOGFILE}
 		oc get events -n ${NAMESPACE} >> ${LOGFILE}
-		oc logs pod/`oc get pods | grep "tfb-qrh" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
+		oc logs pod/`oc get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
 		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
 		echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 		paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log
 		cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
 		cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
 		## Cleanup all the deployments
-		${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
+		${SCRIPT_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 		exit -1
 	fi
 }
@@ -89,6 +90,9 @@ do
 	case ${gopts} in
 	-)
 		case "${OPTARG}" in
+			clustertype=*)
+				CLUSTER_TYPE=${OPTARG#*=}
+				;;
 			iter=*)
 				TOTAL_ITR=${OPTARG#*=}
 				;;
@@ -242,8 +246,8 @@ do
 	esac
 done
 
-if [[ -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH}" ]]; then
-	echo "Do set the variables - BENCHMARK_SERVER and RESULTS_DIR_PATH "
+if [[ -z "${CLUSTER_TYPE}" || -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH}" ]]; then
+	echo "Do set the variables - CLUSTER_TYPE, BENCHMARK_SERVER and RESULTS_DIR_PATH "
 	usage
 fi
 
@@ -288,7 +292,13 @@ if [ -z "${DURATION}" ]; then
 fi
 
 if [ -z "${CONNECTIONS}" ]; then
-	CONNECTIONS="700"
+	CONNECTIONS="512"
+fi
+
+if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
+        K_EXEC="oc"
+elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
+        K_EXEC="kubectl"
 fi
 
 RESULTS_DIR_ROOT=${RESULTS_DIR_PATH}/tfb-$(date +%Y%m%d%H%M)
@@ -303,30 +313,32 @@ check_load_prereq
 # Add any debug logs required
 function debug_logs() {
         for i in 0 1; do
-                oc exec -n openshift-user-workload-monitoring prometheus-user-workload-${i} -c prometheus -- curl -s http://localhost:9090/api/v1/targets > ${RESULTS_DIR_ROOT}/targets.${i}.json
+        	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
+			${K_EXEC} exec -n openshift-user-workload-monitoring prometheus-user-workload-${i} -c prometheus -- curl -s http://localhost:9090/api/v1/targets > ${RESULTS_DIR_ROOT}/targets.${i}.json
+		fi
         done
 }
 
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
-	CMD=$(oc get pods --namespace=${NAMESPACE} | grep "tfb-qrh" | grep "Running" | cut -d " " -f1)
-	for status in "${CMD[@]}"
-	do
-		if [ -z "${status}" ]; then
-                	echo "Application pod did not come up" >> ${LOGFILE}
-			oc get pods -n ${NAMESPACE} >> ${LOGFILE}
-			oc get events -n ${NAMESPACE} >> ${LOGFILE}
-			oc logs pod/`oc get pods | grep "tfb-qrh" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
-			echo "The run failed. See setup.log for more details"
-			echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
-			echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
-			paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log	
-			## Cleanup all the deployments
-			${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
-			exit -1;
-		fi
-	done
+	if [ "${CLUSTER_TYPE}" == "openshift" ]; then
+                K_EXEC="oc"
+        elif [ "${CLUSTER_TYPE}" == "minikube" ]; then
+                K_EXEC="kubectl"
+        fi
+        CMD=$(${K_EXEC} get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
+        for status in "${CMD[@]}"
+        do
+                if [ -z "${status}" ]; then
+                        echo "Application pod did not come up" >> ${LOGFILE}
+                        ${K_EXEC} get pods -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} get events -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} logs pod/`${K_EXEC} get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
+                        echo "The run failed. See setup.log for more details"
+                        exit -1;
+                fi
+        done
 }
 
 # Download the required dependencies 
@@ -363,11 +375,20 @@ function run_wrk_with_scaling()
 	TYPE=$1
 	RUN=$2
 	RESULTS_DIR_L=$3
-	SVC_APIS=($(oc status --namespace=${NAMESPACE} | grep "tfb-qrh" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
+		SVC_APIS=($(${K_EXEC} status --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep port | cut -d " " -f1 | cut -d "/" -f3))
+	elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
+		SVC_APIS=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep "${APP_NAME}" | cut -d " " -f1))
+	fi
 	load_setup
 	for svc_api  in "${SVC_APIS[@]}"
 	do
 		RESULT_LOG=${RESULTS_DIR_L}/wrk-${svc_api}-${TYPE}-${RUN}.log
+		if [[ ${CLUSTER_TYPE} == "minikube" ]]; then
+			minikube_ip=$(minikube ip)
+			TFB_PORT=$(kubectl -n ${NAMESPACE} get svc | grep ${APP_NAME} | tr -s " " | cut -d " " -f5 | cut -d ":" -f2 | cut -d "/" -f1)
+			svc_api="${minikube_ip}:${TFB_PORT}"
+		fi
 		run_wrk_workload ${svc_api} ${RESULT_LOG} &
 	done
 }
@@ -385,7 +406,7 @@ function runItr()
 		# Check if the application is running
 		check_app 
 		# Get CPU and MEM info through prometheus queries
-		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} tfb-qrh &
+		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
 		# Run the wrk workload
 		run_wrk_with_scaling ${TYPE} ${run} ${RESULTS_DIR_L}
 		# Sleep till the wrk load completes
@@ -399,12 +420,14 @@ function runItr()
 # output: kruize recommendations for tfb
 function get_recommendations_from_kruize()
 {
-	TOKEN=`oc whoami --show-token`
-	APP_LIST=($(oc get deployments --namespace=${NAMESPACE} | grep "tfb-qrh" | cut -d " " -f1))
+	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
+		TOKEN=`${K_EXEC} whoami --show-token`
+	fi
+	APP_LIST=($(${K_EXEC} get deployments --namespace=${NAMESPACE} | grep "${APP_NAME}" | cut -d " " -f1))
 	for app in "${APP_LIST[@]}"
 	do
 		curl --silent -k -H "Authorization: Bearer ${TOKEN}" http://kruize-openshift-monitoring.apps.${BENCHMARK_SERVER}/recommendations?application_name=${app} > ${RESULTS_DIR_I}/${app}-recommendations.log
-		err_exit "Error: could not generate the recommendations for tfb-qrh" >> ${LOGFILE}
+		err_exit "Error: could not generate the recommendations for ${APP_NAME}" >> ${LOGFILE}
 	done
 }
 
@@ -424,8 +447,8 @@ function runIterations() {
 		echo "***************************************" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
 			echo "Deploying the application..." >> ${LOGFILE}
-			${SCRIPT_REPO}/tfb-qrh-deploy-openshift.sh -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${TFB_IMAGE} --dbtype=${DB_TYPE} --dbhost=${DB_HOST} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --usertunables=${OPTIONS_VAR} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} --FreqInlineSize=${FreqInlineSize} --MaxInlineLevel=${MaxInlineLevel} --MinInliningThreshold=${MinInliningThreshold} --CompileThreshold=${CompileThreshold} --CompileThresholdScaling=${CompileThresholdScaling} --ConcGCThreads=${ConcGCThreads} --InlineSmallCode=${InlineSmallCode} --LoopUnrollLimit=${LoopUnrollLimit} --LoopUnrollMin=${LoopUnrollMin} --MinSurvivorRatio=${MinSurvivorRatio} --NewRatio=${NewRatio} --TieredStopAtLevel=${TieredStopAtLevel} --TieredCompilation=${TieredCompilation} --AllowParallelDefineClass=${AllowParallelDefineClass} --AllowVectorizeOnDemand=${AllowVectorizeOnDemand} --AlwaysCompileLoopMethods=${AlwaysCompileLoopMethods} --AlwaysPreTouch=${AlwaysPreTouch} --AlwaysTenure=${AlwaysTenure} --BackgroundCompilation=${BackgroundCompilation} --DoEscapeAnalysis=${DoEscapeAnalysis} --UseInlineCaches=${UseInlineCaches} --UseLoopPredicate=${UseLoopPredicate} --UseStringDeduplication=${UseStringDeduplication} --UseSuperWord=${UseSuperWord} --UseTypeSpeculation=${UseTypeSpeculation} >> ${LOGFILE}
-			# err_exit "Error: tfb-qrh deployment failed" >> ${LOGFILE}
+			${SCRIPT_REPO}/tfb-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${TFB_IMAGE} --dbtype=${DB_TYPE} --dbhost=${DB_HOST} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --usertunables=${OPTIONS_VAR} --quarkustpcorethreads=${quarkustpcorethreads} --quarkustpqueuesize=${quarkustpqueuesize} --quarkusdatasourcejdbcminsize=${quarkusdatasourcejdbcminsize} --quarkusdatasourcejdbcmaxsize=${quarkusdatasourcejdbcmaxsize} --FreqInlineSize=${FreqInlineSize} --MaxInlineLevel=${MaxInlineLevel} --MinInliningThreshold=${MinInliningThreshold} --CompileThreshold=${CompileThreshold} --CompileThresholdScaling=${CompileThresholdScaling} --ConcGCThreads=${ConcGCThreads} --InlineSmallCode=${InlineSmallCode} --LoopUnrollLimit=${LoopUnrollLimit} --LoopUnrollMin=${LoopUnrollMin} --MinSurvivorRatio=${MinSurvivorRatio} --NewRatio=${NewRatio} --TieredStopAtLevel=${TieredStopAtLevel} --TieredCompilation=${TieredCompilation} --AllowParallelDefineClass=${AllowParallelDefineClass} --AllowVectorizeOnDemand=${AllowVectorizeOnDemand} --AlwaysCompileLoopMethods=${AlwaysCompileLoopMethods} --AlwaysPreTouch=${AlwaysPreTouch} --AlwaysTenure=${AlwaysTenure} --BackgroundCompilation=${BackgroundCompilation} --DoEscapeAnalysis=${DoEscapeAnalysis} --UseInlineCaches=${UseInlineCaches} --UseLoopPredicate=${UseLoopPredicate} --UseStringDeduplication=${UseStringDeduplication} --UseSuperWord=${UseSuperWord} --UseTypeSpeculation=${UseTypeSpeculation} >> ${LOGFILE}
+			# err_exit "Error: ${APP_NAME} deployment failed" >> ${LOGFILE}
 		fi
 		# Add extra sleep time for the deployment to complete as few machines takes longer time.
 		sleep 180
@@ -469,6 +492,11 @@ echo "50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO
 
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize} , ${FreqInlineSize} , ${MaxInlineLevel} , ${MinInliningThreshold} , ${CompileThreshold} , ${CompileThresholdScaling} , ${ConcGCThreads} , ${InlineSmallCode} , ${LoopUnrollLimit} , ${LoopUnrollMin} , ${MinSurvivorRatio} , ${NewRatio} , ${TieredStopAtLevel} , ${TieredCompilation} , ${AllowParallelDefineClass} , ${AllowVectorizeOnDemand} , ${AlwaysCompileLoopMethods} , ${AlwaysPreTouch} , ${AlwaysTenure} , ${BackgroundCompilation} , ${DoEscapeAnalysis} , ${UseInlineCaches} , ${UseLoopPredicate} , ${UseStringDeduplication} , ${UseSuperWord} , ${UseTypeSpeculation} " >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 
+if [ ${CLUSTER_TYPE} == "minikube" ]; then
+#	reload_minikube ${K_CPU} ${K_MEM}
+	fwd_prometheus_port_minikube
+fi
+
 #TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
 # Scale the instances and run the iterations
 for (( scale=1; scale<=${TOTAL_INST}; scale++ ))
@@ -483,14 +511,14 @@ do
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
 	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
 	# Parse the results
-	${SCRIPT_REPO}/perf/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO}
+	${SCRIPT_REPO}/perf/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE}
 	sleep 5
 	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
 	
 done
 
 ## Cleanup all the deployments
-${SCRIPT_REPO}/tfb-cleanup.sh -c openshift -n ${NAMESPACE} >> ${LOGFILE}
+${SCRIPT_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 sleep 10
 echo " "
 # Display the Metrics log file

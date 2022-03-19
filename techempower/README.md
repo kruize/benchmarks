@@ -1,10 +1,12 @@
 # Instructions to run the TechEmpower Framework (Quarkus) application using scripts 
-**The scripts written supports**
-- [Openshift](#Openshift)
+**The scripts written supports openshift and minikube**
 
 ## Prerequisites
-- Enable monitoring for user-defined projects.
 - Packages required on client machine : php java11 git wget zip bc jq.
+- On minikube:
+	- Prometheus ( To install prometheus, use script available [here](https://github.com/kruize/autotune/tree/master/scripts) )
+- On openshift:
+	- Enable monitoring for user-defined projects.
 
 To enable monitring for user-defined projects on openshift:
 
@@ -31,17 +33,16 @@ To enable monitring for user-defined projects on openshift:
 For more details on enabling monitoring, check [this](https://docs.openshift.com/container-platform/4.6/monitoring/enabling-monitoring-for-user-defined-projects.html)
 
 
-tfb-qrh represents TechEmpower Framework benchmark - [Quarkus resteasy-hibernate](https://github.com/TechEmpower/FrameworkBenchmarks/tree/master/frameworks/Java/quarkus)
+## To run the benchmark
 
-Example to deploy and run multiple tfb-qrh application instances using default image
+As of now, the benchmark runs [TechEmpower Framework- Quarkus resteasy-hibernate](https://github.com/TechEmpower/FrameworkBenchmarks/tree/master/frameworks/Java/quarkus)
 
 ```
-## Openshift
+To run the benchmark on kubernetes cluster to collect performance metrics
 
-To run the benchmark on openshift cluster to collect performance metrics
+`./scripts/perf/tfb-run.sh --cluster_type=CLUSTER_TYPE -s BENCHMARK_SERVER -e RESULTS_DIR [--dbtype=DB_TYPE] [--dbhost=DB_HOST] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
 
-`./scripts/perf/run-tfb-qrh-openshift.sh -s BENCHMARK_SERVER -e RESULTS_DIR [--dbtype=DB_TYPE] [--dbhost=DB_HOST] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
-
+- **CLUSTER_TYPE**: Type of cluster. Supports openshift , minikube.
 - **BENCHMARK_SERVER**: Name of the cluster you are using
 - **RESULTS_DIR**: Directory to store results
 - **DB_TYPE**: Supports only options : DOCKER , STANDALONE. Default is DOCKER.
@@ -69,7 +70,23 @@ To run the benchmark on openshift cluster to collect performance metrics
 - **QUARKUS_DATASOURCE_JDBC_MAXSIZE**: quarkus.data-source.jdbc.min.size property for Quarkus.
 
 Example:
-`./scripts/perf/run-tfb-qrh-openshift.sh -s <example.com> -e results -r -d 60 -w 20 -m 3 -i 1 --iter=5 -n default -t 3 -R 200 --connection=200 --cpureq=1.31 --memreq=648M --cpulim=1.3 --memlim=648M --maxinlinelevel=44 --quarkustpcorethreads=22 --quarkustpqueuesize=950 --quarkusdatasourcejdbcminsize=8 --quarkusdatasourcejdbcmaxsize=36`
+`./scripts/perf/run-tfb-qrh-openshift.sh --clustertype=openshift -s <example.com> -e results -r -d 60 -w 20 -m 3 -i 1 --iter=5 -n default -t 3 -R 200 --connection=200 --cpureq=1.31 --memreq=648M --cpulim=1.3 --memlim=648M --maxinlinelevel=44 --quarkustpcorethreads=22 --quarkustpqueuesize=950 --quarkusdatasourcejdbcminsize=8 --quarkusdatasourcejdbcmaxsize=36`
+```
+
+```
+Only to deploy the benchmark:
+
+`./scripts/tfb-deploy.sh --cluster_type=CLUSTER_TYPE [-s BENCHMARK_SERVER] [--dbtype=DB_TYPE] [--dbhost=DB_HOST] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
+
+Example:
+`./scripts/tfb-deploy.sh --clustertype=openshift -s <example.com> --dbtype=docker -i 1 -n default --cpureq=1.31 --memreq=648M --cpulim=1.3 --memlim=648M --maxinlinelevel=44 --quarkustpcorethreads=22 --quarkustpqueuesize=950 --quarkusdatasourcejdbcminsize=8 --quarkusdatasourcejdbcmaxsize=36`
+
+To run the load on benchmark:
+`./scripts/tfb-load.sh --clustertype=CLUSTER_TYPE [-i SERVER_INSTANCES] [--iter=ITERATIONS] [-n NAMESPACE] [-a IP_ADDR]`
+
+Example:
+./scripts/tfb-load.sh --clustertype=openshift -i 1 --iter=3 -n default
+
 ```
 
 **Sample Output and Description:**
@@ -111,14 +128,16 @@ INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RE
 ```
 **Note:** If the run fails, the output values would be **99999**. This is added for the convenience of experiments with autotune. For more details, look into setup.log as mentioned at the end of the run.
 
+
 ## Scripts Details
 
-| Script Name                   |       What it does?                                                                                                                                           |
-|-------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| perf/run-tfb-qrh-openshift.sh |       Main script to run the benchmark - which internally calls other scripts to deploy and run the load and collecting the metrics and parsing the data.     |
-| tfb-qrh-deploy-openshift.sh   |       Deploy the benchmark with tunables                                                                                                                      |
-| perf/getmetrics-promql.sh     |       Has prometheus queries that are required calculate the metrics required for objective function and the benchmark.                                       |
-| perf/parsemetrics-promql.sh   |       Parse the prometheus metrics data to calculate the average , max and min values as per the requirement of the benchmark.                                |
-| perf/ci.php			|	Use to measure confidence interval of data.														|
-| perf/parsemetrics-wrk.sh      |       Parse the metrics data from hyperfoil/wrk load simulator.                                                                                               |
+| Script Name                   |       What it does?																			|
+|-------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| perf/tfb-run.sh		|       Script to measure the performance of benchmark - internally calls other scripts to deploy and run the load and collecting the metrics and parsing the data.	|
+| tfb-deploy.sh			|       Deploy the benchmark with tunables                                                                                                                      	|
+| perf/getmetrics-promql.sh     |       Has prometheus queries that are required calculate the metrics required for objective function and the benchmark.                                       	|
+| perf/parsemetrics-promql.sh   |       Parse the prometheus metrics data to calculate the average , max and min values as per the requirement of the benchmark.                                	|
+| perf/ci.php			|	Use to measure confidence interval of data.															|
+| perf/parsemetrics-wrk.sh      |       Parse the metrics data from hyperfoil/wrk load simulator.                                                                                               	|
+| tfb-load.sh			|	To run the load separately 																	|
 

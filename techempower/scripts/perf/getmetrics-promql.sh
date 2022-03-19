@@ -479,13 +479,22 @@ function get_http_quantiles() {
 ITER=$1
 TIMEOUT=$2
 RESULTS_DIR=$3
-mkdir -p ${RESULTS_DIR}
-#QUERY_APP=prometheus-k8s-openshift-monitoring.apps
-QUERY_APP=thanos-querier-openshift-monitoring.apps
 BENCHMARK_SERVER=$4
 APP_NAME=$5
-URL=https://${QUERY_APP}.${BENCHMARK_SERVER}/api/v1/query
-TOKEN=`oc whoami --show-token`
+CLUSTER_TYPE=$6
+
+mkdir -p ${RESULTS_DIR}
+#QUERY_APP=prometheus-k8s-openshift-monitoring.apps
+if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
+	QUERY_APP=thanos-querier-openshift-monitoring.apps
+	URL=https://${QUERY_APP}.${BENCHMARK_SERVER}/api/v1/query
+	TOKEN=`oc whoami --show-token`
+elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
+	#QUERY_IP=`minikibe ip`
+	QUERY_APP="${BENCHMARK_SERVER}:9090"
+	URL=http://${QUERY_APP}/api/v1/query
+	TOKEN=TOKEN
+fi
 
 export -f err_exit get_cpu get_mem_rss get_mem_usage get_receive_bandwidth get_transmit_bandwidth
 export -f get_app_timer_sum get_app_timer_count get_app_timer_secondspercount get_app_timer_max get_server_errors get_server_requests_sum get_server_requests_count get_server_requests_max 
