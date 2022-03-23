@@ -91,6 +91,9 @@ do
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
 				;;
+			envoptions=*)
+				JDK_JAVA_OPTIONS=${OPTARG#*=}
+				;;
 			usertunables=*)
 				OPTIONS_VAR=${OPTARG#*=}
 				;;
@@ -307,8 +310,14 @@ function createInstances() {
                         fi
 
                 done
-
-		sed -i "s/\"-server\"/\"${OPTIONS_VAR}\"/" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		if [ ! -z  "${OPTIONS_VAR}" ]; then
+			sed -i "s/\"-server\"/\"${OPTIONS_VAR}\"/" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+		fi
+		
+		if [ ! -z  "${JDK_JAVA_OPTIONS}" ]; then
+                        sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"${JDK_JAVA_OPTIONS}\"" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+                        sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "JDK_JAVA_OPTIONS"' ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
+                fi
 
 		if [[ ${DB_TYPE} == "standalone" || ${DB_TYPE} == "STANDALONE" ]]; then
 			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"jdbc:postgresql://${DB_HOST}/techempower?loggerLevel=OFF&disableColumnSanitiser=true&assumeMinServerVersion=12&sslmode=disable\"" ${MANIFESTS_DIR}/quarkus-resteasy-hibernate-${inst}.yaml
