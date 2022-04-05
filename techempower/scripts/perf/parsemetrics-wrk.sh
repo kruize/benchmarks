@@ -18,6 +18,8 @@
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
 source ${CURRENT_DIR}/../utils/common.sh
+#source ${CURRENT_DIR}/../tfb-common.sh
+#APP_NAME="tfb-qrh"
 
 # Parse the result log files
 # input:Type of run(warmup|measure), total number of runs, total number of iteration
@@ -147,6 +149,7 @@ MEASURES=$5
 NAMESPACE=$6
 SCRIPT_REPO=$7
 CLUSTER_TYPE=$8
+APP_NAME=$9
 
 if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
         K_EXEC="oc"
@@ -154,4 +157,4 @@ elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
         K_EXEC="kubectl"
 fi
 
-parseResults ${TOTAL_ITR} ${RESULTS_SC} ${SCALE} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE}
+parseResults ${TOTAL_ITR} ${RESULTS_SC} ${SCALE} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE} ${APP_NAME}

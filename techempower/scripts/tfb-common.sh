@@ -156,3 +156,32 @@ function reload_minikube(){
 function fwd_prometheus_port_minikube() {
 	kubectl port-forward pod/prometheus-k8s-0 9090:9090 -n monitoring >> ${LOGFILE} 2>&1 &
 }
+
+## Create json output to support HPO wrapper
+function createoutputcsv() {
+	   "deployment_name": row[DEPLOYMENT_NAME],
+            "namespace": row[NAMESPACE],
+                "image_name": row[IMAGE_NAME],
+                "container_name": row[CONTAINER_NAME],
+                            "score": row[CPU_MEAN],
+                            "mean": row[CPU_MEAN],
+                            "min": row[CPU_MIN],
+                            "max": row[CPU_MAX]
+                            "score" : row[MEM_MEAN],
+                            "mean" : row[MEM_MEAN],
+                            "min" : row[MEM_MIN],
+                            "max" : row[MEM_MAX]
+                        "score": row[RQSUM_MEAN],
+                        "mean" : row[RQSUM_MEAN],
+                        "max" : row[RQSUM_MAX]
+                        "50p": row[RQ_50p],
+                        "95p": row[RQ_95p],
+                        "97p": row[RQ_97p],
+                        "99p": row[RQ_99p],
+                        "99.9p": row[RQ_99.9p],
+                        "99.99p": row[RQ_99.99p],
+                        "99.999p": row[RQ_99.999p],
+                        "100p": row[RQ_100p]
+                        "score": row[RQC_MEAN],
+                        "score": row[RQ_MAX]
+}
