@@ -244,4 +244,14 @@ echo "Collecting metric data" >> setup.log
 timeout ${TIMEOUT} bash -c  "get_cpu ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 timeout ${TIMEOUT} bash -c  "get_mem_rss ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 timeout ${TIMEOUT} bash -c  "get_mem_usage ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_ container_network_receive_bytes_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_ container_network_transmit_bytes_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_ container_network_receive_packets_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_ container_network_transmit_packets_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_disk_details_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_container_fs_io_time_seconds_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_container_fs_read_seconds_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_container_fs_write_seconds_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_request_duration_seconds_sum_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
+timeout ${TIMEOUT} bash -c  "get_request_duration_seconds_count_total ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME}" &
 sleep ${TIMEOUT}
