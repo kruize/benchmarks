@@ -40,7 +40,7 @@ function get_cpu()
 	do
 		# Processing curl output "timestamp value" using jq tool.
 #		echo "curl --silent -G -kH Authorization: Bearer ${TOKEN} --data-urlencode 'query=sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate) by (pod)' ${URL} "		 
-	curl --data-urlencode 'query=sum(rate(container_cpu_usage_seconds_total[5m])) by (pod,namespace)' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]'
+	curl --data-urlencode 'query=sum(rate(container_cpu_usage_seconds_total[5m])) by (pod,namespace)' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/cpu-${ITER}.json
 err_exit "Error: could not get cpu details of the pod" >>setup.log
 	done
 }
@@ -57,7 +57,7 @@ function get_mem_rss()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_rss) by (pod)' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]'
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_rss) by (pod)' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/mem-${ITER}.json
 		err_exit "Error: could not get memory details of the pod" >>setup.log
 	done
 }
@@ -73,7 +73,7 @@ function get_mem_usage()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_working_set_bytes) by (pod) ' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]'
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_working_set_bytes) by (pod) ' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/memusage-${ITER}.json
 		err_exit "Error: could not get memory details of the pod" >>setup.log
 	done
 }
