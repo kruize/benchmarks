@@ -17,7 +17,7 @@
 ### Script to perform load test on multiple instances of techempower Quarkus benchmarks on openshift###
 #
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-source ${CURRENT_DIR}/../tfb-common.sh
+source ${CURRENT_DIR}/../renaissance-common.sh
 pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
 SCRIPT_REPO=${PWD}
@@ -302,3 +302,24 @@ mkdir -p ${RESULTS_DIR_ROOT}
 
 #Adding 5 secs buffer to retrieve CPU and MEM info
 CPU_MEM_DURATION=`expr ${DURATION} + 5`
+# Check if the application is running
+# output: Returns 1 if the application is running else returns 0
+function check_app() {
+	if [ "${CLUSTER_TYPE}" == "openshift" ]; then
+                K_EXEC="oc"
+        elif [ "${CLUSTER_TYPE}" == "minikube" ]; then
+                K_EXEC="kubectl"
+        fi
+        CMD=$(${K_EXEC} get pods --namespace=${NAMESPACE} | grep "${APP_NAME}" | grep "Running" | cut -d " " -f1)
+        for status in "${CMD[@]}"
+        do
+                if [ -z "${status}" ]; then
+                        echo "Application pod did not come up" >> ${LOGFILE}
+                        ${K_EXEC} get pods -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} get events -n ${NAMESPACE} >> ${LOGFILE}
+                        ${K_EXEC} logs pod/`${K_EXEC} get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
+                        echo "The run failed. See setup.log for more details"
+                        exit -1;
+                fi
+        done
+}
