@@ -31,9 +31,9 @@ NAMESPACE="${DEFAULT_NAMESPACE}"
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 --clustertype=CLUSTER_TYPE [-s BENCHMARK_SERVER] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] "
+	echo "Usage: $0 --clustertype=CLUSTER_TYPE [-s BENCHMARK_SERVER] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g RENAISSANCE_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-b BENCHMARKS] [-t BENCHMARK_DURATION]"
 	echo " "
-	echo "Example: $0 --clustertype=openshift -s example.in.com -i 2 -g kruize/tfb-qrh:1.13.2.F_mm.v1 --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi"
+	echo "Example: $0 --clustertype=openshift -s example.in.com -i 2 -g prakalp23/renaissance1041:latest --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi -b page-rank -t 480"
 	exit -1
 }
 
@@ -106,6 +106,12 @@ do
 	n)
 		NAMESPACE="${OPTARG}"		
 		;;
+	b)      
+	   	BENCHMARKS="${OPTARG}"	
+		;;
+	t)	
+		BENCHMARK_DURATION="${OPTARG}"	
+		;;
 	esac
 done
 
@@ -163,7 +169,14 @@ function createInstances() {
 		if [ ! -z  ${CPU_LIM} ]; then
 			sed -i '/limits:/a \ \ \ \ \ \ \ \ \ \ cpu: '${CPU_LIM}'' ${MANIFESTS_DIR}/renaissance-${inst}.yaml
 		fi
-
+		if [ ! -z  ${BENCHMARKS} ]; then
+			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "${BENCHMARKS}"" ${MANIFESTS_DIR}/renaissance-${inst}.yaml
+             		sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "BENCHAMRKS"' ${MANIFESTS_DIR}/renaissance-${inst}.yaml
+		fi
+		if [ ! -z  ${BENCHMARK_DURATION} ]; then
+			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "${BENCHMARK_DURATION}"" ${MANIFESTS_DIR}/renaissance-${inst}.yaml
+             		sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "TIME_LIMIT"' ${MANIFESTS_DIR}/renaissance-${inst}.yaml
+		fi
 		tunables_jvm_boolean=(TieredCompilation AllowParallelDefineClass AllowVectorizeOnDemand AlwaysCompileLoopMethods AlwaysPreTouch AlwaysTenure BackgroundCompilation DoEscapeAnalysis UseInlineCaches UseLoopPredicate UseStringDeduplication UseSuperWord UseTypeSpeculation)
 		tunables_jvm_values=(FreqInlineSize MaxInlineLevel MinInliningThreshold CompileThreshold CompileThresholdScaling ConcGCThreads InlineSmallCode LoopUnrollLimit LoopUnrollMin MinSurvivorRatio NewRatio TieredStopAtLevel)
 		user_options=$(echo ${OPTIONS_VAR} | tr ";" "\n")
@@ -221,7 +234,7 @@ function createInstances() {
 	fi
 
 	## extra sleep time
-	sleep 60
+	#sleep 60
 			
 	# Check if the application is running
 	#check_app >> ${LOGFILE}
