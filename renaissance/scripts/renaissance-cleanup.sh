@@ -50,7 +50,7 @@ fi
 # Removes the renaissance instances
 # output: Removes the renaissance and renaissance deployments, services, service monitors and routes
 function remove_renaissance() {
-	renaissance_DEPLOYMENTS=($(${K_EXEC} get deployments --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
+	renaissance_DEPLOYMENTS=($(${K_EXEC} get deployments --namespace=${NAMESPACE} | grep -e "${APP_NAME}"  | cut -d " " -f1))
 
 	for de in "${renaissance_DEPLOYMENTS[@]}"
 	do
@@ -58,19 +58,19 @@ function remove_renaissance() {
 	done
 
 	#Delete the services and routes if any
-	renaissance_SERVICES=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
+	renaissance_SERVICES=($(${K_EXEC} get svc --namespace=${NAMESPACE} | grep -e "${APP_NAME}" | cut -d " " -f1))
 	for se in "${renaissance_SERVICES[@]}"
 	do
 		${K_EXEC} delete svc ${se} --namespace=${NAMESPACE}
 	done
-	renaissance_SERVICE_MONITORS=($(${K_EXEC} get servicemonitor --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
+	renaissance_SERVICE_MONITORS=($(${K_EXEC} get servicemonitor --namespace=${NAMESPACE} | grep -e "${APP_NAME}" | cut -d " " -f1))
 	for sm in "${renaissance_SERVICE_MONITORS[@]}"
 	do
 		${K_EXEC} delete servicemonitor ${sm} --namespace=${NAMESPACE}
 	done
 
 	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
-		renaissance_ROUTES=($(${K_EXEC} get route --namespace=${NAMESPACE} | grep -e "${APP_NAME}" -e "${APP_DB}" | cut -d " " -f1))
+		renaissance_ROUTES=($(${K_EXEC} get route --namespace=${NAMESPACE} | grep -e "${APP_NAME}" | cut -d " " -f1))
 		for ro in "${renaissance_ROUTES[@]}"
 		do
 			${K_EXEC} delete route ${ro} --namespace=${NAMESPACE}
@@ -83,6 +83,6 @@ elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 	K_EXEC="kubectl"
 fi
 
-echo -n "Removing the tfb instances..."
+echo -n "Removing the renaissance instances..."
 remove_renaissance >> ${LOGFILE}
 echo "done"
