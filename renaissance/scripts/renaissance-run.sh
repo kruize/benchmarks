@@ -33,51 +33,26 @@ function err_exit() {
 		printf "$*"
 		echo
 		echo "The run failed. See setup.log for more details"
-		oc get pods -n ${NAMESPACE} >> ${LOGFILE}
-		oc get events -n ${NAMESPACE} >> ${LOGFILE}
-		oc logs pod/`oc get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
-		echo "1 , 99999 , 99999 , 99999 , 99999 , 99999 , 999999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999 , 99999" >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
-		echo ", 99999 , 99999 , 99999 , 99999 , 9999 , 0 , 0" >> ${RESULTS_DIR_ROOT}/Metrics-wrk.log
-		paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log ${RESULTS_DIR_ROOT}/deploy-config.log
-		cat ${RESULTS_DIR_ROOT}/app-calc-metrics-measure-raw.log
-		cat ${RESULTS_DIR_ROOT}/server_requests-metrics-${TYPE}-raw.log
+		${K_EXEC} get pods -n ${NAMESPACE} >> ${LOGFILE}
+                ${K_EXEC} get events -n ${NAMESPACE} >> ${LOGFILE}
+                ${K_EXEC} logs pod/`${K_EXEC} get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
+		echo "1 , 99999 " >> ${RESULTS_DIR_ROOT}/Metrics-prom.log
+		cat ${RESULTS_DIR_ROOT}/Metrics-prom.log 
 		## Cleanup all the deployments
 		${SCRIPT_REPO}/renaissance-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 		exit -1
 	fi
 }
 # Run the benchmark as
-# SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH WARMUPS MEASURES TOTAL_INST TOTAL_ITR RE_DEPLOY
-# Ex of ARGS : --clustertype=openshift -s example.in.com -e /tfb/results -w 5 -m 3 -i 1 --iter=1 -r
+# SCRIPT BENCHMARK_SERVER_NAME NAMESPACE RESULTS_DIR_PATH WARMUPS MEASURES TOTAL_INST TOTAL_ITR RE_DEPLOY DURATION BENCHMARK
+# Ex of ARGS : --clustertype=openshift -s example.in.com -e /tfb/results -w 5 -m 3 -i 1 --iter=1 -r -d 60 -b page-rank
 # Describes the usage of the script
 function usage() {
 	echo
-	echo "Usage: $0 --clustertype=CLUSTER_TYPE -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-g TFB_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-t THREAD] [-R REQUEST_RATE] [-d DURATION] [--connection=CONNECTIONS]"
+	echo "Usage: $0 --clustertype=CLUSTER_TYPE -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-g RENAISSANCE_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-b BENCHMARKS] [-R REPETITIONS] [-d DURATION] "
 	exit -1
 }
-# Check if java is installed and it is of version 11 or newer
-function check_load_prereq() {
-	echo
-	echo -n "Info: Checking prerequisites..." >> ${LOGFILE}
-	# check if java exists
-	if [ ! `which java` ]; then
-		echo " "
-		echo "Error: java is not installed."
-		exit 1
-	else
-		JAVA_VER=$(java -version 2>&1 >/dev/null | egrep "\S+\s+version" | awk '{print $3}' | tr -d '"')
-		case "${JAVA_VER}" in 
-			1[1-9].*.*)
-				echo "done" >> ${LOGFILE}
-				;;
-			*)
-				echo " "
-				echo "Error: Hyperfoil requires Java 11 or newer and current java version is ${JAVA_VER}"
-				exit 1
-				;;
-		esac
-	fi
-}
+
 # Iterate through the commandline options
 while getopts s:e:w:m:i:rg:n:t:R:d:-: gopts
 do
@@ -89,13 +64,7 @@ do
 				;;
 			iter=*)
 				TOTAL_ITR=${OPTARG#*=}
-				;;
-			dbtype=*)
-				DB_TYPE=${OPTARG#*=}
-				;;
-			dbhost=*)
-				DB_HOST=${OPTARG#*=}
-				;;
+				;;			
 			cpureq=*)
 				CPU_REQ=${OPTARG#*=}
 				;;
@@ -113,96 +82,6 @@ do
 				;;
 			usertunables=*)
                                 OPTIONS_VAR=${OPTARG#*=}
-                                ;;
-			connection=*)
-				CONNECTIONS=${OPTARG#*=}
-				;;
-			quarkustpcorethreads=*)
-				quarkustpcorethreads=${OPTARG#*=}
-                                ;;
-			quarkustpqueuesize=*)
-				quarkustpqueuesize=${OPTARG#*=}
-                                ;;
-			quarkusdatasourcejdbcminsize=*)
-				quarkusdatasourcejdbcminsize=${OPTARG#*=}
-                                ;;
-			quarkusdatasourcejdbcmaxsize=*)
-				quarkusdatasourcejdbcmaxsize=${OPTARG#*=}
-                                ;;
-			FreqInlineSize=*)
-                                FreqInlineSize=${OPTARG#*=}
-                                ;;
-                        MaxInlineLevel=*)
-                                MaxInlineLevel=${OPTARG#*=}
-                                ;;
-                        MinInliningThreshold=*)
-                                MinInliningThreshold=${OPTARG#*=}
-                                ;;
-                        CompileThreshold=*)
-                                CompileThreshold=${OPTARG#*=}
-                                ;;
-                        CompileThresholdScaling=*)
-                                CompileThresholdScaling=${OPTARG#*=}
-                                ;;
-                        InlineSmallCode=*)
-                                InlineSmallCode=${OPTARG#*=}
-                                ;;
-                        LoopUnrollLimit=*)
-                                LoopUnrollLimit=${OPTARG#*=}
-                                ;;
-                        LoopUnrollMin=*)
-                                LoopUnrollMin=${OPTARG#*=}
-                                ;;
-                        MinSurvivorRatio=*)
-                                MinSurvivorRatio=${OPTARG#*=}
-                                ;;
-                        NewRatio=*)
-                                NewRatio=${OPTARG#*=}
-                                ;;
-                        TieredStopAtLevel=*)
-                                TieredStopAtLevel=${OPTARG#*=}
-                                ;;
-                        ConcGCThreads=*)
-                                ConcGCThreads=${OPTARG#*=}
-                                ;;
-                        TieredCompilation=*)
-                                TieredCompilation=${OPTARG#*=}
-                                ;;
-                        AllowParallelDefineClass=*)
-                                AllowParallelDefineClass=${OPTARG#*=}
-                                ;;
-                        AllowVectorizeOnDemand=*)
-                                AllowVectorizeOnDemand=${OPTARG#*=}
-				;;
-                        AlwaysCompileLoopMethods=*)
-                                AlwaysCompileLoopMethods=${OPTARG#*=}
-                                ;;
-                        AlwaysPreTouch=*)
-                                AlwaysPreTouch=${OPTARG#*=}
-                                ;;
-                        AlwaysTenure=*)
-                                AlwaysTenure=${OPTARG#*=}
-                                ;;
-                        BackgroundCompilation=*)
-                                BackgroundCompilation=${OPTARG#*=}
-                                ;;
-                        DoEscapeAnalysis=*)
-                                DoEscapeAnalysis=${OPTARG#*=}
-                                ;;
-                        UseInlineCaches=*)
-                                UseInlineCaches=${OPTARG#*=}
-                                ;;
-                        UseLoopPredicate=*)
-                                UseLoopPredicate=${OPTARG#*=}
-                                ;;
-                        UseStringDeduplication=*)
-                                UseStringDeduplication=${OPTARG#*=}
-                                ;;
-                        UseSuperWord=*)
-                                UseSuperWord=${OPTARG#*=}
-                                ;;
-                        UseTypeSpeculation=*)
-                                UseTypeSpeculation=${OPTARG#*=}
                                 ;;
 			*)
 		esac
@@ -226,16 +105,16 @@ do
 		RE_DEPLOY="true"
 		;;
 	g)
-		renaissance_IMAGE="${OPTARG}"		
+		RENAISSANCE_IMAGE="${OPTARG}"		
 		;;
 	n)
 		NAMESPACE="${OPTARG}"		
 		;;
-	t)
-		THREAD="${OPTARG}"
+	b)
+		BENCHMARKS="${OPTARG}"
 		;;
 	R)
-		REQUEST_RATE="${OPTARG}"
+		REPETITIONS="${OPTARG}"
 		;;
 	d)
 		DURATION="${OPTARG}"
@@ -268,7 +147,7 @@ if [ -z "${RE_DEPLOY}" ]; then
 fi
 
 if [ -z "${BENCHMARK_IMAGE}" ]; then
-	BENCHMARK_IMAGE="${prakalp23/renaissance1041:latest"}"
+	BENCHMARK_IMAGE="prakalp23/renaissance1041:latest"
 fi
 
 if [ -z "${NAMESPACE}" ]; then
@@ -279,16 +158,12 @@ if [ -z "${REPETITIONS}" ]; then
 	REPETITIONS="20"
 fi
 
-if [ -z "${RUN_SECONDS}" ]; then
-	RUN_SECONDS="40"
+if [ -z "${BENCHMARKS}" ]; then
+	BENCHMARKS="all"
 fi
 
 if [ -z "${DURATION}" ]; then
 	DURATION="60"
-fi
-
-if [ -z "${CONNECTIONS}" ]; then
-	CONNECTIONS="512"
 fi
 
 if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
@@ -302,6 +177,7 @@ mkdir -p ${RESULTS_DIR_ROOT}
 
 #Adding 5 secs buffer to retrieve CPU and MEM info
 CPU_MEM_DURATION=`expr ${DURATION} + 5`
+BENCHMARK_DURATION=`expr (${WARMUPS} + ${MEASURES}) * ${DURATION} `
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
@@ -343,21 +219,6 @@ function runItr()
 		sleep 1
 	done
 }
-# get the kruize recommendation for tfb application
-# input: result directory
-# output: kruize recommendations for tfb
-function get_recommendations_from_kruize()
-{
-	if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
-		TOKEN=`${K_EXEC} whoami --show-token`
-	fi
-	APP_LIST=($(${K_EXEC} get deployments --namespace=${NAMESPACE} | grep "${APP_NAME}" | cut -d " " -f1))
-	for app in "${APP_LIST[@]}"
-	do
-		curl --silent -k -H "Authorization: Bearer ${TOKEN}" http://kruize-openshift-monitoring.apps.${BENCHMARK_SERVER}/recommendations?application_name=${app} > ${RESULTS_DIR_I}/${app}-recommendations.log
-		err_exit "Error: could not generate the recommendations for ${APP_NAME}" >> ${LOGFILE}
-	done
-}
 function runIterations() {
 	SCALING=$1
 	TOTAL_ITR=$2
@@ -371,7 +232,7 @@ function runIterations() {
 		echo "***************************************" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
 			echo "Deploying the application..." >> ${LOGFILE}
-			${SCRIPT_REPO}/renaissance-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${RENAISSANCE_IMAGE}  --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" --usertunables="${OPTIONS_VAR}"  >> ${LOGFILE}
+			${SCRIPT_REPO}/renaissance-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${RENAISSANCE_IMAGE}  --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" --usertunables="${OPTIONS_VAR} -b ${BENCHMARKS} -t ${BENCHMARK_DURATION}"  >> ${LOGFILE}
 			# err_exit "Error: ${APP_NAME} deployment failed" >> ${LOGFILE}
 		fi
 		# Add extra sleep time for the deployment to complete as few machines takes longer time.
