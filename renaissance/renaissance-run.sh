@@ -267,8 +267,8 @@ if [ -z "${RE_DEPLOY}" ]; then
 	RE_DEPLOY=false
 fi
 
-if [ -z "${renaissance_IMAGE}" ]; then
-	renaissance_IMAGE="${TFB_DEFAULT_IMAGE}"
+if [ -z "${BENCHMARK_IMAGE}" ]; then
+	BENCHMARK_IMAGE="${prakalp23/renaissance1041:latest"}"
 fi
 
 if [ -z "${NAMESPACE}" ]; then
@@ -444,14 +444,14 @@ do
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
 	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
 	# Parse the results
-	${REPO}/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE} ${APP_NAME}
+	# ${REPO}/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE} ${APP_NAME}
 	sleep 5
-	${REPO}/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
+	# ${REPO}/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
 	
 done
 
 ## Cleanup all the deployments
-#${SCRIPT_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
+#${REPO}/renaissance-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 sleep 10
 echo " "
 # Display the Metrics log file
