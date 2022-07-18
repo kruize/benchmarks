@@ -18,7 +18,7 @@
 #
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-source ${CURRENT_DIR}/tfb-common.sh
+source ${CURRENT_DIR}/renaissance-common.sh
 
 SERVER_INSTANCES=1
 DB_TYPE=${DEFAULT_DB_TYPE}
