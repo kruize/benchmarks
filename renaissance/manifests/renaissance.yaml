@@ -26,12 +26,6 @@ spec:
         image: prakalp23/renaissance1041:latest
         imagePullPolicy: IfNotPresent
         env:
-          - name: "JDK_JAVA_OPTIONS"
-            value: " "
-          - name: "BENCHMARK"
-            value: "all"
-          - name: "TIME_LIMIT"
-            value: "5"
         ports:
           - containerPort: 8080
         resources:
