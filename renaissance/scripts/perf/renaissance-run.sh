@@ -172,7 +172,7 @@ elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
         K_EXEC="kubectl"
 fi
 
-RESULTS_DIR_ROOT=${RESULTS_DIR_PATH}/tfb-$(date +%Y%m%d%H%M)
+RESULTS_DIR_ROOT=${RESULTS_DIR_PATH}/renaissance-$(date +%Y%m%d%H%M)
 mkdir -p ${RESULTS_DIR_ROOT}
 
 #Adding 5 secs buffer to retrieve CPU and MEM info
@@ -213,7 +213,7 @@ function runItr()
 		# Check if the application is running
 		check_app 
 		# Get CPU and MEM info through prometheus queries
-		${SCRIPT_REPO}/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
+		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
 		# Sleep till the wrk load completes
 		sleep ${DURATION}
 		sleep 1
