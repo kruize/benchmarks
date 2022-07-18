@@ -18,7 +18,16 @@
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
 pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
+
 # Set the defaults for the app
+export NETWORK="kruize-network"
+LOGFILE="${PWD}/setup.log"
+RENAISSANCE_REPO="${CURRENT_DIR}"
+BENCHMARK_IMAGE="prakalp23/renaissance1041:latest"
+DEFAULT_NAMESPACE="default"
+MANIFESTS_DIR="manifests/"
+APP_NAME="renaissance"
+
 # checks if the previous command is executed successfully
 # input:Return value of previous command
 # output:Prompts the error message if the return value is not zero 
