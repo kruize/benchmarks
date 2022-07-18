@@ -1,0 +1,9 @@
+FROM eclipse-temurin:17.0.3_7-jre
+WORKDIR /target
+COPY renaissance-gpl-0.14.1.jar /target/renaissance-gpl-0.14.1.jar
+COPY jmx_prometheus_javaagent-0.17.0.jar jmx_prometheus_javaagent-0.17.0.jar
+COPY config.yaml config.yaml
+ENV JDK_JAVA_OPTIONS=
+ENV BENCHMARK=all
+ENV TIME_LIMIT=5
+ENTRYPOINT java -javaagent:./jmx_prometheus_javaagent-0.17.0.jar=8080:config.yaml ${JDK_JAVA_OPTIONS} -jar /target/renaissance-gpl-0.14.1.jar -t ${TIME_LIMIT} --csv /output/renaissance-output.csv ${BENCHMARK}
