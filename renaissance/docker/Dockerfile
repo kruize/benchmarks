@@ -1,5 +1,6 @@
 FROM eclipse-temurin:17.0.3_7-jre
 WORKDIR /target
+RUN wget https://github.com/renaissance-benchmarks/renaissance/releases/download/v0.14.1/renaissance-gpl-0.14.1.jar
 COPY renaissance-gpl-0.14.1.jar /target/renaissance-gpl-0.14.1.jar
 COPY jmx_prometheus_javaagent-0.17.0.jar jmx_prometheus_javaagent-0.17.0.jar
 COPY config.yaml config.yaml
