@@ -1,0 +1,2 @@
+# to run the benchmark
+./renaissance-run.sh --clustertype=minikube -s localhost -e ./results -w 1 -m 1 -i 1 --iter=1 -r -n default  --cpureq=1.5 --memreq=3152M --cpulim=1.5 --memlim=3152M -b "page-rank" -d 60
