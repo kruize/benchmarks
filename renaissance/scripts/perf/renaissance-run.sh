@@ -40,7 +40,7 @@ function err_exit() {
 		cat ${RESULTS_DIR_ROOT}/Metrics-prom.log 
 		## Cleanup all the deployments
 		${SCRIPT_REPO}/renaissance-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
-		exit -1
+		exit 1
 	fi
 }
 # Run the benchmark as
@@ -50,11 +50,11 @@ function err_exit() {
 function usage() {
 	echo
 	echo "Usage: $0 --clustertype=CLUSTER_TYPE -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-g RENAISSANCE_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-b BENCHMARKS] [-R REPETITIONS] [-d DURATION] "
-	exit -1
+	exit 1
 }
 
 # Iterate through the commandline options
-while getopts s:e:w:m:i:rg:n:t:R:d:-: gopts
+while getopts s:e:w:m:i:rg:n:t:R:d:b:-: gopts
 do
 	case ${gopts} in
 	-)
@@ -159,7 +159,7 @@ if [ -z "${REPETITIONS}" ]; then
 fi
 
 if [ -z "${BENCHMARKS}" ]; then
-	BENCHMARKS="all"
+	BENCHMARKS="page-rank"
 fi
 
 if [ -z "${DURATION}" ]; then
@@ -177,7 +177,9 @@ mkdir -p ${RESULTS_DIR_ROOT}
 
 #Adding 5 secs buffer to retrieve CPU and MEM info
 CPU_MEM_DURATION=`expr ${DURATION} + 5`
-BENCHMARK_DURATION=`expr (${WARMUPS} + ${MEASURES}) * ${DURATION} `
+#BENCHMARK_DURATION=`expr ${WARMUPS} + ${MEASURES} * ${DURATION}`
+BENCHMARK_DURATION="140"
+echo "THe output is" ${BENCHMARK_DURATION}
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
@@ -195,7 +197,7 @@ function check_app() {
                         ${K_EXEC} get events -n ${NAMESPACE} >> ${LOGFILE}
                         ${K_EXEC} logs pod/`${K_EXEC} get pods | grep "${APP_NAME}" | cut -d " " -f1` -n ${NAMESPACE} >> ${LOGFILE}
                         echo "The run failed. See setup.log for more details"
-                        exit -1;
+                        exit 1;
                 fi
         done
 }
@@ -213,6 +215,7 @@ function runItr()
 		# Check if the application is running
 		check_app 
 		# Get CPU and MEM info through prometheus queries
+		echo "message" ${CPU_MEM_DURATION}
 		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
 		# Sleep till the wrk load completes
 		sleep ${DURATION}
@@ -232,7 +235,8 @@ function runIterations() {
 		echo "***************************************" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
 			echo "Deploying the application..." >> ${LOGFILE}
-			${SCRIPT_REPO}/renaissance-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${RENAISSANCE_IMAGE}  --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" --usertunables="${OPTIONS_VAR} -b ${BENCHMARKS} -t ${BENCHMARK_DURATION}"  >> ${LOGFILE}
+			#echo "${SCRIPT_REPO}/renaissance-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${RENAISSANCE_IMAGE}  --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" --usertunables="${OPTIONS_VAR}" -b ${BENCHMARKS} -t ${BENCHMARK_DURATION}"
+			${SCRIPT_REPO}/renaissance-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${RENAISSANCE_IMAGE}  --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" --usertunables="${OPTIONS_VAR}" -b ${BENCHMARKS} -t ${BENCHMARK_DURATION}  >> ${LOGFILE}
 			# err_exit "Error: ${APP_NAME} deployment failed" >> ${LOGFILE}
 		fi
 		# Add extra sleep time for the deployment to complete as few machines takes longer time.

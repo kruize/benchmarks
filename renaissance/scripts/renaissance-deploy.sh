@@ -64,7 +64,7 @@ function check_memory_unit() {
 }
 
 # Iterate through the commandline options
-while getopts s:i:g:n:-: gopts
+while getopts s:i:g:n:b:t:-: gopts
 do
 	case ${gopts} in
 	-)
@@ -170,13 +170,15 @@ function createInstances() {
 			sed -i '/limits:/a \ \ \ \ \ \ \ \ \ \ cpu: '${CPU_LIM}'' ${MANIFESTS_DIR}/renaissance-${inst}.yaml
 		fi
 		if [ ! -z  ${BENCHMARKS} ]; then
-			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "${BENCHMARKS}"" ${MANIFESTS_DIR}/renaissance-${inst}.yaml
+			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"${BENCHMARKS}\""  ${MANIFESTS_DIR}/renaissance-${inst}.yaml
              		sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "BENCHAMRKS"' ${MANIFESTS_DIR}/renaissance-${inst}.yaml
 		fi
+		echo "MESSAGE" ${BENCHMARKS}
 		if [ ! -z  ${BENCHMARK_DURATION} ]; then
-			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: "${BENCHMARK_DURATION}"" ${MANIFESTS_DIR}/renaissance-${inst}.yaml
+			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"${BENCHMARK_DURATION}\"" ${MANIFESTS_DIR}/renaissance-${inst}.yaml
              		sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "TIME_LIMIT"' ${MANIFESTS_DIR}/renaissance-${inst}.yaml
 		fi
+		echo "message1" ${BENCHMARK_DURATION}
 		tunables_jvm_boolean=(TieredCompilation AllowParallelDefineClass AllowVectorizeOnDemand AlwaysCompileLoopMethods AlwaysPreTouch AlwaysTenure BackgroundCompilation DoEscapeAnalysis UseInlineCaches UseLoopPredicate UseStringDeduplication UseSuperWord UseTypeSpeculation)
 		tunables_jvm_values=(FreqInlineSize MaxInlineLevel MinInliningThreshold CompileThreshold CompileThresholdScaling ConcGCThreads InlineSmallCode LoopUnrollLimit LoopUnrollMin MinSurvivorRatio NewRatio TieredStopAtLevel)
 		user_options=$(echo ${OPTIONS_VAR} | tr ";" "\n")
