@@ -24,7 +24,7 @@ function err_exit()
 	if [ $? != 0 ]; then
 		printf "$*"
 		echo 
-		exit -1
+		exit 1
 	fi
 }
 function get_cpu()
@@ -88,7 +88,7 @@ function get_container_network_receive_bytes_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=container_network_receive_bytes_total' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/netreceivebytes-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_receive_bytes_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' >> ${RESULTS_DIR}/netreceivebytes-${ITER}.json
 		#err_exit "Error: could not get network received details of the pod" >>setup.log
 	done
 }
@@ -102,7 +102,7 @@ function get_container_network_transmit_bytes_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=container_network_transmit_bytes_total' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/nettransmitbytes-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_transmit_bytes_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' >> ${RESULTS_DIR}/nettransmitbytes-${ITER}.json
 		#err_exit "Error: could not get container network transmit bytes details of the pod" >>setup.log
 	done
 }
@@ -116,7 +116,7 @@ function get_container_network_receive_packets_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=container_network_receive_packets_total' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/cnetreceivebytes-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_receive_packets_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]'>> ${RESULTS_DIR}/cnetreceivebytes-${ITER}.json
 		#err_exit "Error: could not get container network receive packet details of the pod" >>setup.log
 	done
 }
@@ -130,7 +130,7 @@ function get_container_network_transmit_packets_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=container_network_transmit_packets_total' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/cnettranmitbytes-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_transmit_packets_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' >> ${RESULTS_DIR}/cnettranmitbytes-${ITER}.json
 		#err_exit "Error: could not get container network tranmit packet  details of the pod" >>setup.log
 	done
 }
@@ -144,7 +144,7 @@ function get_disk_details_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_fs_usage_bytes[30s]))' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/diskdetails-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_fs_usage_bytes[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]'>> ${RESULTS_DIR}/diskdetails-${ITER}.json
 		#err_exit "Error: could not get disk details of the pod" >>setup.log
 	done
 }
@@ -158,7 +158,7 @@ function get_container_fs_io_time_seconds_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=container_fs_io_time_seconds_total' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/fsiototal-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_fs_io_time_seconds_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]'>> ${RESULTS_DIR}/fsiototal-${ITER}.json
 		#err_exit "Error: could not get I/O time details of the pod" >>setup.log
 	done
 }
@@ -172,7 +172,7 @@ function get_container_fs_read_seconds_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=container_fs_read_seconds_total' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/fsreadtotal-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_fs_read_seconds_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]'>> ${RESULTS_DIR}/fsreadtotal-${ITER}.json
 		#err_exit "Error: could not get required details of the pod" >>setup.log
 	done
 }
@@ -186,7 +186,7 @@ function get_container_fs_write_seconds_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=container_fs_write_seconds_total' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/fswritetotal-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_fs_write_seconds_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]'>> ${RESULTS_DIR}/fswritetotal-${ITER}.json
 		#err_exit "Error: could not get required details of the pod" >>setup.log
 	done
 }
@@ -201,7 +201,7 @@ function get_request_duration_seconds_sum_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=http_request_duration_seconds_sum' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_sum_total-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(http_request_duration_seconds_sum[60s])) by (pod)' | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_sum_total-${ITER}.json
 		#err_exit "Error: could not get request sum duration of seconds details of the pod" >>setup.log
 	done
 }
@@ -215,7 +215,7 @@ function get_request_duration_seconds_count_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=http_request_duration_seconds_count' http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_count_total-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(http_request_duration_seconds_count[60s])) by (pod)'| jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_count_total-${ITER}.json
 		#err_exit "Error: could not get request count details of the pod" >>setup.log
 	done
 }

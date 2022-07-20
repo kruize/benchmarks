@@ -177,8 +177,9 @@ mkdir -p ${RESULTS_DIR_ROOT}
 
 #Adding 5 secs buffer to retrieve CPU and MEM info
 CPU_MEM_DURATION=`expr ${DURATION} + 5`
-#BENCHMARK_DURATION=`expr ${WARMUPS} + ${MEASURES} * ${DURATION}`
-BENCHMARK_DURATION="140"
+BENCHMARK_DURATION=`expr ${WARMUPS} + ${MEASURES}`
+BENCHMARK_DURATION=`expr ${BENCHMARK_DURATION} \* ${DURATION}`
+#BENCHMARK_DURATION="140"
 echo "THe output is" ${BENCHMARK_DURATION}
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
