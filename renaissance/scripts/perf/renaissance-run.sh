@@ -297,7 +297,7 @@ do
 	# Parse the results
 	# ${REPO}/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE} ${APP_NAME}
 	sleep 5
-	${SCRIPT_REPO}/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
+	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
 	
 done
 
