@@ -28,7 +28,7 @@ function parsePromMetrics()  {
 	TOTAL_RUNS=$2
 	ITR=$3
 
-	for (( run=0 ; run<"${TOTAL_RUNS}" ; run++))
+	for (( run=0 ; run<"${TOTAL_RUNS}" ;run++))
 	do
 	  for poddatalog in "${POD_CPU_LOGS[@]}"
 		do
@@ -40,7 +40,6 @@ function parsePromMetrics()  {
 			# Parsing Mem logs for pod
 			parsePodMemLog ${podmemlog} ${TYPE} ${run} ${ITR}
 		done
-
 		for poddiskdetailslog in "${POD_DISK_DETAILS_LOGS[@]}"
 		do
 			# Parsing Mem logs for pod
@@ -75,14 +74,14 @@ function parsePodDataLog()
 	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
 	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
 
-	TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
+	#TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
 	for run_pod in "${RUN_PODS[@]}"
 	do
      if [ -s "${DATA_LOG}" ]; then
-    cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
-    each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
-    each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
-    each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
+    cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
+    each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
+    each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
+    each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
     data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
     data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
     data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
@@ -114,10 +113,10 @@ function parsePodMemLog()
 	do
 		if [ -s "${MEM_LOG}" ]; then
                         cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
-                        each_pod_mem_avg=$( echo `calcAvg_inMB ${TEMP_LOG} | cut -d "=" -f2`  )
-                        each_pod_mem_min=$( echo `calcMin ${TEMP_LOG}`  )
+                        each_pod_mem_avg=$( echo `calcAvg_inMB ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
+                        each_pod_mem_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log`  )
                         each_pod_mem_min_inMB=$(echo ${each_pod_mem_min}/1024/1024 | bc)
-                        each_pod_mem_max=$( echo `calcMax ${TEMP_LOG}`  )
+                        each_pod_mem_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log`  )
                         each_pod_mem_max_inMB=$(echo ${each_pod_mem_max}/1024/1024 | bc)
                         mem_sum=$(echo ${mem_sum}+${each_pod_mem_avg} | bc)
                         mem_min=$(echo ${mem_min}+${each_pod_mem_min_inMB} | bc)
@@ -148,9 +147,9 @@ function parseDataLog()
 	do
 		if [ -s "${DATA_LOG}" ]; then
                         cat ${DATA_LOG} | cut -d ";" -f2 | cut -d '"' -f1 > ${TEMP_LOG}
-                        each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
-                        each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
-                        each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
+                        each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
+                        each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
+                        each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
                         data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
                         data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
                         data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
@@ -316,7 +315,7 @@ function parseResults() {
   done
 	###### Add different raw logs we want to merge
 	#Cumulative raw data
-	paste ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >> ${RESULTS_DIR_J}/Metrics-cpumem-raw.log
+	paste ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >> ${RESULTS_DIR_J}/../Metrics-cpumem-raw.log
 
 	for metric in "${TOTAL_LOGS[@]}"
 	do
