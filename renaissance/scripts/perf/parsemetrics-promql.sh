@@ -159,64 +159,65 @@ function parseDataLog()
 	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
 	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
 }
-function parsePodNetworkLog()
-{
-	MODE=$1
-	TYPE=$2
-	RUN=$3
-	ITR=$4
-	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
-	data_sum=0
-	data_min=0
-	data_max=0
-	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
-	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
 
-	TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
-	for run_pod in "${RUN_PODS[@]}"
-	do
-		if [ -s "${DATA_LOG}" ]; then
-                        cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
-                        each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
-                        each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
-                        each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
-                        data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
-                        data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
-                        data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
-    fi
-	done
-	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
-	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
-}
-function parsePodIOLog()
-{
-	MODE=$1
-	TYPE=$2
-	RUN=$3
-	ITR=$4
-	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
-	data_sum=0
-	data_min=0
-	data_max=0
-	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
-	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
+#function parsePodNetworkLog()
+#{
+#	MODE=$1
+#	TYPE=$2
+#	RUN=$3
+#	ITR=$4
+#	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
+	#data_sum=0
+	#data_min=0
+	#data_max=0
+	#DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
+	#RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
 
-	TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
-	for run_pod in "${RUN_PODS[@]}"
-	do
-		if [ -s "${DATA_LOG}" ]; then
-                        cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
-                        each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
-                        each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
-                        each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
-                        data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
-                        data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
-                        data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
-    fi
-	done
-	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
-	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
-}
+	#TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
+	#for run_pod in "${RUN_PODS[@]}"
+#	do
+	#	if [ -s "${DATA_LOG}" ]; then
+   #                     cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
+    #                    each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
+    #                    each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
+     #                   each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
+     #                   data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
+     #                   data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
+     #                   data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
+    #fi
+	#done
+	#echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
+	#echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
+#}
+#function parsePodIOLog()
+#{
+	#MODE=$1
+#	TYPE=$2
+#	RUN=$3
+#	ITR=$4
+#	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
+#	data_sum=0
+#	data_min=0
+#	data_max=0
+#	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
+#	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
+
+#	TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
+#	for run_pod in "${RUN_PODS[@]}"
+#	do
+#		if [ -s "${DATA_LOG}" ]; then
+#                        cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
+#                        each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
+ #                       each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
+ #                       each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
+ #                       data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
+  #                      data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
+ #                       data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
+ #   fi
+#	done
+#	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
+#	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
+# }
 
 
 
@@ -272,12 +273,12 @@ function parseResults() {
 
 
 
-    for podfsiolog in "${POD_IO_LOGS[@]}"
+    for podiolog in "${POD_IO_LOGS[@]}"
     do
-            		   if [ -s "${RESULTS_DIR_J}/${podfsiolog}-measure-${itr}.log" ]; then
-                                                                          cat ${RESULTS_DIR_J}/${podfsiolog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-                                                                          cat ${RESULTS_DIR_J}/${podfsiolog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-                                                                          cat ${RESULTS_DIR_J}/${podfsiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
+            		   if [ -s "${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log" ]; then
+                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
+                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
+                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
                    fi
     done
 	#	for podfsreadtotallog in "${POD_FS_READ_TOTAL_LOGS[@]}"
