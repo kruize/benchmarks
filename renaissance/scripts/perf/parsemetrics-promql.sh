@@ -112,7 +112,7 @@ function parsePodMemLog()
 	for mem_pod in "${MEM_PODS[@]}"
 	do
 		if [ -s "${MEM_LOG}" ]; then
-                        cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
+                        cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
                         each_pod_mem_avg=$( echo `calcAvg_inMB ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
                         each_pod_mem_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log`  )
                         each_pod_mem_min_inMB=$(echo ${each_pod_mem_min}/1024/1024 | bc)
@@ -142,11 +142,10 @@ function parseDataLog()
 	data_max=0
 	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
 	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
-	TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
 	for run_pod in "${RUN_PODS[@]}"
 	do
 		if [ -s "${DATA_LOG}" ]; then
-                        cat ${DATA_LOG} | cut -d ";" -f2 | cut -d '"' -f1 > ${TEMP_LOG}
+                        cat ${DATA_LOG} | cut -d ";" -f2 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
                         each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
                         each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
                         each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
@@ -354,11 +353,11 @@ function parseResults() {
    fi
   done
 
-	echo "INSTANCES ,  CPU_USAGE , MEM_USAGE , DISKDETAILS_USAGE , NETRECEIVEBYTES_USAGE , NETTRANSMITBYTES_USAGE , CNETRECEIVEBYTES_USAGE , CNETTRANSMITBYTES_USAGE , FSIOTOTAL_USAGE FSREADTOTAL_USAGE FSWRITETOTAL_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , DISKDETAILS_MIN , DISKDETAILS_MAX , NETWORKRECEIVEBYTES_MIN , NETWORKRECEIVEBYTES_MAX , CNETRECEIVEBYTES_MIN , CNETRECEIVEBYTES_MAX , NETTRANSMITBYTES_MIN , NETTRANSMITBYTES_MAX , CNETTRANSMITBYTES_MIN , CNETTRANSMITBYTES_MAX , FSIOTOTAL_MIN , FSIOTOTAL_MAX , FSREADTOTAL_MIN , FSREADTOTAL_MAX , FSWRITETOTAL_MIN , FSWRITETOTAL_MAX" > ${RESULTS_DIR_J}/Metrics-prom.log
+	echo "INSTANCES ,  CPU_USAGE , MEM_RSS_USAGE , MEM_USAGE , DISKDETAILS_USAGE , NETTRANSMITBYTES_USAGE , NETRECEIVEBYTES_USAGE , CNETTRANSMITBYTES_USAGE , CNETRECEIVEBYTES_USAGE , FSIOTOTAL_USAGE , FSREADTOTAL_USAGE , FSWRITETOTAL_USAGE , CPU_MIN , CPU_MAX , MEM_RSS_MIN , MEM_RSS_MAX , MEM_MIN , MEM_MAX , DISKDETAILS_MIN , DISKDETAILS_MAX , NETTRANSMITBYTES_MIN , NETTRANSMITBYTES_MAX , NETRECEIVEBYTES_MIN , NETRECEIVEBYTES_MAX , CNETTRANSMITBYTES_MIN , CNETTRANSMITBYTES_MAX , CNETRECEIVEBYTES_MIN , CNETRECEIVEBYTES_MAX , FSIOTOTAL_MIN , FSIOTOTAL_MAX , FSREADTOTAL_MIN , FSREADTOTAL_MAX , FSWRITETOTAL_MIN , FSWRITETOTAL_MAX" > ${RESULTS_DIR_J}/Metrics-prom.log
 
 #	echo "${SCALE} , ${total_server_requests_thrpt_rate_3m_avg} , ${total_server_requests_rsp_time_rate_3m_avg} , ${total_server_requests_ms_max} , ${total_http_ms_quan_50_histo_avg} , ${total_http_ms_quan_95_histo_avg} , ${total_http_ms_quan_97_histo_avg} , ${total_http_ms_quan_99_histo_avg} , ${total_http_ms_quan_999_histo_avg} , ${total_http_ms_quan_9999_histo_avg} , ${total_http_ms_quan_99999_histo_avg} , ${total_http_ms_quan_100_histo_avg} , ${total_cpu_avg} , ${total_mem_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${ci_server_requests_thrpt_rate_3m} , ${ci_server_requests_rsp_time_rate_3m} " >> ${RESULTS_DIR_J}/../Metrics-prom.log
 
-	echo "${SCALE} , ${total_cpu_avg} , ${total_mem_avg} , ${total_memusage_avg} , ${total_nettransmitbytes_avg} , ${total_diskdetails_avg} , ${total_netreceivebytes_avg} , ${total_nettransmitbytes_avg} , ${total_cnettransmitbytes_avg} , ${total_cnetreceivebytes_avg} , ${total_fsiototal_avg} , ${total_fsreadtotal_avg} , ${total_fswritetotal_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_memusage_min} , ${total_memusage_max} , ${total_nettransmitbytes_min} , ${total_nettransmitbytes_max} , ${total_diskdetails_min} , ${total_diskdetails_max} , ${total_netreceivebytes_min} , ${total_netreceivebytes_max} , ${total_nettransmitbytes_min} , ${total_nettransmitbytes_max} , ${total_cnettransmitbytes_min} , ${total_cnettransmitbytes_max} , ${total_cnetreceivebytes_min} , ${total_cnetreceivebytes_max} , ${total_fsiototal_min} , ${total_fsiototal_max} , ${total_fsreadtotal_min} , ${total_fsreadtotal_max} , ${total_fswritetotal_min} , ${total_fswritetotal_max}" >> ${RESULTS_DIR_J}/Metrics-prom.log
+	echo "${SCALE} , ${total_cpu_avg} , ${total_mem_avg} , ${total_memusage_avg} , ${total_diskdetails_avg} , ${total_nettransmitbytes_avg} , ${total_netreceivebytes_avg}  , ${total_cnettransmitbytes_avg} , ${total_cnetreceivebytes_avg} , ${total_fsiototal_avg} , ${total_fsreadtotal_avg} , ${total_fswritetotal_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_memusage_min} , ${total_memusage_max} , ${total_diskdetails_min} , ${total_diskdetails_max} , ${total_nettransmitbytes_min} , ${total_nettransmitbytes_max} , ${total_netreceivebytes_min} , ${total_netreceivebytes_max} , ${total_cnettransmitbytes_min} , ${total_cnettransmitbytes_max} , ${total_cnetreceivebytes_min} , ${total_cnetreceivebytes_max} , ${total_fsiototal_min} , ${total_fsiototal_max} , ${total_fsreadtotal_min} , ${total_fsreadtotal_max} , ${total_fswritetotal_min} , ${total_fswritetotal_max}" >> ${RESULTS_DIR_J}/Metrics-prom.log
 
   echo "${SCALE} ,  ${total_mem_avg} , ${total_memusage_avg} " >> ${RESULTS_DIR_J}/Metrics-mem-prom.log
   echo "${SCALE} ,  ${total_cpu_avg} " >> ${RESULTS_DIR_J}/Metrics-cpu-prom.log
