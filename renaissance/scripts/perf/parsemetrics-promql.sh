@@ -256,17 +256,17 @@ function parseResults() {
 		for poddiskdetailslog in "${POD_DISK_DETAILS_LOGS[@]}"
 		do
 			if [ -s "${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log" ]; then
-                                cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podfsusagelog}-measure-temp.log
-                                cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podfsusagelog}_min-measure-temp.log
-                                cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podfsusagelog}_max-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${poddiskdetailslog}_min-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${poddiskdetailslog}_max-measure-temp.log
       fi
 		done
 		for podnetworklog in "${POD_NW_LOGS[@]}"
 		do
 			if [ -s "${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log" ]; then
-                                cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podreceivelog}-measure-temp.log
-                                cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podreceivelog}_min-measure-temp.log
-                                cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podreceivelog}_max-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podnetworklog}-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podnetworklog}_min-measure-temp.log
+                                cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podnetworklog}_max-measure-temp.log
       fi
 		done
 
@@ -275,9 +275,9 @@ function parseResults() {
     for podiolog in "${POD_IO_LOGS[@]}"
     do
             		   if [ -s "${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log" ]; then
-                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
+                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podiolog}-measure-temp.log
+                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podiolog}_min-measure-temp.log
+                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podiolog}_max-measure-temp.log
                    fi
     done
 	#	for podfsreadtotallog in "${POD_FS_READ_TOTAL_LOGS[@]}"
@@ -320,14 +320,14 @@ function parseResults() {
 	for metric in "${TOTAL_LOGS[@]}"
 	do
 		if [ -s ${RESULTS_DIR_J}/${metric}-measure-temp.log ]; then
-		if [ ${metric} == "cpu_min" ] || [ ${metric} == "mem_min" ] || [ ${metric} == "memusage_min" ] || [ ${metric} == "diskdetails_min" ] || [ ${metric} == "netreceivebytes_min" ] || [ ${metric} == "nettransmitbytes_min" ] || [ ${metric} == "cnetreceivebytes_min" ] || [ ${metric} == "cnettransmitbytes_min" ] || [ ${metric} == "fsiototal_min" ] || [ ${metric} == "fsread_min" ] || [ ${metric} == "fswrite_min" ]  || [ ${metric} == "request_count_min" ] || [ ${metric} == "request_sum_min" ]; then
+		if [ ${metric} == "cpu_min" ] || [ ${metric} == "mem_min" ] || [ ${metric} == "memusage_min" ] || [ ${metric} == "diskdetails_min" ] || [ ${metric} == "netreceivebytes_min" ] || [ ${metric} == "nettransmitbytes_min" ] || [ ${metric} == "cnetreceivebytes_min" ] || [ ${metric} == "cnettransmitbytes_min" ] || [ ${metric} == "fsiototal_min" ] || [ ${metric} == "fsreadtotal_min" ] || [ ${metric} == "fswritetotal_min" ]  || [ ${metric} == "request_count_min" ] || [ ${metric} == "request_sum_min" ]; then
 			 minval=$(echo `calcMin ${RESULTS_DIR_J}/${metric}-measure-temp.log`)
 		   if [ ! -z ${minval} ]; then
 				eval total_${metric}=${minval}
 		   else
 				eval total_${metric}=0
 		   fi
-		elif [ ${metric} == "cpu_max" ] || [ ${metric} == "mem_max" ] || [ ${metric} == "memusage_max" ] || [ ${metric} == "diskdetails_max" ] || [ ${metric} == "netreceivebytes_max" ] || [ ${metric} == "nettransmitbytes_max" ] || [ ${metric} == "cnetreceivebytes_max" ] || [ ${metric} == "cnettransmitbytes_max" ] || [ ${metric} == "fsiototal_max" ] || [ ${metric} == "fsread_max" ] || [ ${metric} == "fswrite_max" ]  || [ ${metric} == "request_count_max" ] || [ ${metric} == "request_sum_max" ]; then
+		elif [ ${metric} == "cpu_max" ] || [ ${metric} == "mem_max" ] || [ ${metric} == "memusage_max" ] || [ ${metric} == "diskdetails_max" ] || [ ${metric} == "netreceivebytes_max" ] || [ ${metric} == "nettransmitbytes_max" ] || [ ${metric} == "cnetreceivebytes_max" ] || [ ${metric} == "cnettransmitbytes_max" ] || [ ${metric} == "fsiototal_max" ] || [ ${metric} == "fsreadtotal_max" ] || [ ${metric} == "fswritetotal_max" ]  || [ ${metric} == "request_count_max" ] || [ ${metric} == "request_sum_max" ]; then
 			maxval=$(echo `calcMax ${RESULTS_DIR_J}/${metric}-measure-temp.log`)
 		  if [ ! -z ${maxval} ]; then
 				eval total_${metric}=${maxval}

@@ -130,7 +130,7 @@ function get_container_network_transmit_packets_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_transmit_packets_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' >> ${RESULTS_DIR}/cnettranmitbytes-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_transmit_packets_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' >> ${RESULTS_DIR}/cnettransmitbytes-${ITER}.json
 		#err_exit "Error: could not get container network tranmit packet  details of the pod" >>setup.log
 	done
 }
