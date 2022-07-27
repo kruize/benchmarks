@@ -193,8 +193,7 @@ function get_container_fs_write_seconds_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_fs_write_seconds_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]'>> ${RESULTS_DIR}/fswritetotal-${ITER}.json
-		sed -i 's/[][]//g' ${RESULTS_DIR}/fswritetotal-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_fs_write_seconds_total[60s]))' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]'| grep -E "[0-9]">> ${RESULTS_DIR}/fswritetotal-${ITER}.json
 		#err_exit "Error: could not get required details of the pod" >>setup.log
 	done
 }
