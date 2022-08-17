@@ -40,7 +40,7 @@ function get_cpu()
 	do
 		# Processing curl output "timestamp value" using jq tool.
 #		echo "curl --silent -G -kH Authorization: Bearer ${TOKEN} --data-urlencode 'query=sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate) by (pod)' ${URL} "		 
-	curl --data-urlencode 'query=sum(rate(container_cpu_usage_seconds_total[5m])) by (pod,namespace)' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/cpu-${ITER}.json
+	curl --data-urlencode 'query=sum(rate(container_cpu_usage_seconds_total[5m])) by (pod,namespace)' http://localhost:9090/api/v1/query | jq '[ .data.result[] | [ .value[0], .value[1]|tostring]| join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/cpu-${ITER}.json
 #err_exit "Error: could not get cpu details of the pod" >>setup.log
 	done
 }
@@ -57,7 +57,7 @@ function get_mem_rss()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_rss) by (pod)' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/mem-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_rss) by (pod)' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .value[1]|tostring]| join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/mem-${ITER}.json
 		#err_exit "Error: could not get memory details of the pod" >>setup.log
 	done
 }
@@ -73,7 +73,7 @@ function get_mem_usage()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_working_set_bytes) by (pod) ' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/memusage-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(container_memory_working_set_bytes) by (pod) ' http://localhost:9090/api/v1/query  | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" >> ${RESULTS_DIR}/memusage-${ITER}.json
 		#err_exit "Error: could not get memory details of the pod" >>setup.log
 	done
 }
@@ -201,7 +201,7 @@ function get_request_duration_seconds_sum_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(http_request_duration_seconds_sum[60s])) by (pod)' | jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_sum_total-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(http_request_duration_seconds_sum[60s])) by (pod)' | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_sum_total-${ITER}.json
 		#err_exit "Error: could not get request sum duration of seconds details of the pod" >>setup.log
 	done
 }
@@ -215,7 +215,7 @@ function get_request_duration_seconds_count_total()
 	while true
 	do
 		# Processing curl output "timestamp value" using jq tool.
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(http_request_duration_seconds_count[60s])) by (pod)'| jq '[ .data.result[] | [ .value[0], .metric.namespace, .metric.pod, .value[1]|tostring] | join(";") ]' | grep "${APP_NAME}" http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_count_total-${ITER}.json
+		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(http_request_duration_seconds_count[60s])) by (pod)'| jq '[ .data.result[] | [ .value[0], .value[1]|tostring]| join(";") ]' | grep "${APP_NAME}" http://localhost:9090/api/v1/query >> ${RESULTS_DIR}/get_request_duration_seconds_count_total-${ITER}.json
 		#err_exit "Error: could not get request count details of the pod" >>setup.log
 	done
 }
