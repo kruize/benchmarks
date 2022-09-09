@@ -79,6 +79,9 @@ do
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
 				;;
+			envoptions=*)
+				JDK_JAVA_OPTIONS=${OPTARG#*=}
+				;;
 			*)
 		esac
 		;;
@@ -163,6 +166,11 @@ function createInstances() {
 		if [ ! -z  ${CPU_LIM} ]; then
 			sed -i '/limits:/a \ \ \ \ \ \ \ \ \ \ cpu: '${CPU_LIM}'' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
 		fi
+
+		if [ ! -z  "${JDK_JAVA_OPTIONS}" ]; then
+                        sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"${JDK_JAVA_OPTIONS}\"" ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+                        sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "JDK_JAVA_OPTIONS"' ${MANIFESTS_DIR}/petclinic-${inst}.yaml
+                fi
 		
 		oc create -f ${MANIFESTS_DIR}/petclinic-${inst}.yaml -n ${NAMESPACE}
 		err_exit "Error: Issue in deploying."
