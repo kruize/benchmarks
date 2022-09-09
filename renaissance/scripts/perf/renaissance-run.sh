@@ -236,16 +236,10 @@ function runIterations() {
 		echo "***************************************" >> ${LOGFILE}
 		if [ ${RE_DEPLOY} == "true" ]; then
 			echo "Deploying the application..." >> ${LOGFILE}
-			#echo "${SCRIPT_REPO}/renaissance-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${RENAISSANCE_IMAGE}  --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" --usertunables="${OPTIONS_VAR}" -b ${BENCHMARKS} -t ${BENCHMARK_DURATION}"
 			${SCRIPT_REPO}/renaissance-deploy.sh --clustertype=${CLUSTER_TYPE} -s ${BENCHMARK_SERVER} -n ${NAMESPACE} -i ${SCALING} -g ${RENAISSANCE_IMAGE}  --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" --usertunables="${OPTIONS_VAR}" -b ${BENCHMARKS} -t ${BENCHMARK_DURATION}  >> ${LOGFILE}
-			# err_exit "Error: ${APP_NAME} deployment failed" >> ${LOGFILE}
 		fi
 		# Add extra sleep time for the deployment to complete as few machines takes longer time.
 		sleep 30
-		
-		##Debug
-		#Extra sleep time
-		#sleep 600
 		
 		# Start the load
 		RESULTS_DIR_I=${RESULTS_DIR_R}/ITR-${itr}
@@ -294,19 +288,14 @@ do
 	# Perform warmup and measure runs
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
 	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
-	# Parse the results
-	# ${REPO}/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE} ${APP_NAME}
 	sleep 5
 	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
 	
 done
 
-## Cleanup all the deployments
-#${REPO}/renaissance-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 sleep 10
 echo " "
 # Display the Metrics log file
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log ${RESULTS_DIR_ROOT}/deploy-config.log
-#paste ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
 
 paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/deploy-config.log > ${RESULTS_DIR_ROOT}/output.csv

@@ -235,11 +235,6 @@ function createInstances() {
 		done
 	fi
 
-	## extra sleep time
-	#sleep 60
-			
-	# Check if the application is running
-	#check_app >> ${LOGFILE}
 }
 
 
@@ -248,8 +243,6 @@ function stopAllInstances() {
 	${RENAISSANCE_REPO}/renaissance-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 	sleep 30
 
-	##extra sleep time
-#	sleep 60
 }
 
 # Stop all renaissance related instances if there are any
