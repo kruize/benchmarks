@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020, 2021,2022 Red Hat, IBM Corporation and others.
+# Copyright (c) 2022, 2022 Red Hat, IBM Corporation and others.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,8 +20,8 @@ CURRENT_DIR="$(dirname "$(realpath "$0")")"
 source ${CURRENT_DIR}/renaissance-common.sh
 function usage() {
 	echo
-	echo "Usage: -c CLUSTER_TYPE[docker|minikube|openshift] [-n NAMESPACE]"
-	exit -1
+	echo "Usage: -c CLUSTER_TYPE[docker|minikube] [-n NAMESPACE]"
+	exit 1
 }
 
 if [ "$#" -lt 1 ]; then

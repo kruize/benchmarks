@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020, 2021,2022 IBM Corporation, RedHat and others.
+# Copyright (c) 2022,2022 IBM Corporation, RedHat and others.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -157,69 +157,6 @@ function parseDataLog()
 	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
 	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
 }
-
-#function parsePodNetworkLog()
-#{
-#	MODE=$1
-#	TYPE=$2
-#	RUN=$3
-#	ITR=$4
-#	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
-	#data_sum=0
-	#data_min=0
-	#data_max=0
-	#DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
-	#RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
-
-	#TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
-	#for run_pod in "${RUN_PODS[@]}"
-#	do
-	#	if [ -s "${DATA_LOG}" ]; then
-   #                     cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
-    #                    each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
-    #                    each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
-     #                   each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
-     #                   data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
-     #                   data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
-     #                   data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
-    #fi
-	#done
-	#echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
-	#echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
-#}
-#function parsePodIOLog()
-#{
-	#MODE=$1
-#	TYPE=$2
-#	RUN=$3
-#	ITR=$4
-#	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
-#	data_sum=0
-#	data_min=0
-#	data_max=0
-#	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
-#	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
-
-#	TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
-#	for run_pod in "${RUN_PODS[@]}"
-#	do
-#		if [ -s "${DATA_LOG}" ]; then
-#                        cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${TEMP_LOG}
-#                        each_pod_data_avg=$( echo `calcAvg ${TEMP_LOG} | cut -d "=" -f2`  )
- #                       each_pod_data_min=$( echo `calcMin ${TEMP_LOG}` )
- #                       each_pod_data_max=$( echo `calcMax ${TEMP_LOG}` )
- #                       data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
-  #                      data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
- #                       data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
- #   fi
-#	done
-#	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
-#	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
-# }
-
-
-
-
 # Parse the results of jmeter load for each instance of application
 # input: total number of iterations, result directory, Total number of instances
 # output: Parse the results and generate the Metrics log files
@@ -279,38 +216,7 @@ function parseResults() {
                               cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podiolog}_max-measure-temp.log
                    fi
     done
-	#	for podfsreadtotallog in "${POD_FS_READ_TOTAL_LOGS[@]}"
-   # do
-   #  		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-#                             cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-   #                          cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-    #                         cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
-     #      fi
-  #  done
- #   for podfswritetotallog in "${POD_FS_WRITE_TOTAL_LOGS[@]}"
-  #  do
-   #          		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-   #                         cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-    #                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-    #                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
-    #               fi
-    #done
-    #for podrequestdurationcountlog in "${POD_REQUEST_DURATION_COUNT_LOGS[@]}"
-    #do
-    #             		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-     #                      cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-      #                     cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-       #                    cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
-       #                fi
-    #done
-   # for podrequestdurationsumlog in "${POD_REQUEST_DURATION_SUM_LOGS[@]}"
-   # do
-   #                      		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-   #                                         cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-    #                                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-     #                                       cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
-     #                          fi
-    #done
+
   done
 	###### Add different raw logs we want to merge
 	#Cumulative raw data
@@ -361,29 +267,16 @@ function parseResults() {
 
   echo "${SCALE} ,  ${total_mem_avg} , ${total_memusage_avg} " >> ${RESULTS_DIR_J}/Metrics-mem-prom.log
   echo "${SCALE} ,  ${total_cpu_avg} " >> ${RESULTS_DIR_J}/Metrics-cpu-prom.log
-#       echo "${SCALE} , ${total_c_cpu_avg} , ${total_c_cpurequests_avg} , ${total_c_cpulimits_avg} , ${total_c_mem_avg} , ${total_c_memrequests_avg} , ${total_c_memlimits_avg} " >> ${RESULTS_DIR_J}/../Metrics-cluster.log
-        #echo "${total_server_requests_thrpt_rate_1m_avg} , ${total_server_requests_rsp_time_rate_1m_avg} , ${total_server_requests_thrpt_rate_3m_avg} , ${total_server_requests_rsp_time_rate_3m_avg} , ${total_server_requests_thrpt_rate_5m_avg} , ${total_server_requests_rsp_time_rate_5m_avg} , ${total_server_requests_thrpt_rate_6m_avg} , ${total_server_requests_rsp_time_rate_6m_avg} " >> ${RESULTS_DIR_J}/Metrics-rate-prom.log
-#        echo "${SCALE} , ${total_http_ms_quan_50_histo_avg} , ${total_http_ms_quan_95_histo_avg} , ${total_http_ms_quan_97_histo_avg} , ${total_http_ms_quan_99_histo_avg} , ${total_http_ms_quan_999_histo_avg} , ${total_http_ms_quan_9999_histo_avg} , ${total_http_ms_quan_99999_histo_avg} , ${total_http_ms_quan_100_histo_avg}" >> ${RESULTS_DIR_J}/Metrics-quantiles-prom.log
   echo "${SCALE} , ${total_maxspike_cpu_max} , ${total_maxspike_mem_max} "  >> ${RESULTS_DIR_J}/Metrics-spikes-prom.log
 
  #       paste ${RESULTS_DIR_J}/http_seconds_quan_50_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_95_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_97_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_99_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_999_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_9999_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_99999_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_100_histo-measure-temp.log >> ${RESULTS_DIR_J}/Metrics-histogram-prom.log
 }
-
 POD_CPU_LOGS=(cpu)
 POD_MEM_LOGS=(mem memusage)
 POD_DISK_DETAILS_LOGS=(diskdetails)
 POD_NW_LOGS=(netreceivebytes nettransmitbytes cnetreceivebytes cnettransmitbytes)
 POD_IO_LOGS=(fsiototal fsreadtotal fswritetotal)
-
-#TIMER_RATE_LOGS=(app_timer_count_rate_1m app_timer_count_rate_3m app_timer_count_rate_5m app_timer_count_rate_7m app_timer_count_rate_9m app_timer_count_rate_15m app_timer_count_rate_30m app_timer_sum_rate_1m app_timer_sum_rate_3m app_timer_sum_rate_5m app_timer_sum_rate_7m app_timer_sum_rate_9m app_timer_sum_rate_15m app_timer_sum_rate_30m)
-#SERVER_REQUESTS_RATE_LOGS=(server_requests_count_rate_1m server_requests_count_rate_3m server_requests_count_rate_5m server_requests_count_rate_6m server_requests_sum_rate_1m server_requests_sum_rate_3m server_requests_sum_rate_5m server_requests_sum_rate_6m)
-#HTTP_P_LOGS=(http_seconds_quan_50_histo http_seconds_quan_95_histo http_seconds_quan_97_histo http_seconds_quan_98_histo http_seconds_quan_99_histo http_seconds_quan_999_histo http_seconds_quan_9999_histo http_seconds_quan_99999_histo http_seconds_quan_100_histo)
-#MICROMETER_LOGS=(app_timer_sum app_timer_count ${TIMER_RATE_LOGS[@]} server_requests_sum server_requests_count server_requests_max ${SERVER_REQUESTS_RATE_LOGS[@]} ${LATENCY_P_LOGS[@]} latency_seconds_max ${HTTP_P_LOGS[@]})
-#APP_CALC_METRIC_LOGS=(app_timer_rsp_time app_timer_thrpt app_timer_rsp_time_rate_3m app_timer_thrpt_rate_3m)
-#SERVER_REQUESTS_METRIC_LOGS=(server_requests_rsp_time server_requests_thrpt server_requests_rsp_time_rate_3m server_requests_thrpt_rate_3m)
-#METRIC_LOGS=(${APP_CALC_METRIC_LOGS[@]} ${SERVER_REQUESTS_METRIC_LOGS[@]})
 TOTAL_LOGS=(${POD_CPU_LOGS[@]} ${POD_MEM_LOGS[@]} ${POD_DISK_DETAILS_LOGS[@]} ${POD_NW_LOGS[@]} ${POD_IO_LOGS[@]} cpu_min cpu_max mem_min mem_max memusage_min memusage_max diskdetails_min diskdetails_max netreceivebytes_min netreceivebytes_max nettransmitbytes_min nettransmitbytes_max cnettransmitbytes_min cnettransmitbytes_max cnetreceivebytes_min cnetreceivebytes_max)
-
 
 TOTAL_ITR=$1
 RESULTS_DIR_J=$2

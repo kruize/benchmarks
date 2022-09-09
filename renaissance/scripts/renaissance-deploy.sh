@@ -33,8 +33,8 @@ function usage() {
 	echo
 	echo "Usage: $0 --clustertype=CLUSTER_TYPE [-s BENCHMARK_SERVER] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g RENAISSANCE_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-b BENCHMARKS] [-t BENCHMARK_DURATION]"
 	echo " "
-	echo "Example: $0 --clustertype=openshift -s example.in.com -i 2 -g prakalp23/renaissance1041:latest --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi -b page-rank -t 480"
-	exit -1
+	echo "Example: $0 --clustertype=minikube -s example.in.com -i 2 -g prakalp23/renaissance1041:latest --cpulim=4 --cpureq=2 --memlim=1024Mi --memreq=512Mi -b page-rank -t 480"
+	exit 1
 }
 
 # Check if the memory request/limit has unit. If not ask user to append the unit
