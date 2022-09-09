@@ -274,41 +274,41 @@ function parseResults() {
     for podiolog in "${POD_IO_LOGS[@]}"
     do
             		   if [ -s "${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log" ]; then
-                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podiolog}-measure-temp.log
-                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podiolog}_min-measure-temp.log
-                                                                          cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podiolog}_max-measure-temp.log
+                              cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podiolog}-measure-temp.log
+                              cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podiolog}_min-measure-temp.log
+                              cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podiolog}_max-measure-temp.log
                    fi
     done
 	#	for podfsreadtotallog in "${POD_FS_READ_TOTAL_LOGS[@]}"
    # do
    #  		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-    #                                                                                cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-   #                                                                                 cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-    #                                                                                cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
+#                             cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
+   #                          cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
+    #                         cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
      #      fi
   #  done
  #   for podfswritetotallog in "${POD_FS_WRITE_TOTAL_LOGS[@]}"
   #  do
    #          		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-   #                                                                                         cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-    #                                                                                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-    #                                                                                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
+   #                         cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
+    #                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
+    #                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
     #               fi
     #done
     #for podrequestdurationcountlog in "${POD_REQUEST_DURATION_COUNT_LOGS[@]}"
     #do
     #             		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-     #                                                                                                             cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-      #                                                                                                            cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-       #                                                                                                           cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
+     #                      cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
+      #                     cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
+       #                    cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
        #                fi
     #done
    # for podrequestdurationsumlog in "${POD_REQUEST_DURATION_SUM_LOGS[@]}"
    # do
    #                      		   if [ -s "${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log" ]; then
-   #                                                                                                                       cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
-    #                                                                                                                      cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
-     #                                                                                                                     cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
+   #                                         cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podtransmitlog}-measure-temp.log
+    #                                        cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podtransmitlog}_min-measure-temp.log
+     #                                       cat ${RESULTS_DIR_J}/${podtransmitlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podtransmitlog}_max-measure-temp.log
      #                          fi
     #done
   done
