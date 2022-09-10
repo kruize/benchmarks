@@ -78,7 +78,7 @@ function parsePodDataLog()
 	for run_pod in "${RUN_PODS[@]}"
 	do
      if [ -s "${DATA_LOG}" ]; then
-    cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
+    cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f2 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
     each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
     each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
     each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
@@ -112,7 +112,7 @@ function parsePodMemLog()
 	for mem_pod in "${MEM_PODS[@]}"
 	do
 		if [ -s "${MEM_LOG}" ]; then
-                        cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f4 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-mem.log
+                        cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f2 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-mem.log
                         each_pod_mem_avg=$( echo `calcAvg_inMB ${RESULTS_DIR_P}/temp-mem.log | cut -d "=" -f2`  )
                         each_pod_mem_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-mem.log`  )
                         each_pod_mem_min_inMB=$(echo ${each_pod_mem_min}/1024/1024 | bc)
