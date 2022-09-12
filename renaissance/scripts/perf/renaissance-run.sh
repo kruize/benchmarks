@@ -292,9 +292,7 @@ do
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
 	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
 	sleep 5
-	echo "$$$$$$$$$$$$$$"
 	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
-	echo "$$$$$$$$$$$$$$"
 	
 done
 
