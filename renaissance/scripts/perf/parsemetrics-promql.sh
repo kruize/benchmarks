@@ -33,7 +33,7 @@ function parsePromMetrics()  {
 	  for poddatalog in "${POD_CPU_LOGS[@]}"
 		do
 			# Parsing CPU, app metric logs for pod
-			parsePodDataLog ${poddatalog} ${TYPE} ${run} ${ITR}
+			parseDataLog ${poddatalog} ${TYPE} ${run} ${ITR}
 		done
 		for podmemlog in "${POD_MEM_LOGS[@]}"
 		do
@@ -58,38 +58,6 @@ function parsePromMetrics()  {
 		done
 	done
 }
-# Parsing CPU logs for pod
-# input: podcpulogs array element, type of run(warmup|measure), run(warmup|measure) number, iteration number
-# output:creates cpu log for pod
-function parsePodDataLog()
-{
-	MODE=$1
-	TYPE=$2
-	RUN=$3
-	ITR=$4
-	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
-	data_sum=0
-	data_min=0
-	data_max=0
-	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
-	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
-
-	#TEMP_LOG=${RESULTS_DIR_P}/temp-data-${MODE}.log
-	for run_pod in "${RUN_PODS[@]}"
-	do
-     if [ -s "${DATA_LOG}" ]; then
-    cat ${DATA_LOG} | grep ${run_pod} | cut -d ";" -f2 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
-    each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
-    each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
-    each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
-    data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
-    data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
-    data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
-    fi
-	done
-	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
-	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
-}
 
 # Parsing memory logs for pod
 # input: podmemlogs array element, type of run(warmup|measure), run(warmup|measure) number, iteration number
@@ -101,35 +69,23 @@ function parsePodMemLog()
 	RUN=$3
 	ITR=$4
 	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
-	mem_sum=0
-	mem_min=0
-	mem_max=0
-
 	MEM_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
-	MEM_PODS=($(cat ${MEM_LOG} | cut -d ";" -f2 | sort | uniq))
-
 	TEMP_LOG=${RESULTS_DIR_P}/temp-mem-${MODE}.log
-	for mem_pod in "${MEM_PODS[@]}"
-	do
 		if [ -s "${MEM_LOG}" ]; then
-                        cat ${MEM_LOG} | grep ${mem_pod} | cut -d ";" -f2 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-mem.log
-                        each_pod_mem_avg=$( echo `calcAvg_inMB ${RESULTS_DIR_P}/temp-mem.log | cut -d "=" -f2`  )
-                        each_pod_mem_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-mem.log`  )
-                        each_pod_mem_min_inMB=$(echo ${each_pod_mem_min}/1024/1024 | bc)
-                        each_pod_mem_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-mem.log`  )
-                        each_pod_mem_max_inMB=$(echo ${each_pod_mem_max}/1024/1024 | bc)
-                        mem_sum=$(echo ${mem_sum}+${each_pod_mem_avg} | bc)
-                        mem_min=$(echo ${mem_min}+${each_pod_mem_min_inMB} | bc)
-                        mem_max=$(echo ${mem_max}+${each_pod_mem_max_inMB} | bc)
+                        cat ${MEM_LOG} |  cut -d ";" -f2 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-mem.log
+                       mem_avg=$( echo `calcAvg_inMB ${RESULTS_DIR_P}/temp-mem.log | cut -d "=" -f2`  )
+                       mem_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-mem.log`  )
+                        mem_min_inMB=$(echo ${mem_min}/1024/1024 | bc)
+                        mem_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-mem.log`  )
+                        mem_max_inMB=$(echo ${mem_max}/1024/1024 | bc)
     fi
-	done
-	echo "${run} , ${mem_sum}, ${mem_min} , ${mem_max} " >> ${RESULTS_DIR_J}/${RESULTS_LOG}
-	echo ", ${mem_sum} , ${mem_min} , ${mem_max} " >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
+	echo "${run} , ${mem_avg}, ${mem_min_inMB} , ${mem_max_inMB} " >> ${RESULTS_DIR_J}/${RESULTS_LOG}
+	echo ", ${mem_avg} , ${mem_min_inMB} , ${mem_max_inMB} " >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
 }
 
-# Parsing memory logs for pod
-# input: clusterlogs array element, json file with cluster information, result log file
-# output:creates clsuter log file
+# Parsing CPU,Network,I/O,Disk logs for pod
+# input: podcpulogs array element, type of run(warmup|measure), run(warmup|measure) number, iteration number
+# output:creates metric specific log for pod
 function parseDataLog()
 {
 	MODE=$1
@@ -137,26 +93,17 @@ function parseDataLog()
 	RUN=$3
 	ITR=$4
 	RESULTS_LOG=${MODE}-${TYPE}-${ITR}.log
-	data_sum=0
-	data_min=0
-	data_max=0
 	DATA_LOG=${RESULTS_DIR_P}/${MODE}-${TYPE}-${RUN}.json
-	RUN_PODS=($(cat ${DATA_LOG} | cut -d ";" -f2 | sort | uniq))
-	for run_pod in "${RUN_PODS[@]}"
-	do
-		if [ -s "${DATA_LOG}" ]; then
+  if [ -s "${DATA_LOG}" ]; then
                         cat ${DATA_LOG} | cut -d ";" -f2 | cut -d '"' -f1 > ${RESULTS_DIR_P}/temp-data.log
-                        each_pod_data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
-                        each_pod_data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
-                        each_pod_data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
-                        data_sum=$(echo ${data_sum}+${each_pod_data_avg}| bc -l)
-                        data_min=$(echo ${data_min}+${each_pod_data_min}| bc -l)
-                        data_max=$(echo ${data_max}+${each_pod_data_max} | bc -l)
-    fi
-	done
-	echo "${run} , ${data_sum}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
-	echo ",${data_sum} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
+                        data_avg=$( echo `calcAvg ${RESULTS_DIR_P}/temp-data.log | cut -d "=" -f2`  )
+                        data_min=$( echo `calcMin ${RESULTS_DIR_P}/temp-data.log` )
+                        data_max=$( echo `calcMax ${RESULTS_DIR_P}/temp-data.log` )
+  fi
+	echo "${run} , ${data_avg}, ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${RESULTS_LOG}
+	echo ",${data_avg} , ${data_min} , ${data_max}" >> ${RESULTS_DIR_J}/${MODE}-${TYPE}-raw.log
 }
+
 # Parse the results of jmeter load for each instance of application
 # input: total number of iterations, result directory, Total number of instances
 # output: Parse the results and generate the Metrics log files
@@ -175,7 +122,7 @@ function parseResults() {
 
 		for poddatalog in "${POD_CPU_LOGS[@]}"
 		do
-			if [ -s "${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log" ]; then
+		  if [ -s "${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log" ]; then
                                 cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${poddatalog}-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${poddatalog}_min-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${poddatalog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${poddatalog}_max-measure-temp.log
@@ -183,7 +130,7 @@ function parseResults() {
 		done
 		for podmemlog in "${POD_MEM_LOGS[@]}"
 		do
-			if [ -s "${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log" ]; then
+		  if [ -s "${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log" ]; then
                                 cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podmemlog}-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podmemlog}_min-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${podmemlog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podmemlog}_max-measure-temp.log
@@ -191,7 +138,7 @@ function parseResults() {
 		done
 		for poddiskdetailslog in "${POD_DISK_DETAILS_LOGS[@]}"
 		do
-			if [ -s "${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log" ]; then
+		  if [ -s "${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log" ]; then
                                 cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${poddiskdetailslog}_min-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${poddiskdetailslog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${poddiskdetailslog}_max-measure-temp.log
@@ -199,7 +146,7 @@ function parseResults() {
 		done
 		for podnetworklog in "${POD_NW_LOGS[@]}"
 		do
-			if [ -s "${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log" ]; then
+		  if [ -s "${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log" ]; then
                                 cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podnetworklog}-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podnetworklog}_min-measure-temp.log
                                 cat ${RESULTS_DIR_J}/${podnetworklog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podnetworklog}_max-measure-temp.log
@@ -210,14 +157,15 @@ function parseResults() {
 
     for podiolog in "${POD_IO_LOGS[@]}"
     do
-            		   if [ -s "${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log" ]; then
+            		      if [ -s "${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log" ]; then
                               cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f2 >> ${RESULTS_DIR_J}/${podiolog}-measure-temp.log
                               cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f3 >> ${RESULTS_DIR_J}/${podiolog}_min-measure-temp.log
                               cat ${RESULTS_DIR_J}/${podiolog}-measure-${itr}.log | cut -d "," -f4 >> ${RESULTS_DIR_J}/${podiolog}_max-measure-temp.log
-                   fi
+                      fi
     done
 
   done
+
 	###### Add different raw logs we want to merge
 	#Cumulative raw data
 	paste ${RESULTS_DIR_J}/cpu-measure-raw.log ${RESULTS_DIR_J}/mem-measure-raw.log >> ${RESULTS_DIR_J}/../Metrics-cpumem-raw.log
@@ -249,8 +197,7 @@ function parseResults() {
 	  fi
 
 		# Calculate confidence interval
-		metric_ci=`php ${SCRIPT_REPO}/../utils/ci.php ${RESULTS_DIR_J}/${metric}-measure-temp.log`
-		echo "metric_ci = $metric_ci"
+		metric_ci=`php ${SCRIPT_REPO}/utils/ci.php ${RESULTS_DIR_J}/${metric}-measure-temp.log`
 		if [ ! -z ${metric_ci} ]; then
 			eval ci_${metric}=${metric_ci}
 		else
@@ -259,24 +206,19 @@ function parseResults() {
    fi
   done
 
-	echo "INSTANCES ,  CPU_USAGE , MEM_RSS_USAGE , MEM_USAGE , DISKDETAILS_USAGE , NETTRANSMITBYTES_USAGE , NETRECEIVEBYTES_USAGE , CNETTRANSMITBYTES_USAGE , CNETRECEIVEBYTES_USAGE , FSIOTOTAL_USAGE , FSREADTOTAL_USAGE , FSWRITETOTAL_USAGE , CPU_MIN , CPU_MAX , MEM_RSS_MIN , MEM_RSS_MAX , MEM_MIN , MEM_MAX , DISKDETAILS_MIN , DISKDETAILS_MAX , NETTRANSMITBYTES_MIN , NETTRANSMITBYTES_MAX , NETRECEIVEBYTES_MIN , NETRECEIVEBYTES_MAX , CNETTRANSMITBYTES_MIN , CNETTRANSMITBYTES_MAX , CNETRECEIVEBYTES_MIN , CNETRECEIVEBYTES_MAX , FSIOTOTAL_MIN , FSIOTOTAL_MAX , FSREADTOTAL_MIN , FSREADTOTAL_MAX , FSWRITETOTAL_MIN , FSWRITETOTAL_MAX" > ${RESULTS_DIR_J}/Metrics-prom.log
-
-#	echo "${SCALE} , ${total_server_requests_thrpt_rate_3m_avg} , ${total_server_requests_rsp_time_rate_3m_avg} , ${total_server_requests_ms_max} , ${total_http_ms_quan_50_histo_avg} , ${total_http_ms_quan_95_histo_avg} , ${total_http_ms_quan_97_histo_avg} , ${total_http_ms_quan_99_histo_avg} , ${total_http_ms_quan_999_histo_avg} , ${total_http_ms_quan_9999_histo_avg} , ${total_http_ms_quan_99999_histo_avg} , ${total_http_ms_quan_100_histo_avg} , ${total_cpu_avg} , ${total_mem_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${ci_server_requests_thrpt_rate_3m} , ${ci_server_requests_rsp_time_rate_3m} " >> ${RESULTS_DIR_J}/../Metrics-prom.log
-
-	echo "${SCALE} , ${total_cpu_avg} , ${total_mem_avg} , ${total_memusage_avg} , ${total_diskdetails_avg} , ${total_nettransmitbytes_avg} , ${total_netreceivebytes_avg}  , ${total_cnettransmitbytes_avg} , ${total_cnetreceivebytes_avg} , ${total_fsiototal_avg} , ${total_fsreadtotal_avg} , ${total_fswritetotal_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_memusage_min} , ${total_memusage_max} , ${total_diskdetails_min} , ${total_diskdetails_max} , ${total_nettransmitbytes_min} , ${total_nettransmitbytes_max} , ${total_netreceivebytes_min} , ${total_netreceivebytes_max} , ${total_cnettransmitbytes_min} , ${total_cnettransmitbytes_max} , ${total_cnetreceivebytes_min} , ${total_cnetreceivebytes_max} , ${total_fsiototal_min} , ${total_fsiototal_max} , ${total_fsreadtotal_min} , ${total_fsreadtotal_max} , ${total_fswritetotal_min} , ${total_fswritetotal_max}" >> ${RESULTS_DIR_J}/Metrics-prom.log
-
-  echo "${SCALE} ,  ${total_mem_avg} , ${total_memusage_avg} " >> ${RESULTS_DIR_J}/Metrics-mem-prom.log
-  echo "${SCALE} ,  ${total_cpu_avg} " >> ${RESULTS_DIR_J}/Metrics-cpu-prom.log
-  echo "${SCALE} , ${total_maxspike_cpu_max} , ${total_maxspike_mem_max} "  >> ${RESULTS_DIR_J}/Metrics-spikes-prom.log
-
- #       paste ${RESULTS_DIR_J}/http_seconds_quan_50_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_95_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_97_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_99_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_999_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_9999_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_99999_histo-measure-temp.log ${RESULTS_DIR_J}/http_seconds_quan_100_histo-measure-temp.log >> ${RESULTS_DIR_J}/Metrics-histogram-prom.log
+	echo "INSTANCES ,  CPU_USAGE , MEM_RSS_USAGE , MEM_USAGE , DISKDETAILS_USAGE , NETTRANSMITBYTES_USAGE , NETRECEIVEBYTES_USAGE , CNETTRANSMITBYTES_USAGE , CNETRECEIVEBYTES_USAGE , FSIOTOTAL_USAGE , FSREADTOTAL_USAGE , FSWRITETOTAL_USAGE , CPU_MIN , CPU_MAX , MEM_RSS_MIN , MEM_RSS_MAX , MEM_MIN , MEM_MAX , DISKDETAILS_MIN , DISKDETAILS_MAX , NETTRANSMITBYTES_MIN , NETTRANSMITBYTES_MAX , NETRECEIVEBYTES_MIN , NETRECEIVEBYTES_MAX , CNETTRANSMITBYTES_MIN , CNETTRANSMITBYTES_MAX , CNETRECEIVEBYTES_MIN , CNETRECEIVEBYTES_MAX , FSIOTOTAL_MIN , FSIOTOTAL_MAX , FSREADTOTAL_MIN , FSREADTOTAL_MAX , FSWRITETOTAL_MIN , FSWRITETOTAL_MAX" > ${RESULTS_DIR_J}/../Metrics-prom.log
+	echo "${SCALE} , ${total_cpu_avg} , ${total_mem_avg} , ${total_memusage_avg} , ${total_diskdetails_avg} , ${total_nettransmitbytes_avg} , ${total_netreceivebytes_avg}  , ${total_cnettransmitbytes_avg} , ${total_cnetreceivebytes_avg} , ${total_fsiototal_avg} , ${total_fsreadtotal_avg} , ${total_fswritetotal_avg} , ${total_cpu_min} , ${total_cpu_max} , ${total_mem_min} , ${total_mem_max} , ${total_memusage_min} , ${total_memusage_max} , ${total_diskdetails_min} , ${total_diskdetails_max} , ${total_nettransmitbytes_min} , ${total_nettransmitbytes_max} , ${total_netreceivebytes_min} , ${total_netreceivebytes_max} , ${total_cnettransmitbytes_min} , ${total_cnettransmitbytes_max} , ${total_cnetreceivebytes_min} , ${total_cnetreceivebytes_max} , ${total_fsiototal_min} , ${total_fsiototal_max} , ${total_fsreadtotal_min} , ${total_fsreadtotal_max} , ${total_fswritetotal_min} , ${total_fswritetotal_max}" >> ${RESULTS_DIR_J}/../Metrics-prom.log
+  echo "${SCALE} ,  ${total_mem_avg} , ${total_memusage_avg} " >> ${RESULTS_DIR_J}/../Metrics-mem-prom.log
+  echo "${SCALE} ,  ${total_cpu_avg} " >> ${RESULTS_DIR_J}/../Metrics-cpu-prom.log
+  echo "${SCALE} , ${total_maxspike_cpu_max} , ${total_maxspike_mem_max} "  >> ${RESULTS_DIR_J}/../Metrics-spikes-prom.log
 }
+
 POD_CPU_LOGS=(cpu)
 POD_MEM_LOGS=(mem memusage)
 POD_DISK_DETAILS_LOGS=(diskdetails)
 POD_NW_LOGS=(netreceivebytes nettransmitbytes cnetreceivebytes cnettransmitbytes)
 POD_IO_LOGS=(fsiototal fsreadtotal fswritetotal)
-TOTAL_LOGS=(${POD_CPU_LOGS[@]} ${POD_MEM_LOGS[@]} ${POD_DISK_DETAILS_LOGS[@]} ${POD_NW_LOGS[@]} ${POD_IO_LOGS[@]} cpu_min cpu_max mem_min mem_max memusage_min memusage_max diskdetails_min diskdetails_max netreceivebytes_min netreceivebytes_max nettransmitbytes_min nettransmitbytes_max cnettransmitbytes_min cnettransmitbytes_max cnetreceivebytes_min cnetreceivebytes_max)
+TOTAL_LOGS=(${POD_CPU_LOGS[@]} ${POD_MEM_LOGS[@]} ${POD_DISK_DETAILS_LOGS[@]} ${POD_NW_LOGS[@]} ${POD_IO_LOGS[@]} cpu_min cpu_max mem_min mem_max memusage_min memusage_max diskdetails_min diskdetails_max netreceivebytes_min netreceivebytes_max nettransmitbytes_min nettransmitbytes_max cnettransmitbytes_min cnettransmitbytes_max cnetreceivebytes_min cnetreceivebytes_max  fsiototal_min , fsiototal_max , fsreadtotal_min , fsreadtotal_max , fswritetotal_min , fswritetotal_max)
 
 TOTAL_ITR=$1
 RESULTS_DIR_J=$2

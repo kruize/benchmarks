@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020, 2021,2022 Red Hat, IBM Corporation and others.
+# Copyright (c) 2022,2022 Red Hat, IBM Corporation and others.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -178,7 +178,6 @@ function createInstances() {
 			sed -i "/env:/a \ \ \ \ \ \ \ \ \ \ \ \ value: \"${BENCHMARK_DURATION}\"" ${MANIFESTS_DIR}/renaissance-${inst}.yaml
              		sed -i '/env:/a \ \ \ \ \ \ \ \ \ \ - name: "TIME_LIMIT"' ${MANIFESTS_DIR}/renaissance-${inst}.yaml
 		fi
-		echo "message1" ${BENCHMARK_DURATION}
 		tunables_jvm_boolean=(TieredCompilation AllowParallelDefineClass AllowVectorizeOnDemand AlwaysCompileLoopMethods AlwaysPreTouch AlwaysTenure BackgroundCompilation DoEscapeAnalysis UseInlineCaches UseLoopPredicate UseStringDeduplication UseSuperWord UseTypeSpeculation)
 		tunables_jvm_values=(FreqInlineSize MaxInlineLevel MinInliningThreshold CompileThreshold CompileThresholdScaling ConcGCThreads InlineSmallCode LoopUnrollLimit LoopUnrollMin MinSurvivorRatio NewRatio TieredStopAtLevel)
 		user_options=$(echo ${OPTIONS_VAR} | tr ";" "\n")

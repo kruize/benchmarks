@@ -52,7 +52,11 @@ function usage() {
 	echo "Usage: $0 --clustertype=CLUSTER_TYPE -s BENCHMARK_SERVER -e RESULTS_DIR_PATH [-w WARMUPS] [-m MEASURES] [-i TOTAL_INST] [--iter=TOTAL_ITR] [-r= set redeploy to true] [-n NAMESPACE] [-g RENAISSANCE_IMAGE] [--cpureq=CPU_REQ] [--memreq=MEM_REQ] [--cpulim=CPU_LIM] [--memlim=MEM_LIM] [-b BENCHMARKS] [-R REPETITIONS] [-d DURATION] "
 	exit 1
 }
-
+## Check if prometheus is running for valid benchmark results.
+prometheus_pod_running=$(kubectl get pods --all-namespaces | grep "prometheus-k8s-0")
+if [ "${prometheus_pod_running}" == "" ]; then
+      err_exit "Install prometheus for valid results from benchmark."
+fi
 # Iterate through the commandline options
 while getopts s:e:w:m:i:rg:n:t:R:d:b:-: gopts
 do
@@ -121,6 +125,7 @@ do
 		;;
 	esac
 done
+
 if [[ -z "${CLUSTER_TYPE}" || -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH}" ]]; then
 	echo "Do set the variables - CLUSTER_TYPE, BENCHMARK_SERVER and RESULTS_DIR_PATH "
 	usage
@@ -146,8 +151,8 @@ if [ -z "${RE_DEPLOY}" ]; then
 	RE_DEPLOY=false
 fi
 
-if [ -z "${BENCHMARK_IMAGE}" ]; then
-	BENCHMARK_IMAGE="prakalp23/renaissance1041:latest"
+if [ -z "${RENAISSANCE_IMAGE}" ]; then
+	RENAISSANCE_IMAGE="prakalp23/renaissance1041:latest"
 fi
 
 if [ -z "${NAMESPACE}" ]; then
@@ -179,8 +184,6 @@ mkdir -p ${RESULTS_DIR_ROOT}
 CPU_MEM_DURATION=`expr ${DURATION} + 5`
 BENCHMARK_DURATION=`expr ${WARMUPS} + ${MEASURES}`
 BENCHMARK_DURATION=`expr ${BENCHMARK_DURATION} \* ${DURATION}`
-#BENCHMARK_DURATION="140"
-echo "THe output is" ${BENCHMARK_DURATION}
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
@@ -216,13 +219,13 @@ function runItr()
 		# Check if the application is running
 		check_app 
 		# Get CPU and MEM info through prometheus queries
-		echo "message" ${CPU_MEM_DURATION}
 		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
 		# Sleep till the wrk load completes
 		sleep ${DURATION}
 		sleep 1
 	done
 }
+
 function runIterations() {
 	SCALING=$1
 	TOTAL_ITR=$2
@@ -255,6 +258,7 @@ function runIterations() {
 		echo "***************************************" >> ${LOGFILE}
 	done
 }
+
 echo "INSTANCES ,  CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX " > ${RESULTS_DIR_ROOT}/Metrics-prom.log
 echo ", OPERATION_TIME, WEB_ERRORS , OPTIME_CI " > ${RESULTS_DIR_ROOT}/Metrics-renaissance.log
 echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM " > ${RESULTS_DIR_ROOT}/Metrics-config.log
@@ -272,7 +276,6 @@ echo "INSTANCES , CPU_MAXSPIKE , MEM_MAXSPIKE "  >> ${RESULTS_DIR_ROOT}/Metrics-
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} " >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 echo ", renaissance-sample , ${NAMESPACE} , ${renaissance_IMAGE} , renaissance" >> ${RESULTS_DIR_ROOT}/deploy-config.log
 if [ ${CLUSTER_TYPE} == "minikube" ]; then
-#	reload_minikube ${K_CPU} ${K_MEM}
 	fwd_prometheus_port_minikube
 fi
 #TODO Create a function on how many DB inst required for a server. For now,defaulting it to 1
@@ -289,13 +292,15 @@ do
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
 	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
 	sleep 5
+	echo "$$$$$$$$$$$$$$"
 	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
+	echo "$$$$$$$$$$$$$$"
 	
 done
 
 sleep 10
 echo " "
 # Display the Metrics log file
-paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log ${RESULTS_DIR_ROOT}/deploy-config.log
+paste ${RESULTS_DIR_ROOT}/Metrics-prom.log  ${RESULTS_DIR_ROOT}/Metrics-config.log ${RESULTS_DIR_ROOT}/deploy-config.log
 
-paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/deploy-config.log > ${RESULTS_DIR_ROOT}/output.csv
+paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/deploy-config.log > ${RESULTS_DIR_ROOT}/output.csv

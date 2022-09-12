@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2020, 2021,2022 Red Hat, IBM Corporation and others.
+# Copyright (c) 2022,2022 Red Hat, IBM Corporation and others.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ pushd "${CURRENT_DIR}" > /dev/null
 pushd ".." > /dev/null
 
 # Set the defaults for the app
-export NETWORK="kruize-network"
 LOGFILE="${PWD}/setup.log"
 RENAISSANCE_REPO="${CURRENT_DIR}"
 BENCHMARK_IMAGE="prakalp23/renaissance1041:latest"
@@ -39,6 +38,7 @@ function err_exit() {
 		exit -1
 	fi
 }
+
 # Get the IP addr of the machine / vm that we are running on
 function get_ip() {
 	IP_ADDR=$(ip addr | grep "global" | grep "dynamic" | awk '{ print $2 }' | cut -f 1 -d '/')
@@ -46,6 +46,7 @@ function get_ip() {
 		IP_ADDR=$(ip addr | grep "global" | head -1 | awk '{ print $2 }' | cut -f 1 -d '/')
 	fi
 }
+
 # Check if the application is running
 # output: Returns 1 if the application is running else returns 0
 function check_app() {
@@ -67,6 +68,7 @@ function check_app() {
                 fi
         done
 }
+
 ## Forward the prometheus port to collect the metrics
 function fwd_prometheus_port_minikube() {
 	kubectl port-forward pod/prometheus-k8s-0 9090:9090 -n monitoring >> ${LOGFILE} 2>&1 &
