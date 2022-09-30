@@ -68,6 +68,9 @@ do
 			memlim=*)
 				MEM_LIM=${OPTARG#*=}
 				;;
+			envoptions=*)
+				ENV_OPTIONS=${OPTARG#*=}
+				;;
 			*)
 		esac
 		;;
@@ -523,7 +526,7 @@ function runIterations() {
 	for (( itr=0; itr<${TOTAL_ITR}; itr++ ))
 	do
 		if [ ${RE_DEPLOY} == "true" ]; then
-			${SCRIPT_REPO}/petclinic-deploy-openshift.sh -s ${BENCHMARK_SERVER} -i ${SCALING} -p ${PETCLINIC_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} >> setup.log
+			${SCRIPT_REPO}/petclinic-deploy-openshift.sh -s ${BENCHMARK_SERVER} -i ${SCALING} -p ${PETCLINIC_IMAGE} --cpureq=${CPU_REQ} --memreq=${MEM_REQ} --cpulim=${CPU_LIM} --memlim=${MEM_LIM} --envoptions="${ENV_OPTIONS}" >> setup.log
 			err_exit "Error: petclinic deployment failed"
 		fi
 		# Start the load
