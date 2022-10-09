@@ -13,7 +13,7 @@ spec:
       query: rate(http_server_requests_seconds_count{method="GET",outcome="SUCCESS",status="200",uri="/galaxies",}[1m])
       datasource: "prometheus"
       value_type: "double"
-  mode: "show"
+  mode: "experiment"
   selector:
     matchLabel: "app.kubernetes.io/name"
     matchLabelValue: "galaxies-deployment"
