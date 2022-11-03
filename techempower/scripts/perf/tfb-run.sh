@@ -26,6 +26,8 @@ pushd ".." > /dev/null
 LOGFILE="${PWD}/setup.log"
 K_CPU=6
 K_MEM=8192
+DEPLOYMENT_NAME="tfb-qrh-sample-0"
+CONTAINER_NAME="tfb-server"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -257,10 +259,6 @@ if [[ -z "${CLUSTER_TYPE}" || -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH
 	usage
 fi
 
-if [ -z "${MODE}" ]; then
-        MODE="experiment"
-fi
-
 if [ -z "${WARMUPS}" ]; then
 	WARMUPS=5
 fi
@@ -422,7 +420,7 @@ function runItr()
 		check_app 
 		# Get CPU and MEM info through prometheus queries
 		if [[ ${MODE} == "monitoring" ]]; then
-			${SCRIPT_REPO}/../../utils/monitor-metrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
+			${SCRIPT_REPO}/../../utils/monitor-metrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} &
 		else
 			${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &		
 		fi
