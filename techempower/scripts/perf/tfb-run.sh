@@ -93,6 +93,9 @@ do
 			clustertype=*)
 				CLUSTER_TYPE=${OPTARG#*=}
 				;;
+			mode=*)
+				MODE=${OPTARG#*=}
+				;;
 			iter=*)
 				TOTAL_ITR=${OPTARG#*=}
 				;;
@@ -254,6 +257,10 @@ if [[ -z "${CLUSTER_TYPE}" || -z "${BENCHMARK_SERVER}" || -z "${RESULTS_DIR_PATH
 	usage
 fi
 
+if [ -z "${MODE}" ]; then
+        MODE="experiment"
+fi
+
 if [ -z "${WARMUPS}" ]; then
 	WARMUPS=5
 fi
@@ -362,11 +369,16 @@ function run_wrk_workload() {
 	IP_ADDR=$1
 	RESULTS_LOG=$2
 	# Run the wrk load
-	echo "Running wrk load with the following parameters" >> ${LOGFILE}
-#	cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
-	cmd="${HYPERFOIL_DIR}/wrk.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s http://${IP_ADDR}/db"
-	echo "CMD = ${cmd}" >> ${LOGFILE}
-	${cmd} > ${RESULTS_LOG}
+	if [[ ${MODE} == "monitoring" ]]; then
+		echo "Running load for monitoring mode" >> ${LOGFILE}
+		${SCRIPT_REPO}/utils/monitoring_load.sh ${HYPERFOIL_DIR} ${RESULTS_LOG} ${IP_ADDR} ${DURATION} ${THREAD} ${CONNECTIONS} > ${RESULTS_LOG}
+	else
+		echo "Running wrk load with the following parameters" >> ${LOGFILE}
+#		cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
+		cmd="${HYPERFOIL_DIR}/wrk.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s http://${IP_ADDR}/db"
+		echo "CMD = ${cmd}" >> ${LOGFILE}
+		${cmd} > ${RESULTS_LOG}
+	fi
 	sleep 3
 }
 
@@ -409,9 +421,14 @@ function runItr()
 		# Check if the application is running
 		check_app 
 		# Get CPU and MEM info through prometheus queries
-		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
+		if [[ ${MODE} == "monitoring" ]]; then
+			${SCRIPT_REPO}/../../utils/monitor-metrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
+		else
+			${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &		
+		fi
 		# Run the wrk workload
 		run_wrk_with_scaling ${TYPE} ${run} ${RESULTS_DIR_L}
+		
 		# Sleep till the wrk load completes
 		sleep ${DURATION}
 		sleep 1
