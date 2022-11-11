@@ -303,6 +303,14 @@ if [ -z "${CONNECTIONS}" ]; then
 	CONNECTIONS="512"
 fi
 
+# Default values for monitoring mode
+if [[ ${MODE} == "monitoring" ]]; then
+	WARMUPS=0
+	MEASURES=1
+	TOTAL_INST=1
+	TOTAL_ITR=1
+fi
+
 if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
         K_EXEC="oc"
 elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
@@ -369,7 +377,7 @@ function run_wrk_workload() {
 	# Run the wrk load
 	if [[ ${MODE} == "monitoring" ]]; then
 		echo "Running load for monitoring mode" >> ${LOGFILE}
-		${SCRIPT_REPO}/utils/monitoring_load.sh ${HYPERFOIL_DIR} ${RESULTS_LOG} ${IP_ADDR} ${DURATION} ${THREAD} ${CONNECTIONS} > ${RESULTS_LOG}
+		${SCRIPT_REPO}/monitoring_load.sh ${HYPERFOIL_DIR} ${RESULTS_LOG} ${IP_ADDR} ${DURATION} ${THREAD} ${CONNECTIONS} > ${RESULTS_LOG}
 	else
 		echo "Running wrk load with the following parameters" >> ${LOGFILE}
 #		cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
