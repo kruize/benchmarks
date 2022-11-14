@@ -9,4 +9,4 @@ ENV JDK_JAVA_OPTIONS=
 ENV BENCHMARK=all
 ENV TIME_LIMIT=5
 ENTRYPOINT java -javaagent:./jmx_prometheus_javaagent-0.17.0.jar=8080:config.yaml ${JDK_JAVA_OPTIONS} -jar /target/renaissance-gpl-0.14.1.jar -t ${TIME_LIMIT} --csv /output/renaissance-output.csv ${BENCHMARK}
-Footer
+
