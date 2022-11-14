@@ -1,3 +1,4 @@
+FROM registry.access.redhat.com/ubi8/ubi-minimal:8.4
 FROM eclipse-temurin:17.0.3_7-jre
 WORKDIR /target
 RUN wget https://github.com/renaissance-benchmarks/renaissance/releases/download/v0.14.1/renaissance-gpl-0.14.1.jar
