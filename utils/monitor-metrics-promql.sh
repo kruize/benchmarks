@@ -56,21 +56,33 @@ function cpu_metrics()
 		# cpu_limit_sum_container
                 cpu_limit_sum_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
-		# cpu_usage_avg_container
-                cpu_usage_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+		if [[ ${queryVersion} == "4.9" ]]; then
+			# cpu_usage_avg_container
+                        cpu_usage_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
-		# cpu_usage_max_container
-                cpu_usage_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+                        # cpu_usage_max_container
+                        cpu_usage_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
-		# cpu_usage_min_container
-                cpu_usage_min_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+                        # cpu_usage_min_container
+                        cpu_usage_min_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_irate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
+		else
+			# cpu_usage_avg_container
+        	        cpu_usage_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
+			# cpu_usage_max_container
+	                cpu_usage_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
+			# cpu_usage_min_container
+                	cpu_usage_min_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+		fi
 
 		# cpu_throttle_avg_container
                 cpu_throttle_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(rate(container_cpu_cfs_throttled_seconds_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		sleep ${INTERVAL}
 		end_timestamp=`date`
-		echo "${start_timestamp},${end_timestamp},${cpu_request_avg_container},${cpu_request_sum_container},${cpu_limit_avg_container},${cpu_limit_sum_container},${cpu_usage_avg_container},${cpu_usage_max_container},${cpu_usage_min_container},${cpu_throttle_avg_container}" >> cpu_metrics.csv
+		echo "${start_timestamp},${end_timestamp},${cpu_request_avg_container},${cpu_request_sum_container},${cpu_limit_avg_container},${cpu_limit_sum_container},${cpu_usage_avg_container},${cpu_usage_max_container},${cpu_usage_min_container},${cpu_throttle_avg_container}" >> ${RESULTS_DIR}/cpu_metrics.csv
         done
 }
 
@@ -127,7 +139,7 @@ function mem_metrics()
 
                 sleep ${INTERVAL}
 		end_timestamp=`date`
-		echo "${start_timestamp},${end_timestamp},${mem_request_avg_container},${mem_request_sum_container},${mem_limit_avg_container},${mem_limit_sum_container},${mem_usage_avg_container},${mem_usage_max_container},${mem_usage_min_container},${mem_rss_avg_container},${mem_rss_max_container},${mem_rss_min_container}" >> mem_metrics.csv
+		echo ",${mem_request_avg_container},${mem_request_sum_container},${mem_limit_avg_container},${mem_limit_sum_container},${mem_usage_avg_container},${mem_usage_max_container},${mem_usage_min_container},${mem_rss_avg_container},${mem_rss_max_container},${mem_rss_min_container}" >> ${RESULTS_DIR}/mem_metrics.csv
         done
 }
 
@@ -151,11 +163,15 @@ function load_metrics()
 	
 		sleep ${INTERVAL}
 		end_timestamp=`date`
-		echo "${start_timestamp},${end_timestamp},${network_avg_pod}" >> load_metrics.csv
+		echo ",${network_avg_pod}" >> ${RESULTS_DIR}/load_metrics.csv
 	done
 
 }
 
+function getversion()
+{
+	echo "$@" | awk -F. '{ printf("%d%03d%03d%03d\n", $1,$2,$3,$4); }'; 
+}
 
 ITER=$1
 TIMEOUT=$2
@@ -178,6 +194,10 @@ if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 	QUERY_APP=thanos-querier-openshift-monitoring.apps
 	URL=https://${QUERY_APP}.${BENCHMARK_SERVER}/api/v1/query
 	TOKEN=`oc whoami --show-token`
+	VERSION=`oc version | grep "Server" | cut -d " " -f3`
+	if [[ $(getversion $VERSION) -ge $(getversion "4.9") ]]; then
+        	queryVersion="4.9"
+	fi
 elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 	#QUERY_IP=`minikibe ip`
 	QUERY_APP="${BENCHMARK_SERVER}:9090"
@@ -187,9 +207,9 @@ fi
 
 export -f err_exit cpu_metrics mem_metrics load_metrics
 
-echo "start_timestamp,end_timestamp,cpu_request_avg_container,cpu_request_sum_container,cpu_limit_avg_container,cpu_limit_sum_container,cpu_usage_avg_container,cpu_usage_max_container,cpu_usage_min_container,cpu_throttle_avg_container" > cpu_metrics.csv
-echo "start_timestamp,end_timestamp,mem_request_avg_container,mem_request_sum_container,mem_limit_avg_container,mem_limit_sum_container,mem_usage_avg_container,mem_usage_max_container,mem_usage_min_container,mem_rss_avg_container,mem_rss_max_container,mem_rss_min_container" > mem_metrics.csv
-echo "start_timestamp,end_timestamp,network_avg_pod" > load_metrics.csv
+echo "start_timestamp,end_timestamp,cpu_request_avg_container,cpu_request_sum_container,cpu_limit_avg_container,cpu_limit_sum_container,cpu_usage_avg_container,cpu_usage_max_container,cpu_usage_min_container,cpu_throttle_avg_container" > ${RESULTS_DIR}/cpu_metrics.csv
+echo ",mem_request_avg_container,mem_request_sum_container,mem_limit_avg_container,mem_limit_sum_container,mem_usage_avg_container,mem_usage_max_container,mem_usage_min_container,mem_rss_avg_container,mem_rss_max_container,mem_rss_min_container" > ${RESULTS_DIR}/mem_metrics.csv
+echo ",network_avg_pod" > ${RESULTS_DIR}/load_metrics.csv
 
 echo "Collecting metric data" >> setup.log
 start_timestamp=`date`
@@ -197,4 +217,4 @@ timeout ${TIMEOUT} bash -c  "cpu_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} 
 timeout ${TIMEOUT} bash -c  "mem_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL}" &
 timeout ${TIMEOUT} bash -c  "load_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL}" &
 sleep ${TIMEOUT}
-
+paste ${RESULTS_DIR}/cpu_metrics.csv ${RESULTS_DIR}/mem_metrics.csv ${RESULTS_DIR}/load_metrics.csv > ${RESULTS_DIR}/../../monitoring_metrics.csv

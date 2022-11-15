@@ -5,12 +5,16 @@ DURATION=$4
 THREAD=$5
 CONNECTIONS=$6
 
-INTERVAL=300
+INTERVAL=900
 runtime="${DURATION} seconds"
 endtime=$(date -ud "$runtime" +%s)
 
 while [[ $(date -u +%s) -le $endtime ]]
 do
+	if [[ ${INTERVAL} -ge ${DURATION} ]] ; then
+        	INTERVAL=${DURATION}
+	fi
+
 	for (( connection=1; connection <= 512 ; connection++))
 	do
 		for (( thread=1 ; thread <= 56 ; thread++ ))
