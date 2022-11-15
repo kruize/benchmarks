@@ -42,30 +42,35 @@ function cpu_metrics()
 
         while true
         do
+		start_timestamp=`date`
                 # Processing curl output "timestamp value" using jq tool.
 		# cpu_request_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_request_avg_container-${ITER}.json
+                cpu_request_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 		
 		# cpu_request_sum_container
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_request_sum_container-${ITER}.json
+		cpu_request_sum_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		# cpu_limit_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_limit_avg_container-${ITER}.json
+                cpu_limit_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# cpu_limit_sum_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_limit_sum_container-${ITER}.json
+                cpu_limit_sum_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="cpu", unit="core"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# cpu_usage_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_usage_avg_container-${ITER}.json
+                cpu_usage_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		# cpu_usage_max_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_usage_max_container-${ITER}.json
+                cpu_usage_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		# cpu_usage_min_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_usage_min_container-${ITER}.json
+                cpu_usage_min_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		# cpu_throttle_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(rate(container_cpu_cfs_throttled_seconds_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/cpu_throttle_avg_container-${ITER}.json
+                cpu_throttle_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(rate(container_cpu_cfs_throttled_seconds_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		sleep ${INTERVAL}
+		end_timestamp=`date`
+		echo "${start_timestamp},${end_timestamp},${cpu_request_avg_container},${cpu_request_sum_container},${cpu_limit_avg_container},${cpu_limit_sum_container},${cpu_usage_avg_container},${cpu_usage_max_container},${cpu_usage_min_container},${cpu_throttle_avg_container}" >> cpu_metrics.csv
         done
 }
 
@@ -85,33 +90,44 @@ function mem_metrics()
         rm -rf ${RESULTS_DIR}/mem_request_avg_container-${ITER}.json
         while true
         do
+		start_timestamp=`date`
                 # Processing curl output "timestamp value" using jq tool.
 		# mem_request_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_request_avg_container-${ITER}.json
+                mem_request_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# mem_request_sum_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_request_sum_container-${ITER}.json
+		mem_request_sum_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_requests{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# mem_limit_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_limit_avg_container-${ITER}.json
+                mem_limit_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# mem_limit_sum_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_limit_sum_container-${ITER}.json
+                mem_limit_sum_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(kube_pod_container_resource_limits{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'", resource="memory", unit="byte"})' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# mem_usage_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(container_memory_working_set_bytes{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_usage_avg_container-${ITER}.json
+                mem_usage_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(container_memory_working_set_bytes{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# mem_usage_min_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(container_memory_working_set_bytes{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_usage_min_container-${ITER}.json
+                mem_usage_min_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(container_memory_working_set_bytes{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# mem_usage_max_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(container_memory_working_set_bytes{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_usage_max_container-${ITER}.json
+                mem_usage_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(container_memory_working_set_bytes{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
 		# mem_rss_avg_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(container_memory_rss{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_rss_avg_container-${ITER}.json
+                mem_rss_avg_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=avg(avg_over_time(container_memory_rss{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 	
 		# mem_rss_min_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(container_memory_rss{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_rss_min_container-${ITER}.json
+                mem_rss_min_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=min(min_over_time(container_memory_rss{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		# mem_rss_max_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(container_memory_rss{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_rss_max_container-${ITER}.json
+                mem_rss_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(container_memory_rss{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
 		# mem_rss_max_container
-                curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=rate(container_network_receive_bytes_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"'])' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/mem_rss_max_container-${ITER}.json
+                mem_rss_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=rate(container_network_receive_bytes_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"'])' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+
                 sleep ${INTERVAL}
+		end_timestamp=`date`
+		echo "${start_timestamp},${end_timestamp},${mem_request_avg_container},${mem_request_sum_container},${mem_limit_avg_container},${mem_limit_sum_container},${mem_usage_avg_container},${mem_usage_max_container},${mem_usage_min_container},${mem_rss_avg_container},${mem_rss_max_container},${mem_rss_min_container}" >> mem_metrics.csv
         done
 }
 
@@ -129,12 +145,17 @@ function load_metrics()
 
         while true
         do
+		start_timestamp=`date`
 		# network_avg_pod
-		curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_receive_bytes_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq '[ .data.result[] | [ .value[0], .value[1]|tostring] | join(";") ]' | grep -E "[0-9]" >> ${RESULTS_DIR}/network_avg_pod-${ITER}.json		
+		network_avg_pod=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=sum(rate(container_network_receive_bytes_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
+	
 		sleep ${INTERVAL}
+		end_timestamp=`date`
+		echo "${start_timestamp},${end_timestamp},${network_avg_pod}" >> load_metrics.csv
 	done
 
 }
+
 
 ITER=$1
 TIMEOUT=$2
@@ -166,8 +187,12 @@ fi
 
 export -f err_exit cpu_metrics mem_metrics load_metrics
 
+echo "start_timestamp,end_timestamp,cpu_request_avg_container,cpu_request_sum_container,cpu_limit_avg_container,cpu_limit_sum_container,cpu_usage_avg_container,cpu_usage_max_container,cpu_usage_min_container,cpu_throttle_avg_container" > cpu_metrics.csv
+echo "start_timestamp,end_timestamp,mem_request_avg_container,mem_request_sum_container,mem_limit_avg_container,mem_limit_sum_container,mem_usage_avg_container,mem_usage_max_container,mem_usage_min_container,mem_rss_avg_container,mem_rss_max_container,mem_rss_min_container" > mem_metrics.csv
+echo "start_timestamp,end_timestamp,network_avg_pod" > load_metrics.csv
 
 echo "Collecting metric data" >> setup.log
+start_timestamp=`date`
 timeout ${TIMEOUT} bash -c  "cpu_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL}" &
 timeout ${TIMEOUT} bash -c  "mem_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL}" &
 timeout ${TIMEOUT} bash -c  "load_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL}" &
