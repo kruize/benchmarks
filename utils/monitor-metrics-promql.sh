@@ -134,9 +134,6 @@ function mem_metrics()
 		# mem_rss_max_container
                 mem_rss_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=max(max_over_time(container_memory_rss{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"']))' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
 
-		# mem_rss_max_container
-                mem_rss_max_container=`curl --silent -G -kH "Authorization: Bearer ${TOKEN}" --data-urlencode 'query=rate(container_network_receive_bytes_total{pod=~"'"${DEPLOYMENT_NAME}-[^-]*-[^-]*$"'", container="'"${CONTAINER_NAME}"'", namespace="'"${NAMESPACE}"'"}['"${INTERVAL}"'])' ${URL} | jq -c '[ .data.result[] | .value[1]] | .[]'`
-
                 sleep ${INTERVAL}
 		end_timestamp=`date`
 		echo ",${mem_request_avg_container},${mem_request_sum_container},${mem_limit_avg_container},${mem_limit_sum_container},${mem_usage_avg_container},${mem_usage_max_container},${mem_usage_min_container},${mem_rss_avg_container},${mem_rss_max_container},${mem_rss_min_container}" >> ${RESULTS_DIR}/mem_metrics.csv
@@ -186,7 +183,7 @@ NAMESPACE=$9
 #DEPLOYMENT_NAME="tfb-qrh-sample-0"
 #CONTAINER_NAME="tfb-server"
 #NAMESPACE="autotune-tfb"
-INTERVAL=5m
+INTERVAL=15m
 
 mkdir -p ${RESULTS_DIR}
 #QUERY_APP=prometheus-k8s-openshift-monitoring.apps
