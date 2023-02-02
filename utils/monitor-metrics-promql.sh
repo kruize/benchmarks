@@ -222,7 +222,7 @@ if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
 	TOKEN=`oc whoami --show-token`
 	VERSION=`oc version | grep "Server" | cut -d " " -f3`
 	if [[ $(getversion $VERSION) -ge $(getversion "4.9") ]]; then
-        	queryVersion="4.9"
+        	export queryVersion="4.9"
 	fi
 elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
 	#QUERY_IP=`minikibe ip`
