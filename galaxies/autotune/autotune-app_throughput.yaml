@@ -5,7 +5,9 @@ metadata:
   namespace: "default"
 spec:
   slo:
-    objective_function: "app_getop_count"
+    objective_function:
+      function_type: "expression"
+      expression: "app_getop_count"
     slo_class: "throughput"
     direction: "maximize"
     function_variables:
