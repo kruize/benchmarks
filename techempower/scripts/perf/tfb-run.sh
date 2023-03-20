@@ -348,7 +348,7 @@ function check_app() {
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
 	if [ ! -d "${SCRIPT_REPO}/hyperfoil-${HYPERFOIL_VERSION}" ]; then
-		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/hyperfoil-all-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
 		err_exit "Error: Could not download the dependencies" >> ${LOGFILE}
 		unzip -o hyperfoil-${HYPERFOIL_VERSION}.zip -d ${SCRIPT_REPO} >> ${LOGFILE}
 	fi
