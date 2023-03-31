@@ -193,6 +193,7 @@ function load_metrics()
 		sleep ${INTERVAL}
 		end_timestamp=`date`
 		echo ",${network_sum_pod},${network_avg_pod},${network_max_pod},${network_min_pod}" >> ${RESULTS_DIR}/load_metrics.csv
+		echo ",${DEPLOYMENT_NAME},deployment,${NAMESPACE},${CONTAINER_NAME},${CONTAINER_IMAGE}" >> ${RESULTS_DIR}/config_metrics.csv
 	done
 
 }
@@ -239,11 +240,11 @@ export -f err_exit cpu_metrics mem_metrics load_metrics
 echo "start_timestamp,end_timestamp,cpu_request_avg_container,cpu_request_sum_container,cpu_limit_avg_container,cpu_limit_sum_container,cpu_usage_sum_container,cpu_usage_avg_container,cpu_usage_max_container,cpu_usage_min_container,cpu_throttle_sum_container,cpu_throttle_avg_container,cpu_throttle_max_container" > ${RESULTS_DIR}/cpu_metrics.csv
 echo ",mem_request_avg_container,mem_request_sum_container,mem_limit_avg_container,mem_limit_sum_container,mem_usage_sum_container,mem_usage_avg_container,mem_usage_max_container,mem_usage_min_container,mem_rss_sum_container,mem_rss_avg_container,mem_rss_max_container,mem_rss_min_container" > ${RESULTS_DIR}/mem_metrics.csv
 echo ",network_sum_pod,network_avg_pod,network_max_pod,network_min_pod" > ${RESULTS_DIR}/load_metrics.csv
-
+echo ",k8_object_name,k8_object_type,namespace,container_name,image_name" > ${RESULTS_DIR}/config_metrics.csv
 echo "Collecting metric data" >> setup.log
 start_timestamp=`date`
 timeout ${TIMEOUT} bash -c  "cpu_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL} ${CLUSTER_TYPE}" &
 timeout ${TIMEOUT} bash -c  "mem_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL} ${CLUSTER_TYPE}" &
 timeout ${TIMEOUT} bash -c  "load_metrics ${URL} ${TOKEN} ${RESULTS_DIR} ${ITER} ${APP_NAME} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} ${INTERVAL} ${CLUSTER_TYPE}" &
 sleep ${TIMEOUT}
-paste ${RESULTS_DIR}/cpu_metrics.csv ${RESULTS_DIR}/mem_metrics.csv ${RESULTS_DIR}/load_metrics.csv > ${RESULTS_DIR}/../../monitoring_metrics.csv
+paste ${RESULTS_DIR}/cpu_metrics.csv ${RESULTS_DIR}/mem_metrics.csv ${RESULTS_DIR}/load_metrics.csv ${RESULTS_DIR}/config_metrics.csv > ${RESULTS_DIR}/../../monitoring_metrics.csv
