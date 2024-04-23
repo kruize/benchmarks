@@ -42,7 +42,7 @@ As of now, the benchmark runs [TechEmpower Framework- Quarkus resteasy-hibernate
 ```
 To run the benchmark on kubernetes cluster to collect performance metrics
 
-`./scripts/perf/tfb-run.sh --clustertype=CLUSTER_TYPE -s BENCHMARK_SERVER -e RESULTS_DIR [--dbtype=DB_TYPE] [--dbhost=DB_HOST] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
+`./scripts/perf/tfb-run.sh --clustertype=CLUSTER_TYPE -s BENCHMARK_SERVER -e RESULTS_DIR [--dbtype=DB_TYPE] [--dbhost=DB_HOST] [-i SERVER_INSTANCES] [-n NAMESPACE] [-g TFB_IMAGE] [-d DURATION] [-w WARMUPS] [-m MEASURES] [--iter ITERATIONS] [-t THREADS] [-R RATE] [--connection CONNECTIONS] [-r RE_DEPLOY] [--mode=monitoring] [--cpureq=CPU_REQ] [--memreq MEM_REQ] [--cpulim=CPU_LIM] [--memlim MEM_LIM] [--usertunables=USER_TUNABLES] [--MaxInlineLevel=MAXINLINELEVEL] [--quarkustpcorethreads==QUARKUS_THREADPOOL_CORETHREADS] [quarkustpqueuesize=QUARKUS_THREADPOOL_QUEUESIZE] [--quarkusdatasourcejdbcminsize=QUARKUS_DATASOURCE_JDBC_MINSIZE] [--quarkusdatasourcejdbcmaxsize=QUARKUS_DATASOURCE_JDBC_MAXSIZE]`
 
 - **CLUSTER_TYPE**: Type of cluster. Supports openshift , minikube.
 - **BENCHMARK_SERVER**: Name of the cluster you are using
@@ -53,6 +53,7 @@ To run the benchmark on kubernetes cluster to collect performance metrics
 - **NAMESPACE**: Namespace in which tfb-qrh application is to be deployed. It is optional, if not specified then `default` will be considered as the namespace.
 - **TFB_IMAGE**: TechEmpower Framework Quarkus image to deploy. It is optional, if is not specified then the default image `kruize/tfb-qrh:1.13.2.F_mm.v1` will be considered for the deployment.
 - **RE_DEPLOY**: Deploy the application in cluster. If application is already running, it deletes the old deployment and deploy again.
+- **MODE**: Monitoring mode enables to run the application to run the load and monitor the metrics for the specified duration mentioned with -d option.
 - **DURATION**: Duration of each warmup and measurement run.
 - **WARMUPS**: No.of warmup runs.
 - **MEASURES**: No.of measurement runs.
@@ -73,6 +74,9 @@ To run the benchmark on kubernetes cluster to collect performance metrics
 
 Example:
 `./scripts/perf/run-tfb-qrh-openshift.sh --clustertype=openshift -s <example.com> -e results -r -d 60 -w 20 -m 3 -i 1 --iter=5 -n default -t 3 -R 200 --connection=200 --cpureq=1.31 --memreq=648M --cpulim=1.31 --memlim=648M --maxinlinelevel=44 --quarkustpcorethreads=22 --quarkustpqueuesize=950 --quarkusdatasourcejdbcminsize=8 --quarkusdatasourcejdbcmaxsize=36`
+
+For monitoring mode:
+`./scripts/perf/tfb-run.sh --clustertype=openshift -s <example.com>  -e results -r -d 60000 -n default -t 3 -R 200 --mode=monitoring --dbtype=DOCKER`
 ```
 
 ```
