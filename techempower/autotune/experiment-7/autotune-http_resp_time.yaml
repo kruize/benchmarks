@@ -5,7 +5,9 @@ metadata:
   namespace: "default"
 spec:
   slo:
-    objective_function: "(1.25 * request_count) - (1.5 * (request_sum / request_count)) - (0.25 * request_max)"
+    objective_function:
+      function_type: "expression"
+      expression: "(1.25 * request_count) - (1.5 * (request_sum / request_count)) - (0.25 * request_max)"
     slo_class: "response_time"
     direction: "minimize"
     function_variables:
