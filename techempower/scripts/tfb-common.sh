@@ -28,7 +28,7 @@ TFB_DEFAULT_IMAGE="kruize/tfb-qrh:1.13.2.F_mm.v1"
 DEFAULT_NAMESPACE="default"
 DEFAULT_DB_TYPE="docker"
 MANIFESTS_DIR="manifests/"
-HYPERFOIL_VERSION="0.24.1"
+HYPERFOIL_VERSION="0.25.2"
 HYPERFOIL_DIR="${PWD}/hyperfoil-${HYPERFOIL_VERSION}/bin"
 APP_NAME="tfb-qrh"
 APP_DB="tfb-database"
@@ -131,7 +131,7 @@ function parse_tfb_results() {
 # output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
 function load_setup(){
 	if [ ! -d "${PWD}/hyperfoil-${HYPERFOIL_VERSION}" ]; then
-		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/hyperfoil-all-${HYPERFOIL_VERSION}/hyperfoil-${HYPERFOIL_VERSION}.zip >> ${LOGFILE} 2>&1
 		unzip hyperfoil-${HYPERFOIL_VERSION}.zip 
 	fi
 	pushd hyperfoil-${HYPERFOIL_VERSION}/bin > /dev/null

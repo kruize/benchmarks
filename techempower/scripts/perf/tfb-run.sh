@@ -26,6 +26,8 @@ pushd ".." > /dev/null
 LOGFILE="${PWD}/setup.log"
 K_CPU=6
 K_MEM=8192
+DEPLOYMENT_NAME="tfb-qrh-sample-0"
+CONTAINER_NAME="tfb-server"
 
 # checks if the previous command is executed successfully
 # input:Return value of previous command
@@ -92,6 +94,9 @@ do
 		case "${OPTARG}" in
 			clustertype=*)
 				CLUSTER_TYPE=${OPTARG#*=}
+				;;
+			mode=*)
+				MODE=${OPTARG#*=}
 				;;
 			iter=*)
 				TOTAL_ITR=${OPTARG#*=}
@@ -298,6 +303,14 @@ if [ -z "${CONNECTIONS}" ]; then
 	CONNECTIONS="512"
 fi
 
+# Default values for monitoring mode
+if [[ ${MODE} == "monitoring" ]]; then
+	WARMUPS=0
+	MEASURES=1
+	TOTAL_INST=1
+	TOTAL_ITR=1
+fi
+
 if [[ ${CLUSTER_TYPE} == "openshift" ]]; then
         K_EXEC="oc"
 elif [[ ${CLUSTER_TYPE} == "minikube" ]]; then
@@ -362,11 +375,17 @@ function run_wrk_workload() {
 	IP_ADDR=$1
 	RESULTS_LOG=$2
 	# Run the wrk load
-	echo "Running wrk load with the following parameters" >> ${LOGFILE}
-#	cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
-	cmd="${HYPERFOIL_DIR}/wrk.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s http://${IP_ADDR}/db"
-	echo "CMD = ${cmd}" >> ${LOGFILE}
-	${cmd} > ${RESULTS_LOG}
+	if [[ ${MODE} == "monitoring" ]]; then
+		echo "Running load for monitoring mode" >> ${LOGFILE}
+		echo "${SCRIPT_REPO}/monitoring_load.sh ${HYPERFOIL_DIR} ${RESULTS_LOG} ${IP_ADDR} ${DURATION} ${THREAD} ${CONNECTIONS}" >> ${LOGFILE}
+		${SCRIPT_REPO}/monitoring_load.sh ${HYPERFOIL_DIR} ${RESULTS_LOG} ${IP_ADDR} ${DURATION} ${THREAD} ${CONNECTIONS} > ${RESULTS_LOG}
+	else
+		echo "Running wrk load with the following parameters" >> ${LOGFILE}
+#		cmd="${HYPERFOIL_DIR}/wrk2.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s --rate=${REQUEST_RATE} http://${IP_ADDR}/db"
+		cmd="${HYPERFOIL_DIR}/wrk.sh --latency --threads=${THREAD} --connections=${CONNECTIONS} --duration=${DURATION}s http://${IP_ADDR}/db"
+		echo "CMD = ${cmd}" >> ${LOGFILE}
+		${cmd} > ${RESULTS_LOG}
+	fi
 	sleep 3
 }
 
@@ -409,9 +428,14 @@ function runItr()
 		# Check if the application is running
 		check_app 
 		# Get CPU and MEM info through prometheus queries
-		${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &
+		if [[ ${MODE} == "monitoring" ]]; then
+			${SCRIPT_REPO}/../../utils/monitor-metrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} ${DEPLOYMENT_NAME} ${CONTAINER_NAME} ${NAMESPACE} &
+		else
+			${SCRIPT_REPO}/perf/getmetrics-promql.sh ${TYPE}-${run} ${CPU_MEM_DURATION} ${RESULTS_DIR_L} ${BENCHMARK_SERVER} ${APP_NAME} ${CLUSTER_TYPE} &		
+		fi
 		# Run the wrk workload
 		run_wrk_with_scaling ${TYPE} ${run} ${RESULTS_DIR_L}
+		
 		# Sleep till the wrk load completes
 		sleep ${DURATION}
 		sleep 1
@@ -478,21 +502,23 @@ function runIterations() {
 	done
 }
 
-echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_97p , RESPONSE_TIME_99p , RESPONSE_TIME_99.9p , RESPONSE_TIME_99.99p , RESPONSE_TIME_99.999p , RESPONSE_TIME_100p , CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
-echo ", THROUGHPUT_WRK , RESPONSETIME_WRK , RESPONSETIME_MAX_WRK , RESPONSETIME_STDEV_WRK , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
+if [ ${MODE} != "monitoring" ]; then
+	echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_97p , RESPONSE_TIME_99p , RESPONSE_TIME_99.9p , RESPONSE_TIME_99.99p , RESPONSE_TIME_99.999p , RESPONSE_TIME_100p , CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
+	echo ", THROUGHPUT_WRK , RESPONSETIME_WRK , RESPONSETIME_MAX_WRK , RESPONSETIME_STDEV_WRK , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
+	echo "INSTANCES , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
+	echo "RUN , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , THROUGHPUT , RESPONSETIME , WEB_ERRORS , RESPONSETIME_MAX , RESPONSETIME_STDEV , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
+	echo "INSTANCES ,  MEM_RSS , MEM_USAGE " > ${RESULTS_DIR_ROOT}/Metrics-mem-prom.log
+	echo "INSTANCES ,  CPU_USAGE" > ${RESULTS_DIR_ROOT}/Metrics-cpu-prom.log
+	echo ", 50p , 95p , 98p , 99p , 99.9p" > ${RESULTS_DIR_ROOT}/Metrics-percentile-prom.log
+	echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/server_requests-metrics-measure-raw.log
+	echo "THROUGHPUT_RATE_1m , RESPONSE_TIME_RATE_1m , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT_RATE_5m , RESPONSE_TIME_RATE_5m , THROUGHPUT_RATE_6m , RESPONSE_TIME_RATE_6m " > ${RESULTS_DIR_ROOT}/Metrics-rate-prom.log
+	echo "INSTANCES , 50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO , 99.999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
+	echo "INSTANCES , CPU_MAXSPIKE , MEM_MAXSPIKE "  >> ${RESULTS_DIR_ROOT}/Metrics-spikes-prom.log
+	echo "50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO , 99.999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-histogram-prom.log
+fi
+
 echo ", CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , QRKS_TP_CORETHREADS , QRKS_TP_QUEUESIZE , QRKS_DS_JDBC_MINSIZE , QRKS_DS_JDBC_MAXSIZE , FreqInlineSize , MaxInlineLevel , MinInliningThreshold , CompileThreshold , CompileThresholdScaling , ConcGCThreads , InlineSmallCode , LoopUnrollLimit , LoopUnrollMin  , MinSurvivorRatio , NewRatio , TieredStopAtLevel , TieredCompilation , AllowParallelDefineClass , AllowVectorizeOnDemand , AlwaysCompileLoopMethods , AlwaysPreTouch , AlwaysTenure , BackgroundCompilation , DoEscapeAnalysis , UseInlineCaches , UseLoopPredicate , UseStringDeduplication , UseSuperWord , UseTypeSpeculation" > ${RESULTS_DIR_ROOT}/Metrics-config.log
 echo ", DEPLOYMENT_NAME , NAMESPACE , IMAGE_NAME , CONTAINER_NAME" > ${RESULTS_DIR_ROOT}/deploy-config.log
-
-echo "INSTANCES , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
-echo "RUN , CPU_REQ , MEM_REQ , CPU_LIM , MEM_LIM , THROUGHPUT , RESPONSETIME , WEB_ERRORS , RESPONSETIME_MAX , RESPONSETIME_STDEV , CPU , CPU_MIN , CPU_MAX , MEM , MEM_MIN , MEM_MAX" > ${RESULTS_DIR_ROOT}/Metrics-raw.log
-echo "INSTANCES ,  MEM_RSS , MEM_USAGE " > ${RESULTS_DIR_ROOT}/Metrics-mem-prom.log
-echo "INSTANCES ,  CPU_USAGE" > ${RESULTS_DIR_ROOT}/Metrics-cpu-prom.log
-echo ", 50p , 95p , 98p , 99p , 99.9p" > ${RESULTS_DIR_ROOT}/Metrics-percentile-prom.log
-echo "ITR , THROUGHPUT , RESPONSE_TIME , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m" >> ${RESULTS_DIR_ROOT}/server_requests-metrics-measure-raw.log
-echo "THROUGHPUT_RATE_1m , RESPONSE_TIME_RATE_1m , THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , THROUGHPUT_RATE_5m , RESPONSE_TIME_RATE_5m , THROUGHPUT_RATE_6m , RESPONSE_TIME_RATE_6m " > ${RESULTS_DIR_ROOT}/Metrics-rate-prom.log
-echo "INSTANCES , 50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO , 99.999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
-echo "INSTANCES , CPU_MAXSPIKE , MEM_MAXSPIKE "  >> ${RESULTS_DIR_ROOT}/Metrics-spikes-prom.log
-echo "50p_HISTO , 95p_HISTO , 97p_HISTO , 99p_HISTO , 99.9p_HISTO , 99.99p_HISTO , 99.999p_HISTO , 100p_HISTO" >> ${RESULTS_DIR_ROOT}/Metrics-histogram-prom.log
 
 echo ", ${CPU_REQ} , ${MEM_REQ} , ${CPU_LIM} , ${MEM_LIM} , ${quarkustpcorethreads} , ${quarkustpqueuesize} , ${quarkusdatasourcejdbcminsize} , ${quarkusdatasourcejdbcmaxsize} , ${FreqInlineSize} , ${MaxInlineLevel} , ${MinInliningThreshold} , ${CompileThreshold} , ${CompileThresholdScaling} , ${ConcGCThreads} , ${InlineSmallCode} , ${LoopUnrollLimit} , ${LoopUnrollMin} , ${MinSurvivorRatio} , ${NewRatio} , ${TieredStopAtLevel} , ${TieredCompilation} , ${AllowParallelDefineClass} , ${AllowVectorizeOnDemand} , ${AlwaysCompileLoopMethods} , ${AlwaysPreTouch} , ${AlwaysTenure} , ${BackgroundCompilation} , ${DoEscapeAnalysis} , ${UseInlineCaches} , ${UseLoopPredicate} , ${UseStringDeduplication} , ${UseSuperWord} , ${UseTypeSpeculation} " >> ${RESULTS_DIR_ROOT}/Metrics-config.log
 echo ", tfb-qrh-sample , ${NAMESPACE} , ${TFB_IMAGE} , tfb-qrh" >> ${RESULTS_DIR_ROOT}/deploy-config.log
@@ -514,21 +540,26 @@ do
 	echo "Running the benchmark with ${scale}  instances with ${TOTAL_ITR} iterations having ${WARMUPS} warmups and ${MEASURES} measurements" >> ${LOGFILE}
 	# Perform warmup and measure runs
 	runIterations ${scale} ${TOTAL_ITR} ${WARMUPS} ${MEASURES} ${RESULTS_SC}
-	echo "Parsing results for ${scale} instances" >> ${LOGFILE}
-	# Parse the results
-	${SCRIPT_REPO}/perf/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE} ${APP_NAME}
-	sleep 5
-	${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
+	if [[ ${MODE} != "monitoring" ]]; then
+		echo "Parsing results for ${scale} instances" >> ${LOGFILE}
+		# Parse the results
+		${SCRIPT_REPO}/perf/parsemetrics-wrk.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${NAMESPACE} ${SCRIPT_REPO} ${CLUSTER_TYPE} ${APP_NAME}
+		sleep 5
+		${SCRIPT_REPO}/perf/parsemetrics-promql.sh ${TOTAL_ITR} ${RESULTS_SC} ${scale} ${WARMUPS} ${MEASURES} ${SCRIPT_REPO}
+	fi
 	
 done
 
 ## Cleanup all the deployments
-#${SCRIPT_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
+${SCRIPT_REPO}/tfb-cleanup.sh -c ${CLUSTER_TYPE} -n ${NAMESPACE} >> ${LOGFILE}
 sleep 10
 echo " "
-# Display the Metrics log file
-paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log ${RESULTS_DIR_ROOT}/deploy-config.log
-#paste ${RESULTS_DIR_ROOT}/Metrics-quantiles-prom.log
-
-paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/deploy-config.log > ${RESULTS_DIR_ROOT}/output.csv
+if [[ ${MODE} == "monitoring" ]]; then
+	echo "Completed monitoring metrics."
+	echo "View the logs at ${RESULTS_DIR_ROOT}/monitoring_metrics.csv"
+else
+	# Display the Metrics log file
+	paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/Metrics-config.log ${RESULTS_DIR_ROOT}/deploy-config.log
+	paste ${RESULTS_DIR_ROOT}/Metrics-prom.log ${RESULTS_DIR_ROOT}/Metrics-wrk.log ${RESULTS_DIR_ROOT}/deploy-config.log > ${RESULTS_DIR_ROOT}/output.csv
+fi
 
