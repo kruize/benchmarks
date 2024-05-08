@@ -1,0 +1,60 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfb-qrh-sample
+  labels:
+    app: tfb-qrh-app
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: tfb-qrh-deployment
+  template:
+    metadata:
+      labels:
+        name: tfb-qrh-deployment
+        app: tfb-qrh-deployment
+        # Add label to the application which is used by kruize/autotune to monitor it
+        app.kubernetes.io/name: "tfb-qrh-deployment"
+        app.kubernetes.io/layer: "quarkus"
+        version: v1
+    spec:
+      volumes:
+      - name: test-volume
+      containers:
+      - name: tfb-server
+        image: kruize/tfb-qrh:1.13.2.F_et17
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: "JAVA_OPTIONS"
+            value: "-server"
+        ports:
+          - containerPort: 8080
+        resources:
+         requests:
+           cpu: 3.5
+           memory: "2048Mi"
+         limits:
+           cpu: 3.5
+           memory: "2048Mi"
+        volumeMounts:
+          - name: "test-volume"
+            mountPath: "/opt/jLogs"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tfb-qrh-service
+  annotations:
+    prometheus.io/scrape: 'true'
+    prometheus.io/path: '/q/metrics'
+  labels:
+    app: tfb-qrh-app
+spec:
+  type: NodePort
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: tfb-qrh-port
+  selector:
+    name: tfb-qrh-deployment

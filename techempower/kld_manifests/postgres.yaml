@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tfb-database
+  labels:
+    app: tfb-database
+spec:
+  replicas: 1
+  selector:
+   matchLabels:
+     app: tfb-database
+  template:
+    metadata:
+      labels:
+        name: tfb-database
+        app: tfb-database
+        # Add label to the application which is used by kruize/autotune to monitor it
+        app.kubernetes.io/name: "tfb-database"
+        version: v1
+    spec:
+      containers:
+      - name: tfb-database
+        image: docker.io/kruize/tfb-postgres-openshift:latest
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POSTGRESQL_USER
+            value: benchmarkdbuser
+          - name: POSTGRESQL_PASSWORD
+            value: benchmarkdbpass
+          - name: POSTGRESQL_DATABASE
+            value: hello_world
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10 && psql -a hello_world < /tmp/create-postgres-data.sql"]        
+        ports:
+          - containerPort: 5432
+        resources:
+          requests:
+           cpu: 2
+           memory: "1024Mi"
+         limits:
+           cpu: 2
+           memory: "1024Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tfb-database
+  labels:
+    name: tfb-database
+spec:
+    type: ClusterIP
+    selector:
+      app: tfb-database
+    ports:
+      - protocol: TCP
+        port: 5432
+        targetPort: 5432
