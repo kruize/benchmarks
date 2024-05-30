@@ -37,11 +37,11 @@ spec:
           - containerPort: 5432
         resources:
           requests:
-           cpu: 2
-           memory: "1024Mi"
-         limits:
-           cpu: 2
-           memory: "1024Mi"
+            cpu: 2
+            memory: "1024Mi"
+          limits:
+            cpu: 2
+            memory: "1024Mi"
 ---
 apiVersion: v1
 kind: Service
