@@ -17,8 +17,8 @@
 ### Script containing common functions ###
 
 CURRENT_DIR="$(dirname "$(realpath "$0")")"
-pushd "${CURRENT_DIR}" >> setup.log
-pushd ".." >> setup.log
+pushd "${CURRENT_DIR}" > /dev/null
+pushd ".." > /dev/null
 
 # Set the defaults for the app
 export GALAXIES_PORT="32000"
@@ -39,6 +39,30 @@ function err_exit() {
 		echo
 		echo "See ${LOGFILE} for more details"
 		exit -1
+	fi
+}
+
+# Check if java is installed and it is of version 11 or newer
+function check_load_prereq() {
+	echo
+	echo -n "Info: Checking prerequisites..." >> ${LOGFILE} 
+	# check if java exists
+	if [ ! `which java` ]; then
+		echo " "
+		echo "Error: java is not installed."
+		exit 1
+	else
+		JAVA_VER=$(java -version 2>&1 >/dev/null | egrep "\S+\s+version" | awk '{print $3}' | tr -d '"')
+		case "${JAVA_VER}" in 
+			1[1-9].*.*)
+				echo "done" >> ${LOGFILE}
+				;;
+			*)
+				echo " "
+				echo "Error: Hyperfoil requires Java 11 or newer and current java version is ${JAVA_VER}"
+				exit 1
+				;;
+		esac
 	fi
 }
 
@@ -69,7 +93,7 @@ function check_app() {
 	for status in "${CMD[@]}"
 	do
 		if [ -z "${status}" ]; then
-			echo "Application pod did not come up" 
+			echo "Application pod did not come up"
 			exit -1;
 		fi
 	done
@@ -84,11 +108,11 @@ function build_galaxies() {
 	err_exit "Error: Building of docker image of galaxies."
 }
 
-# Run the galaxies application 
+# Run the galaxies application
 # input:galaxies image to be used and JVM arguments if any
 # output:Create network bridge "kruize-network" and run galaxies application container on the same network
 function run_galaxies() {
-	GALAXIES_IMAGE=$1 
+	GALAXIES_IMAGE=$1
 	INST=$2
 	
 	# Create docker network bridge "kruize-network"
@@ -98,14 +122,47 @@ function run_galaxies() {
 		echo "Creating Kruize network: ${NETWORK}..."
 		docker network create --driver bridge ${NETWORK} 2>>${LOGFILE} >>${LOGFILE}
 	else
-		echo "${NETWORK} already exists..." 
+		echo "${NETWORK} already exists..."
 	fi
 
 	# Run the galaxies app container on "kruize-network"
-	cmd="docker run -d --name=galaxies-app-${INST} -p ${GALAXIES_PORT}:8080 --network=${NETWORK} ${GALAXIES_IMAGE} "
-	${cmd}s 2>>${LOGFILE} >>${LOGFILE}
+	cmd="docker run -d --name=galaxies-app-${INST} -p ${GALAXIES_PORT}:8080 --network=${NETWORK} ${GALAXIES_IMAGE}"
+	${cmd} 2>>${LOGFILE} >>${LOGFILE}
 	err_exit "Error: Unable to start galaxies container"
 	((GALAXIES_PORT=GALAXIES_PORT+1))
 	# Check if the application is running
 	check_app
 }
+
+# Parse the Throughput Results
+# input:result directory , Number of iterations of the wrk load
+# output:Throughput log file (tranfer per sec, Number of requests per second, average latency and errors if any)
+function parse_galaxies_results() {
+	RESULTS_DIR=$1
+	TOTAL_LOGS=$2
+	echo "RUN, THROUGHPUT, RESPONSE_TIME, MAX_RESPONSE_TIME, STDDEV_RESPONSE_TIME, ERRORS" > ${RESULTS_DIR}/Throughput.log
+	for (( iteration=1 ; iteration<=${TOTAL_LOGS} ;iteration++))
+	do
+		RESULT_LOG=${RESULTS_DIR}/wrk-${inst}-${iteration}.log
+		throughput=`cat ${RESULT_LOG} | grep "Requests" | cut -d ":" -f2 `
+		responsetime=`cat ${RESULT_LOG} | grep "Latency" | cut -d ":" -f2 | tr -s " " | cut -d " " -f2 `
+		max_responsetime=`cat ${RESULT_LOG} | grep "Latency" | cut -d ":" -f2 | tr -s " " | cut -d " " -f6 `
+		stddev_responsetime=`cat ${RESULT_LOG} | grep "Latency" | cut -d ":" -f2 | tr -s " " | cut -d " " -f4 `
+		weberrors=`cat ${RESULT_LOG} | grep "Non-2xx" | cut -d ":" -f2`
+		if [ "${weberrors}" == "" ]; then
+			weberrors="0"
+		fi
+		echo "${iteration},    ${throughput},     ${responsetime},         ${max_responsetime},             ${stddev_responsetime},             ${weberrors}" >> ${RESULTS_DIR}/Throughput.log
+	done
+}
+
+# Download the required dependencies
+# output: Check if the hyperfoil/wrk dependencies is already present, If not download the required dependencies to apply the load
+function load_setup(){
+	if [ ! -d "${PWD}/hyperfoil-0.13" ]; then
+		wget https://github.com/Hyperfoil/Hyperfoil/releases/download/release-0.13/hyperfoil-0.13.zip >> ${LOGFILE} 2>&1
+		unzip hyperfoil-0.13.zip 
+	fi
+	pushd hyperfoil-0.13/bin > /dev/null
+}
+
