@@ -146,6 +146,6 @@ INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RE
 | perf/ci.php			|	Use to measure confidence interval of data.															|
 | perf/parsemetrics-wrk.sh      |       Parse the metrics data from hyperfoil/wrk load simulator.                                                                                               	|
 | tfb-load.sh			|	To run the load separately 																	|
-| manifests         |   Manifests used by TFB benchmark for performance benchmarking and monitoring purposes            |
-| kld_manifests     |   Manifests used by kruize monitoring demos           |
+| manifests/default_manifests   |   Manifests used by TFB benchmark for performance benchmarking and monitoring purposes            |
+| manifests/resource_provisioning_manifests |   Manifests used by kruize monitoring demo to showcase underprovision/overprovision scenarios           |
 
