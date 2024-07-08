@@ -10,11 +10,9 @@ function readQuestionsFromFile(filePath) {
 
 // Function to run a browser instance
 async function runBrowser(url, questions, duration, delay, headless) {
-  console.log("Headless is ", headless);
-//  headless=false
   const browser = await puppeteer.launch({ 
     headless: headless,
-    args: [' --disable-features=BlockInsecurePrivateNetworkRequests']
+    args: ['--no-sandbox', '--disable-setuid-sandbox','--disable-features=BlockInsecurePrivateNetworkRequests']
   }); //,'--no-sandbox', '--disable-setuid-sandbox']});
   const page = await browser.newPage();
   await page.setCacheEnabled(false);
@@ -85,7 +83,6 @@ const duration = parseInt(args.duration) || 300000; // default 5 minute
 const delay = parseInt(args.delay) || 1000; // default 1 second
 const headless = args.headless || 'true'; // default true
 
-console.log("Headless is:",headless);
 if (!url) {
   console.error('Error: URL parameter is required');
   process.exit(1);
