@@ -1,4 +1,6 @@
-## Deploy the LLM+RAG Demo
+## LLM+RAG Workload
+
+### Deploy the LLM+RAG Demo
 
 To deploy the demo, run the following command:
 
@@ -15,10 +17,10 @@ This script performs the following actions:
 - Deploys the Gradio service for Q&A.
 - Ingests several sources of data into the database for RAG (Retrieval-Augmented Generation).
 
-## Running the Load
+### Running the Load
 
 ``` 
-docker run quay.io/kusumach/llmragdemo-load-puppeteer node load.js --url <GRADIO_Service> [--duration <Duration load runs in ms>:default 300000 (5min)] [--delay <Delay between questions in ms>:default 1000] [--browsers <Number of browsers running the load in parallel>:default 1]
+docker run -d --rm --network=host quay.io/kusumach/llmragdemo-load-puppeteer:v1 node load.js --url <GRADIO_Service> [--duration <Duration load runs in ms>:default 300000 (5min)] [--delay <Delay between questions in ms>:default 1000] [--browsers <Number of browsers running the load in parallel>:default 1]
 
 ```
 
