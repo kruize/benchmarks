@@ -20,7 +20,7 @@ This script performs the following actions:
 ### Running the Load
 
 ``` 
-docker run -d --rm --network=host quay.io/kusumach/llmragdemo-load-puppeteer:v1 node load.js --url <GRADIO_Service> [--duration <Duration load runs in ms>:default 300000 (5min)] [--delay <Delay between questions in ms>:default 1000] [--browsers <Number of browsers running the load in parallel>:default 1]
+docker run -d --rm --network=host quay.io/kusumach/llmragdemo-load-puppeteer:v1 node load.js --url <GRADIO_Service> [--duration <Duration load runs in ms>:default null] [--delay <Delay between questions in ms>:default 10] [--browsers <Number of browsers running the load in parallel>:default 1]
 
 ```
 
