@@ -29,5 +29,5 @@ RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add
 COPY . .
 
 # Command to run the script
-CMD ["node", "load.js", "--url", "http://example.com", "--browsers", "1", "--duration", "60000", "--delay", "1000", "--headless", "true"]
+CMD ["node", "load.js", "--url", "http://example.com", "--browsers", "1", "--duration", "60000", "--delay", "100"]
 

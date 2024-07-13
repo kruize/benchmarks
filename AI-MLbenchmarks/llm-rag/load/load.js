@@ -24,13 +24,14 @@ async function askQuestions(page, questions, endTime, delay) {
 
       console.log("Entered the question and waiting for the response indicator..");
    
+       // Wait for the bot's response to appear
       const initialResponses = await page.$$('button[data-testid="bot"]');
       const initialResponseCount = initialResponses.length;
       //console.log(initialResponseCount)
       await page.waitForFunction(
               initialCount => {
                       const responses = document.querySelectorAll('button[data-testid="bot"]');
-                      //console.log(`Current response count: ${responses.length}, Initial response: ${responses}`);
+                      console.log(`Current response count: ${responses.length}, Initial response: ${responses}`);
                       return responses.length > initialCount;
               },
               {},
@@ -52,26 +53,25 @@ async function askQuestions(page, questions, endTime, delay) {
               //console.log(`Number of bot buttons found: ${buttonCount}`);
 
               let retries = 0;
-              const maxRetries = 5; 
+              const maxRetries = 5; // Adjust based on your needs
               while (retries < maxRetries) {
                       try {
                               currentResponse = await botButtons[latestResponseIndex - 1].evaluate(el => el.innerText);
                               //console.log(currentResponse);
-                              break; 
+                              break;
                       } catch (error) {
                               console.error(`Failed to find element: button[data-testid="bot"]:nth-of-type(${latestResponseIndex})`, error);
                               retries++;
                               await new Promise(resolve => setTimeout(resolve, delay1));
                       }
               }
-
               if (retries === maxRetries) {
                       console.error('Failed to find the current response after multiple attempts.');
                       break;
               }
               if (currentResponse.includes('Loading content')) {
                       //console.log("Response is still loading...");
-                      stabilityCheckCounter = 0; 
+                      stabilityCheckCounter = 0;
               } else if (currentResponse === lastResponse) {
                       stabilityCheckCounter += stabilityCheckDelay;
                       if (stabilityCheckCounter >= stabilityCheckDuration) {
@@ -82,30 +82,38 @@ async function askQuestions(page, questions, endTime, delay) {
                       stabilityCheckCounter = 0;
               }
               await new Promise(resolve => setTimeout(resolve, stabilityCheckDelay));
+
       }
       await delayFunc(delay);
   }
+
+
 }
 
+// Function to run a browser instance
 async function runBrowser(url, questions, duration, delay, headless) {
   const headlessBool = (headless === 'true');
   const browser = await puppeteer.launch({
 	  headless: headlessBool, 
-	  args: ['--no-sandbox', '--disable-setuid-sandbox','--disable-features=BlockInsecurePrivateNetworkRequests'] 
-  });
+	  args: ['--no-sandbox', '--disable-setuid-sandbox','--disable-features=BlockInsecurePrivateNetworkRequests'] });
   const page = await browser.newPage();
   await page.setCacheEnabled(false);
-  await page.setRequestInterception(true);
+  if (url.startsWith('http://')) {
+    await page.setRequestInterception(true);
+  }
   page.on('request', request => {
-    if (request.url().startsWith('http://')) {
-      request.continue();
-    } else {
-      request.abort();
+    const requestUrl = request.url();
+    if (url.startsWith('http://')) {
+      if (requestUrl.includes('https')) {
+	request.abort();
+      } else {
+	request.continue();
+      }
     }
   });
 
-  await page.goto(url, { waitUntil: 'networkidle2' });
-  await page.waitForSelector('[data-testid="textbox"]', { timeout: 90000 });
+  await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+  await page.waitForSelector('[data-testid="textbox"]', { timeout: 120000 });
   console.log("Page has come up!");
   
   const endTime = Date.now() + duration;
@@ -132,11 +140,12 @@ function delayFunc(ms) {
 async function main(url, numberOfBrowsers, duration, delay, headless) {
   const startSetTime = performance.now(); 
   const questions = readQuestionsFromFile('./questions.json');
+
   const browserPromises = [];
 
   for (let i = 0; i < numberOfBrowsers; i++) {
     browserPromises.push(runBrowser(url, questions, duration, delay, headless));
-    await delayFunc(10000);
+    await delayFunc(5000);
   }
 
   await Promise.all(browserPromises);
@@ -144,14 +153,15 @@ async function main(url, numberOfBrowsers, duration, delay, headless) {
   console.log(`Time taken to complete the load run: ${(endSetTime - startSetTime) / 1000} seconds`);
 }
 
+// Parse command-line arguments
 // Parameters: URL, number of browsers, duration in milliseconds, delay between questions in milliseconds, headless mode (true/false)
 const args = minimist(process.argv.slice(2));
 
 const url = args.url;
 const numberOfBrowsers = parseInt(args.browsers) || 1;
 const duration = parseInt(args.duration) || null;
-const delay = parseInt(args.delay) || 100; // default 100ms
-const headless = args.headless || 'true'; // default true
+const delay = parseInt(args.delay) || 100;
+const headless = args.headless || 'true'; 
 
 if (!url) {
   console.error('Error: URL parameter is required');
