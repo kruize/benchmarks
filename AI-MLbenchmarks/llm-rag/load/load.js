@@ -8,6 +8,7 @@ function readQuestionsFromFile(filePath) {
 }
 
 async function askQuestions(page, questions, endTime, delay) {
+  let questionsAnswered = 0;
   for (const question of questions) {
       if(endTime != null) {
         if (Date.now() >= endTime) break;
@@ -31,7 +32,7 @@ async function askQuestions(page, questions, endTime, delay) {
       await page.waitForFunction(
               initialCount => {
                       const responses = document.querySelectorAll('button[data-testid="bot"]');
-                      console.log(`Current response count: ${responses.length}, Initial response: ${responses}`);
+                      //console.log(`Current response count: ${responses.length}, Initial response: ${responses}`);
                       return responses.length > initialCount;
               },
               {},
@@ -84,8 +85,10 @@ async function askQuestions(page, questions, endTime, delay) {
               await new Promise(resolve => setTimeout(resolve, stabilityCheckDelay));
 
       }
+      questionsAnswered++;
       await delayFunc(delay);
   }
+  return questionsAnswered;
 
 
 }
@@ -115,21 +118,29 @@ async function runBrowser(url, questions, duration, delay, headless) {
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
   await page.waitForSelector('[data-testid="textbox"]', { timeout: 120000 });
   console.log("Page has come up!");
-  
+  let questionsBrowserAnswered = 0;
   const endTime = Date.now() + duration;
-  let questionsAnswered = 0;
   const startQATime = performance.now();  
   if (duration) {
     console.log("Duration to run the load is set. Loops over the questions until the duration specified!");
     while(Date.now() < endTime) {
-	    await askQuestions(page, questions, endTime, delay);
+      const questionsBrowserAnsweredtemp = await askQuestions(page, questions, endTime, delay);
+      questionsBrowserAnswered += questionsBrowserAnsweredtemp;
     }
   } else {
-	  console.log("No duration is set. Runs all the questions once");
-	  await askQuestions(page, questions, null, delay);
+    console.log("No duration is set");
+    if (loop) {
+      console.log(`Runs all the 8 questions ${loop} times`);
+      for (let round = 0; round < loop; round++) {
+        const questionsBrowserAnsweredtemp = await askQuestions(page, questions, null, delay); 
+	questionsBrowserAnswered += questionsBrowserAnsweredtemp;
+      }
+    }
   }
   const endQATime = performance.now(); 
-  console.log(`Time taken to run Q and A: ${(endQATime - startQATime) / 1000} seconds`);
+  const QATime = (endQATime - startQATime) / 1000;
+  //console.log(`Time taken to get answers for ${questionsBrowserAnswered} questions : ${(endQATime - startQATime) / 1000} seconds`);
+  return { questionsBrowserAnswered, QATime };
   await browser.close();
 }
 
@@ -140,13 +151,19 @@ function delayFunc(ms) {
 async function main(url, numberOfBrowsers, duration, delay, headless) {
   const startSetTime = performance.now(); 
   const questions = readQuestionsFromFile('./questions.json');
-
+  
   const browserPromises = [];
 
   for (let i = 0; i < numberOfBrowsers; i++) {
     browserPromises.push(runBrowser(url, questions, duration, delay, headless));
     await delayFunc(5000);
   }
+	
+  const results = await Promise.all(browserPromises);
+  results.forEach((result, index) => {
+    const { questionsBrowserAnswered, QATime } = result;
+    console.log(`Browser ${index + 1} answered ${questionsBrowserAnswered} questions in ${QATime} seconds.`);
+  });
 
   await Promise.all(browserPromises);
   const endSetTime = performance.now(); 
@@ -160,6 +177,7 @@ const args = minimist(process.argv.slice(2));
 const url = args.url;
 const numberOfBrowsers = parseInt(args.browsers) || 1;
 const duration = parseInt(args.duration) || null;
+const loop = parseInt(args.loop) || 1;
 const delay = parseInt(args.delay) || 100;
 const headless = args.headless || 'true'; 
 
