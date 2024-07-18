@@ -96,5 +96,5 @@ def run_model(num_prompts):
     print(f"Completed processing. Generated solutions for {num_solutions} prompts in {current_time} seconds.")
 
 num_prompts = 800
-num_prompts = int(os.getenv("Enter the number of prompts to process: ", num_prompts))
+num_prompts = int(os.getenv("num_prompts", num_prompts))
 run_model(num_prompts)
