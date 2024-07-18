@@ -13,9 +13,6 @@ RUN pip install  -r requirements.txt
 # Copy the rest of the application code into the container
 COPY . /app/
 
-# Set environment variable for number of prompts
-ENV num_prompts=800
-
 # Run python script.py when the container launches
 CMD ["python", "script.py"]
 
