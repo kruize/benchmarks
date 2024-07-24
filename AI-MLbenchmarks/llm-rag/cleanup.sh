@@ -16,16 +16,16 @@ find ./shared-rag-llm -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" 
 find ./gradio-rag -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 
 # Cleanup postigres 
-oc delete -f pgvector-rag-deployment/01-db-secret.yaml
-oc delete -f pgvector-rag-deployment/02-pvc.yaml
 oc delete -f pgvector-rag-deployment/03-deployment.yaml
 oc delete -f pgvector-rag-deployment/04-services.yaml
+oc delete -f pgvector-rag-deployment/02-pvc.yaml
+oc delete -f pgvector-rag-deployment/01-db-secret.yaml
 
 # Cleanup llm
-oc delete -f shared-rag-llm/pvc.yaml
 oc delete -f shared-rag-llm/deployment.yaml
 oc delete -f shared-rag-llm/service.yaml
 oc delete -f shared-rag-llm/route.yaml
+oc delete -f shared-rag-llm/pvc.yaml
 
 # Cleanup gradio
 oc delete -f gradio-rag/deployment.yaml
