@@ -15,7 +15,11 @@ find ./pgvector-rag-deployment -type f -exec sed -i "s/ic-shared-rag-llm/${NAMES
 find ./shared-rag-llm -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 find ./gradio-rag -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 
-# Cleanup postigres 
+# Cleanup jobs
+oc delete -f pgvector-rag-deployment/06-extend-pg-db.yaml
+oc delete -f pgvector-rag-deployment/07-ingest-data.yaml
+
+# Cleanup postgres 
 oc delete -f pgvector-rag-deployment/03-deployment.yaml
 oc delete -f pgvector-rag-deployment/04-services.yaml
 oc delete -f pgvector-rag-deployment/02-pvc.yaml
@@ -32,4 +36,3 @@ oc delete -f gradio-rag/deployment.yaml
 oc delete -f gradio-rag/service.yaml
 oc delete -f gradio-rag/route.yaml
 
- 
