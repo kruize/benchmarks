@@ -1,4 +1,4 @@
-#Running ttm-benchmark
+#Running ttm-benchmark using workbench
 
 - Create a workbench with notebook image ‘Standard Data Science’ with `Small` Container size with an accelerate profile.
 - Clone Repo: https://github.com/ibm-granite/granite-tsfm.git
