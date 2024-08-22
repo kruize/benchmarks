@@ -1,0 +1,38 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: training-ttm
+spec:
+  completions: 1
+  parallelism: 1
+  template:
+    metadata:
+      labels:
+        app: training-ttm
+    spec:
+      containers:
+        - name: training-container
+          image: quay.io/kusumach/training_ttm:v1
+          imagePullPolicy: Always
+          resources:
+            limits:
+              nvidia.com/gpu: 1  # Request one GPU per container
+          volumeMounts:
+            - mountPath: /.cache/huggingface/hub
+              name: huggingface-cache
+            - mountPath: /granite-tsfm/ttm_results_benchmark_512_96
+              name: output-dir
+            - mountPath: /dev/shm  # Add this line to increase shared memory
+              name: dshm
+      restartPolicy: Never
+      volumes:
+        - name: huggingface-cache
+          persistentVolumeClaim:
+            claimName: training-ttm-pvc
+        - name: output-dir
+          emptyDir: {}  # Use emptyDir for ephemeral storage
+        - name: dshm  # Add this volume definition
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+
