@@ -1,17 +1,14 @@
 import torch
-if torch.cuda.is_available():
-    print("CUDA is available. GPU:", torch.cuda.get_device_name(0))
-else:
-    print("CUDA is not available.")
-
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-print(f"Using device: {device}")
-
 import os
+import re
 import time
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from datasets import load_dataset, concatenate_datasets
 
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(f"Using device: {device}")
+
+model_name = "Salesforce/codegen-350M-mono"
 
 # Load the HumanEval-XL dataset for all languages
 print("Loading the HumanEval-XL datasets...")
@@ -32,15 +29,13 @@ for programming_language in programming_languages:
 combined_dataset = concatenate_datasets(datasets)
 print(combined_dataset)
 
-model_name = "Salesforce/codegen-350M-mono"
-
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
-
-import re
+try: 
+    tokenizer = AutoTokenizer.from_pretrained(model_name)   
+    model = AutoModelForCausalLM.from_pretrained(model_name).to(device)
+except Exception as e:
+    print(f"Error loading model or tokenizer: {e}")
 
 def generate_code(prompt, model, tokenizer, device, max_new_tokens=200):
-    print("in gen code...")
 
     inputs = tokenizer(prompt, return_tensors="pt").to(device)
     outputs = model.generate(**inputs, max_new_tokens=max_new_tokens, num_return_sequences=1)
@@ -86,7 +81,7 @@ def run_model(num_prompts):
     start_time = time.time()
 
     for prompt in prompts[:num_prompts]:
-        solution = generate_code(prompt, model, tokenizer,"cuda")
+        solution = generate_code(prompt, model, tokenizer, device)
         generated_solutions.append(solution)
         print(f"Prompt:\n{prompt}")
         print(f"Generated Solution:\n{solution}\n")
