@@ -3,26 +3,20 @@
 
 #  # TTM zero-shot and few-shot benchmarking on multiple datasets
 # 
-#   **Using TTM-512-96 model.**
+#  **Using TTM-1024-96-v1 model.**
 
 # ## Imports
-
-# In[1]:
-
 
 # Standard
 import math
 
-# Third Party
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import OneCycleLR
 from transformers import EarlyStoppingCallback, Trainer, TrainingArguments, set_seed
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import os
 
-# First Party
 from tsfm_public.toolkit.callbacks import TrackingCallback
 from tsfm_public.models.tinytimemixer.utils import (
     count_parameters,
@@ -30,20 +24,13 @@ from tsfm_public.models.tinytimemixer.utils import (
     plot_preds,
 )
 
-# Local
 from tsfm_public.models.tinytimemixer import TinyTimeMixerForPrediction
-
-
-# ## Important arguments
-
-# In[2]:
-
 
 # Set seed
 set_seed(42)
 
 # Specify model parameters
-context_length = 512
+context_length = 1024
 forecast_length = 96
 freeze_backbone = True
 learning_rate = 0.001
@@ -60,24 +47,14 @@ NUM_WORKERS = 16
 DATA_ROOT_PATH = "datasets/"
 
 # This is where results will be saved
-OUT_DIR = "ttm_results_benchmark_512_96/"
-
+OUT_DIR = "ttm_results_benchmark_1024_96"
 
 # ## List of benchmark datasets (TTM was not pre-trained on any of these)
-
-# In[3]:
-
 
 list_datasets = [
     "weather",
     "electricity",
 ]
-
-
-# ## Get model path
-
-# In[4]:
-
 
 hf_model_path = "ibm/TTM"
 if context_length == 512:
@@ -91,9 +68,6 @@ else:
 
 
 # ## Main benchmarking loop
-
-# In[ ]:
-
 
 all_results = {
     "dataset": [],
@@ -296,16 +270,12 @@ for DATASET in list_datasets:
     pd.set_option('display.max_colwidth', None)
 
     df_out = pd.DataFrame(all_results).round(3)
+    #print(df_out[["dataset", "zs_mse", "fs5_mse", "fs10_mse"]])
     print(df_out[["dataset", "zs_mse", "fs5_mse", "fs10_mse", "zs_eval_time", "fs5_mean_epoch_time", "fs5_total_train_time", "fs10_mean_epoch_time", "fs10_total_train_time", "fs5_best_val_metric", "fs10_best_val_metric"]])
     df_out.to_csv(f"{OUT_DIR}/results_zero_few.csv")
 
 
-# ## Benchmarking results*
-# 
-# *Some slight differences in the results as compared to the TTM paper results is possible due to different training environments.
-
-# In[6]:
-
+# ## Benchmarking results
 
 df_out
 

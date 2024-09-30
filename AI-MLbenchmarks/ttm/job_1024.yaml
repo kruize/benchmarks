@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: training-ttm
+  name: training-ttm-1024
 spec:
   completions: 1
   parallelism: 1
@@ -16,14 +16,14 @@ spec:
           image: quay.io/kusumach/training_ttm:v1
           imagePullPolicy: Always
           command: ["python3"]
-          args: ["/granite-tsfm/ttm_benchmarking_512_96.py"]
+          args: ["/granite-tsfm/ttm_benchmarking_1024_96.py"]
           resources:
             limits:
               nvidia.com/gpu: 1  # Request one GPU per container
           volumeMounts:
             - mountPath: /.cache/huggingface/hub
               name: huggingface-cache
-            - mountPath: /granite-tsfm/ttm_results_benchmark_512_96
+            - mountPath: /granite-tsfm/ttm_results_benchmark_1024_96
               name: output-dir
             - mountPath: /dev/shm  # Add this line to increase shared memory
               name: dshm
@@ -37,5 +37,5 @@ spec:
         - name: dshm  # Add this volume definition
           emptyDir:
             medium: Memory
-            sizeLimit: 1Gi
+            sizeLimit: 2Gi
 
