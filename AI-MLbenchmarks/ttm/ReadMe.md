@@ -16,7 +16,7 @@
 	- Upload the two csv’s as : 
 		- Create folder `datasets/weather` and `datasets/electricity` in notebooks/hfdemo/tinytimemixer
 		- Upload WTH.csv as weather.csv in datasets/weather
-		- Upload ETC.csv as electricity.csv in datasets/electricity
+		- Upload ECL.csv as electricity.csv in datasets/electricity
 
 ### To run the benchmark: 
 - Open a terminal window and run `pip install .[notebooks]`
