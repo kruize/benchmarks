@@ -1,10 +1,18 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+  echo "Error: Provide namespace to deploy the application."
+  exit 1
+fi
+
+NAMESPACE=$1
+
 # Clone the repo
 git clone https://github.com/kusumachalasani/llm-rag-deployment.git -b kruize-ai
 
 cd llm-rag-deployment/
 
-## Update the namespace from `ic-shared-rag-llm` to `kruize-hackathon`
-NAMESPACE="kruize-hackathon"
+# Update the namespace from `ic-shared-rag-llm` to given namespace
 # Update namespace in `examples/pipelines/data_ingest.py` which is used to ingest data
 sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" examples/pipelines/data_ingest.py
 
@@ -24,9 +32,13 @@ find ./gradio-rag -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 # Has issues creating the storage system in AWS. 
 # Workaround to use gp3 which is default Storage system
 
-# Deploy the postigres 
+# Deploy the postgres 
 
 oc apply -f pgvector-rag-deployment/01-db-secret.yaml
+
+# Update StorageClassName for pvc
+sed -i "s/storageClassName: .*/storageClassName: ocs-external-storagecluster-ceph-rbd/" pgvector-rag-deployment/02-pvc.yaml
+
 oc apply -f pgvector-rag-deployment/02-pvc.yaml
 oc apply -f pgvector-rag-deployment/03-deployment.yaml
 oc apply -f pgvector-rag-deployment/04-services.yaml
@@ -50,7 +62,6 @@ oc apply -f gradio-rag/route.yaml
 GRADIO_ROUTE=$(oc get route -n ${NAMESPACE} --template='{{range .items}}{{.spec.host}}{{"\n"}}{{end}}')
 echo "Access gradio service as  ${GRADIO_ROUTE}"
 
-#Update the namespace 
 # Extend pgvector and ingest data to DB 
 oc apply -f pgvector-rag-deployment/06-extend-pg-db.yaml
 oc apply -f pgvector-rag-deployment/07-ingest-data.yaml
