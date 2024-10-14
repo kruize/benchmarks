@@ -18,7 +18,7 @@ sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" examples/pipelines/data_ingest.py
 
 cd bootstrap-rag
 ## Update namespace for all yamls
-find ./pgvector-rag-deployment -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
+find ./pgvector-rag-deployment -type f -exec sed -i "s/namespace: ic-shared-rag-llm/namespace: ${NAMESPACE}/g" {} +
 find ./shared-rag-llm -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 find ./gradio-rag -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 

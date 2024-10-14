@@ -19,7 +19,7 @@ sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" examples/pipelines/data_ingest.py
 cd bootstrap-rag
 
 ## Update namespace for all yamls
-find ./pgvector-rag-deployment -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
+find ./pgvector-rag-deployment -type f -exec sed -i "s/namespace: ic-shared-rag-llm/namespace: ${NAMESPACE}/g" {} +
 find ./shared-rag-llm -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 find ./gradio-rag -type f -exec sed -i "s/ic-shared-rag-llm/${NAMESPACE}/g" {} +
 
@@ -46,6 +46,9 @@ oc apply -f pgvector-rag-deployment/05-grant-access-to-db.yaml
 
 # Deploy the llm
 #oc apply -f shared-rag-llm/namespace.yaml
+
+# Update StorageClassName for pvc
+sed -i "s/storageClassName: .*/storageClassName: ocs-external-storagecluster-ceph-rbd/" shared-rag-llm/pvc.yaml
 
 oc apply -f shared-rag-llm/pvc.yaml
 oc apply -f shared-rag-llm/deployment.yaml
