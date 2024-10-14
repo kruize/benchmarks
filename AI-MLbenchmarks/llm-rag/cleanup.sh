@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-  echo "Error: Provide namespace to deploy the application."
+  echo "Error: Provide namespace to uninstall the application."
   exit 1
 fi
 
