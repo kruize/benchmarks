@@ -23,7 +23,7 @@ else
 fi
 
 echo "Creating Kubernetes job from $JOB_YAML..."
-#kubectl apply -f $JOB_YAML -n $NAMESPACE
+kubectl apply -f $JOB_YAML -n $NAMESPACE
 echo "Job created: $JOB_NAME"
 
 # Wait for the job to complete
