@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sysbench
+spec:
+  selector:
+    matchLabels:
+      app: sysbench
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: sysbench
+    spec:
+      containers:
+        - name: sysbench
+          image: severalnines/sysbench
+          resources:
+            requests:
+              cpu: 250m
+              memory: 500Mi
+            limits:
+              cpu: 250m
+              memory: 500Mi
+          command:
+          - sysbench
+          - cpu
+          - --threads=1
+          - --time=100000
+          - run
