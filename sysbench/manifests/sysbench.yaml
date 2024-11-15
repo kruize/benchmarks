@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: sysbench
-          image: severalnines/sysbench
+          image: quay.io/kruizehub/sysbench:latest
           resources:
             requests:
               cpu: 250m
