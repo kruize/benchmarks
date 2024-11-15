@@ -24,3 +24,8 @@
 - Update `list_datasets` to use only "weather", "electricity" in both `ttm_benchmarking_512_96.ipynb` and `ttm_benchmarking_1024_96.ipynb`
 - Run the ipynb scripts for benchmarking.
 
+# Attributions
+
+This project uses the following resources:
+
+1. **[ibm-granite](https://github.com/ibm-granite/granite-tsfm.git)** - Used Jupyter notebook images, which were then converted into Kubernetes jobs and executed.
