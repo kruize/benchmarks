@@ -33,5 +33,6 @@ docker run -d --rm --network=host quay.io/kruizehub/llmragdemo-load-puppeteer:v1
 ./cleanup.sh <NAMESPACE>
 ```
 
+## Attributions
 
-
+Forked from **[llm-rag-deployment](https://github.com/ritzshah/llm-rag-deployment)**
