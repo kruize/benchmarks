@@ -14,5 +14,5 @@ RUN python3 -m pip install --no-cache-dir -r requirements.txt
 COPY . /app/
 
 # Run python script.py when the container launches
-CMD ["python", "script.py"]
+CMD ["python", "scripts/script.py"]
 
