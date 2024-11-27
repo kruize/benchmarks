@@ -21,11 +21,11 @@ Towards the end of the script B the user is prompted to fill the run duration, w
 
 ## 2. Automated Job
 
-In this approach we already have a combined script in the scripts folder named `script.py`, and a Docker file which is used to create this docker image `quay.io/kruizehub/human-eval-deployment` which is used in the `job.yaml` file.
+To run the benchmark in an automated way the user simply needs to login to the relevent Openshift AI cluster, create a namespace or you can use the default namespace. Set your desired environment variable in `job.yaml`, you have number of prompts or duration to choose from. If num_prompts and duration_in_seconds both are set num_prompts has a higher precedence. Apply `pcv.yaml` followed by applying `job.yaml`. This would deploy the humaneval benchamrk in the specified namespace.
 
-The user simply needs to login to the relevent Openshift AI cluster, create a namespace or you can use the default namespace. Set your desired environment variable in `job.yaml` and its value, you have number of prompts or duration to choose from. If num_prompts is set in the job yaml it will pick that up, if duration_in_seconds is set in job yaml it will pick that, if both of them are set num_prompts has a higher precedence. Apply `pcv.yaml` followed by applying `job.yaml`. This would deploy the humaneval benchamrk in the specified namespace.
+The user can also make use of the `run_humaneval.sh` scrip with -n or -d option for number of prompts and duration_in_seconds respectively.
+Example `./run_humaneval.sh -n 150` or `./run_humaneval.sh -d 800`
 
-The user can also make use of the `run_humaneval.sh` script and get a default job running with user specified values for number of prompts and duration."
 There is a cleanup script in the scripts folder which deletes the job and pvc, user needs to specify the namespace while running it.
-`./scripts/cleanup.sh <namespace name>`
-Example : `./scripts/cleanup.sh default`
+`./cleanup.sh <namespace name>`
+Example : `./cleanup.sh default`
