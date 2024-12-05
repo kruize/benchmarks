@@ -2,7 +2,7 @@
 
 JOB_YAML=./manifests/job.yaml
 JOB_NAME=human-eval-deployment-job
-NAMESPACE=default
+NAMESPACE=${1:-default}
 PVC_NAME="human-eval-pvc"
 
 DEFAULT_NUM_PROMPTS=500
@@ -43,12 +43,18 @@ while getopts "n:d:" opt; do
   esac
 done
 
+echo $NAMESPACE
+if [ "$NAMESPACE" != "default" ]; then
+  echo "Updating namespace in YAML..."
+  sed -i "s/namespace: default/namespace: $NAMESPACE/" $JOB_YAML
+fi
+
 # Update the Job YAML
 if [ -n "$NUM_PROMPTS" -a "$NUM_PROMPTS" != "$DEFAULT_NUM_PROMPTS" ]; then
   sed -i "/- name: num_prompts/c\            - name: num_prompts\n              value: \"$NUM_PROMPTS\"" $JOB_YAML
   sed -i "/value: '500'/d" $JOB_YAML
   sed -i '/- name: duration_in_seconds/,+1d' $JOB_YAML
-elif [ -n "$DURATION_IN_SECONDS" -a "$DURATION_IN_SECONDS" != "$DEFAULT_DURATION_IN_SECONDS" ]; then
+elif [ -n "$DURATION_IN_SECONDS" -a "$DURATION_IN_SECONDS" != "$DEFAULT_DURATION_IN_SECONDS"]; then
   sed -i "/- name: duration_in_seconds/c\            - name: duration_in_seconds\n              value: \"$DURATION_IN_SECONDS\"" $JOB_YAML
   sed -i "/value: '1800'/d" $JOB_YAML
   sed -i '/- name: num_prompts/,+1d' $JOB_YAML
