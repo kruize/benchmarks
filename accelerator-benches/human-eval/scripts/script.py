@@ -72,7 +72,7 @@ def generate_code(prompt, model, tokenizer, device, max_new_tokens=200):
     return generated_code
 
 
-def run_model(num_prompts):
+def run_model_by_prompts(num_prompts):
     print("Generating code solutions...")
 
     prompts = [sample["prompt"] for sample in combined_dataset]
@@ -83,13 +83,52 @@ def run_model(num_prompts):
     for prompt in prompts[:num_prompts]:
         solution = generate_code(prompt, model, tokenizer, device)
         generated_solutions.append(solution)
-        print(f"Prompt:\n{prompt}")
-        print(f"Generated Solution:\n{solution}\n")
+        # print(f"Prompt:\n{prompt}")
+        # print(f"Generated Solution:\n{solution}\n")
 
     current_time = time.time() - start_time
     num_solutions = len(generated_solutions)
     print(f"Completed processing. Generated solutions for {num_solutions} prompts in {current_time} seconds.")
 
-num_prompts = 800
-num_prompts = int(os.getenv("num_prompts", num_prompts))
-run_model(num_prompts)
+
+def run_model_by_time(duration_in_seconds):
+    print(f"Generating code solutions for {duration_in_seconds} seconds...")
+
+    prompts = [sample["prompt"] for sample in combined_dataset]
+    generated_solutions = []
+
+    start_time = time.time()
+
+    for prompt in prompts:
+        if time.time() - start_time > duration_in_seconds:
+            break
+        solution = generate_code(prompt, model, tokenizer, "cuda")
+        generated_solutions.append(solution)
+        # print(f"Prompt:\n{prompt}")
+        # print(f"Generated Solution:\n{solution}\n")
+
+    elapsed_time = time.time() - start_time
+    print(f"Completed processing. Generated solutions for {len(generated_solutions)} prompts in {elapsed_time:.2f} seconds.")
+
+
+def main():
+    """
+    Main function to decide whether to run the model based on prompts or time. 
+    if num_prompts is set in the job yaml it will pick that up
+    if duration_in_seconds is set in job yaml it will pick that 
+    if both of them are set num_prompts has a higher precedence.
+    """
+    num_prompts = os.getenv("num_prompts")
+    duration_in_seconds = os.getenv("duration_in_seconds")
+
+    if num_prompts is not None:
+        run_model_by_prompts(int(num_prompts))
+    elif duration_in_seconds is not None:
+        run_model_by_time(int(duration_in_seconds))
+    else:
+        print("Neither 'num_prompts' nor 'duration_in_seconds' is set in the environment.")
+
+
+if __name__ == "__main__":
+    main()
+
