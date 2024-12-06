@@ -1,0 +1,182 @@
+apiVersion: kubeflow.org/v1
+kind: Notebook
+metadata:
+  annotations:
+    notebooks.opendatahub.io/inject-oauth: "true" # <1>
+    opendatahub.io/image-display-name: Minimal Python
+    notebooks.opendatahub.io/oauth-logout-url: "https://rhods-dashboard-redhat-ods-applications.apps.my-cluster.com/projects/default?notebookLogout=my-workbench"
+    opendatahub.io/accelerator-name: ""
+    openshift.io/description: ""
+    openshift.io/display-name: my-workbench
+    notebooks.opendatahub.io/last-image-selection: "s2i-minimal-notebook:2024.1"
+    notebooks.kubeflow.org/last_activity_check_timestamp: "2024-07-30T20:43:25Z"
+    notebooks.opendatahub.io/last-size-selection: Small
+    opendatahub.io/username: "kube:admin"
+    notebooks.kubeflow.org/last-activity: "2024-07-30T20:27:25Z"
+  name: my-workbench
+  namespace: default
+spec:
+  template:
+    spec:
+      affinity: {}
+      containers:
+        - resources: # <2>
+            limits:
+              cpu: "2"
+              memory: 8Gi
+            requests:
+              cpu: "1"
+              memory: 8Gi
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /notebook/default/my-workbench/api
+              port: notebook-port
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: my-workbench
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /notebook/default/my-workbench/api
+              port: notebook-port
+              scheme: HTTP
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: NOTEBOOK_ARGS
+              value: |-
+                --ServerApp.port=8888
+                                  --ServerApp.token=''
+                                  --ServerApp.password=''
+                                  --ServerApp.base_url=/notebook/default/my-workbench
+                                  --ServerApp.quit_button=False
+                                  --ServerApp.tornado_settings={"user":"kube-3aadmin","hub_host":"https://rhods-dashboard-redhat-ods-applications.apps.my-cluster.com","hub_prefix":"/projects/default"}
+            - name: JUPYTER_IMAGE
+              value: "image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2024.1"
+            - name: PIP_CERT
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: REQUESTS_CA_BUNDLE
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: SSL_CERT_FILE
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: PIPELINES_SSL_SA_CERTS
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+            - name: GIT_SSL_CAINFO
+              value: /etc/pki/tls/custom-certs/ca-bundle.crt
+          ports:
+            - containerPort: 8888
+              name: notebook-port
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /opt/app-root/src
+              name: my-workbench
+            - mountPath: /dev/shm
+              name: shm
+            - mountPath: /etc/pki/tls/custom-certs/ca-bundle.crt
+              name: trusted-ca
+              readOnly: true
+              subPath: ca-bundle.crt
+          image: "image-registry.openshift-image-registry.svc:5000/redhat-ods-applications/s2i-minimal-notebook:2024.1" # <3>
+          workingDir: /opt/app-root/src
+        - resources: # <4>
+            limits:
+              cpu: 100m
+              memory: 64Mi
+            requests:
+              cpu: 100m
+              memory: 64Mi
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          name: oauth-proxy
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /oauth/healthz
+              port: oauth-proxy
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            successThreshold: 1
+            timeoutSeconds: 1
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          ports:
+            - containerPort: 8443
+              name: oauth-proxy
+              protocol: TCP
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /etc/oauth/config
+              name: oauth-config
+            - mountPath: /etc/tls/private
+              name: tls-certificates
+          image: "registry.redhat.io/openshift4/ose-oauth-proxy@sha256:4bef31eb993feb6f1096b51b4876c65a6fb1f4401fee97fa4f4542b6b7c9bc46"
+          args:
+            - "--provider=openshift"
+            - "--https-address=:8443"
+            - "--http-address="
+            - "--openshift-service-account=my-workbench"
+            - "--cookie-secret-file=/etc/oauth/config/cookie_secret"
+            - "--cookie-expire=24h0m0s"
+            - "--tls-cert=/etc/tls/private/tls.crt"
+            - "--tls-key=/etc/tls/private/tls.key"
+            - "--upstream=http://localhost:8888"
+            - "--upstream-ca=/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+            - "--email-domain=*"
+            - "--skip-provider-button"
+            - '--openshift-sar={"verb":"get","resource":"notebooks","resourceAPIGroup":"kubeflow.org","resourceName":"my-workbench","namespace":"$(NAMESPACE)"}'
+            - "--logout-url=https://rhods-dashboard-redhat-ods-applications.apps.my-cluster.com/projects/default?notebookLogout=my-workbench"
+      enableServiceLinks: false
+      serviceAccountName: my-workbench
+      volumes:
+        - name: my-workbench
+          persistentVolumeClaim:
+            claimName: my-workbench
+        - emptyDir:
+            medium: Memory
+          name: shm
+        - configMap:
+            items:
+              - key: ca-bundle.crt
+                path: ca-bundle.crt
+            name: workbench-trusted-ca-bundle
+            optional: true
+          name: trusted-ca
+        - name: oauth-config
+          secret:
+            defaultMode: 420
+            secretName: my-workbench-oauth-config
+        - name: tls-certificates
+          secret:
+            defaultMode: 420
+            secretName: my-workbench-tls
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: my-workbench
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
