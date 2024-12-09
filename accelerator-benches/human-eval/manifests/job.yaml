@@ -2,19 +2,27 @@ kind: Job
 apiVersion: batch/v1
 metadata:
   name: human-eval-deployment-job
-  namespace: kruize-hackathon
+  namespace: default
 spec:
   template:
     spec:
       containers:
         - name: human-eval-benchmark
-          image: 'quay.io/kruizehub/human-eval-deployment:latest'
+          image: "quay.io/kruizehub/human-eval-deployment:v1"
+          imagePullPolicy: Always
           env:
             - name: num_prompts
-              value: '10' 
+              value: '500'
+            - name: duration_in_seconds
+              value: '1800'
           resources:
+            requests:
+              memory: "512Mi"
+              cpu: "500m"
             limits:
-              nvidia.com/gpu: 1 
+              memory: "4Gi"
+              cpu: "2"
+              nvidia.com/gpu: 1
           volumeMounts:
             - name: cache-volume
               mountPath: /.cache/huggingface
@@ -23,5 +31,4 @@ spec:
       volumes:
         - name: cache-volume
           persistentVolumeClaim:
-            claimName: cache-pvc
-
+            claimName: human-eval-pvc
