@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: acmeair-db
-        image: mongo:latest
+        image: quay.io/kruizehub/mongo:latest
         imagePullPolicy: IfNotPresent
         ports:
           - containerPort: 27017

@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
         - name: training-container
-          image: quay.io/kusumach/training_ttm:v1
+          image: quay.io/kruizehub/training_ttm:v1
           imagePullPolicy: Always
           command: ["python3"]
           args: ["/granite-tsfm/ttm_benchmarking_512_96.py"]
