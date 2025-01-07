@@ -25,7 +25,7 @@ spec:
           type: ""
       containers:
       - name: acmeair-libertyapp
-        image: dinogun/acmeair-monolithic
+        image: quay.io/kruizehub/acmeair-monolithic
         imagePullPolicy: IfNotPresent
         env:
         - name: "MONGO_HOST"

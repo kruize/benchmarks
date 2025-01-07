@@ -1,6 +1,6 @@
 acmeair_db:
   container_name: acmeair-db
-  image: mongo
+  image: quay.io/kruizehub/mongo
   net: ${NETWORK}
   
 mono_service_liberty:

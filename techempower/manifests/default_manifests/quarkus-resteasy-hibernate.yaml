@@ -23,7 +23,7 @@ spec:
       - name: test-volume
       containers:
       - name: tfb-server
-        image: kruize/tfb-qrh:1.13.2.F_et17
+        image: quay.io/kruizehub/tfb-qrh:1.13.2.F_et17
         imagePullPolicy: IfNotPresent
         env:
           - name: "JAVA_OPTIONS"

@@ -1,21 +1,21 @@
 session_db1:
   container_name: session_db1
-  image: mongo
+  image: quay.io/kruizehub/mongo
   net: ${NETWORK}
   
 booking_db1:
   container_name: booking_db1
-  image: mongo
+  image: quay.io/kruizehub/mongo
   net: ${NETWORK}
   
 customer_db1:
   container_name: customer_db1
-  image: mongo
+  image: quay.io/kruizehub/mongo
   net: ${NETWORK}
   
 flight_db1:
   container_name: flight_db1
-  image: mongo
+  image: quay.io/kruizehub/mongo
   net: ${NETWORK}
 
 nginx1:

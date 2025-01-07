@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: tfb-database
-        image: docker.io/kruize/tfb-postgres-openshift:latest
+        image: quay.io/kruizehub/tfb-postgres:openshift
         imagePullPolicy: IfNotPresent
         env:
           - name: POSTGRESQL_USER
