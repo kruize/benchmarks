@@ -77,6 +77,9 @@ function check_load_prereq() {
 			1[1-9].*.*)
 				echo "done" >> ${LOGFILE}
 				;;
+			2[1-9].*.*)
+				echo "done" >> ${LOGFILE}
+                                ;;
 			*)
 				echo " "
 				echo "Error: Hyperfoil requires Java 11 or newer and current java version is ${JAVA_VER}"
@@ -324,7 +327,7 @@ mkdir -p ${RESULTS_DIR_ROOT}
 CPU_MEM_DURATION=`expr ${DURATION} + 5`
 
 # Check if the dependencies required to apply the load is present 
-check_load_prereq 
+check_load_prereq
 
 # Add any debug logs required
 function debug_logs() {
