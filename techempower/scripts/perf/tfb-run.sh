@@ -77,6 +77,9 @@ function check_load_prereq() {
 			1[1-9].*.*)
 				echo "done" >> ${LOGFILE}
 				;;
+			2[1-9].*.*)
+				echo "done" >> ${LOGFILE}
+                                ;;
 			*)
 				echo " "
 				echo "Error: Hyperfoil requires Java 11 or newer and current java version is ${JAVA_VER}"
@@ -324,7 +327,7 @@ mkdir -p ${RESULTS_DIR_ROOT}
 CPU_MEM_DURATION=`expr ${DURATION} + 5`
 
 # Check if the dependencies required to apply the load is present 
-check_load_prereq 
+check_load_prereq
 
 # Add any debug logs required
 function debug_logs() {
@@ -502,7 +505,7 @@ function runIterations() {
 	done
 }
 
-if [ ${MODE} != "monitoring" ]; then
+if [[ ${MODE} != "monitoring" ]]; then
 	echo "INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RESPONSE_TIME_50p , RESPONSE_TIME_95p , RESPONSE_TIME_97p , RESPONSE_TIME_99p , RESPONSE_TIME_99.9p , RESPONSE_TIME_99.99p , RESPONSE_TIME_99.999p , RESPONSE_TIME_100p , CPU_USAGE , MEM_USAGE , CPU_MIN , CPU_MAX , MEM_MIN , MEM_MAX , THRPT_PROM_CI , RSPTIME_PROM_CI" > ${RESULTS_DIR_ROOT}/Metrics-prom.log
 	echo ", THROUGHPUT_WRK , RESPONSETIME_WRK , RESPONSETIME_MAX_WRK , RESPONSETIME_STDEV_WRK , WEB_ERRORS , THRPT_WRK_CI , RSPTIME_WRK_CI" > ${RESULTS_DIR_ROOT}/Metrics-wrk.log
 	echo "INSTANCES , CLUSTER_CPU% , C_CPU_REQ% , C_CPU_LIM% , CLUSTER_MEM% , C_MEM_REQ% , C_MEM_LIM% " > ${RESULTS_DIR_ROOT}/Metrics-cluster.log
