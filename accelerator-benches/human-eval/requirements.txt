@@ -1,5 +1,5 @@
 torch
-transformers==4.42.4
+transformers==4.48.0
 datasets==2.20.0
 
 
