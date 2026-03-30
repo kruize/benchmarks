@@ -167,6 +167,9 @@ Above image shows the logs of the load run, it processes and displays the output
 
 To test with multiple instances follow [README.md](/spring-petclinic/scripts/perf/README.md)
 
+# Manifests Updates for Kruize Recommendations
+- Added the `kruize-demos` manifests as a separate component under `manifests/kruize-demos`, which runs the load by default.
+
 # Cleanup
 `$ ./scripts/petclinic-cleanup.sh -c CLUSTER_TYPE[docker|minikube|openshift] [-n NAMESPACE]`
 - **CLUSTER_TYPE**: docker|minikube|openshift

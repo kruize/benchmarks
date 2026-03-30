@@ -148,4 +148,5 @@ INSTANCES ,  THROUGHPUT_RATE_3m , RESPONSE_TIME_RATE_3m , MAX_RESPONSE_TIME , RE
 | tfb-load.sh			|	To run the load separately 																	|
 | manifests/default_manifests   |   Manifests used by TFB benchmark for performance benchmarking and monitoring purposes. Also, used for kruize monitoring demo to showcase IDLE scenario            |
 | manifests/resource_provisioning_manifests |   Manifests used by kruize monitoring demo to showcase underprovision/overprovision scenarios           |
+| manifests/kruize_demos    |   Manifests used by kruize demos for runtime recommendations with default load    |
 
