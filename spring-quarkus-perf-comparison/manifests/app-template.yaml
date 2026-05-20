@@ -1,0 +1,143 @@
+---
+# Template for application deployment
+# Variables to replace:
+#   {{RUNTIME}}        - Runtime name (e.g., quarkus3-jvm, spring4-jvm)
+#   {{SCENARIO}}       - Scenario name (ootb or tuned)
+#   {{IMAGE}}          - Full container image path
+#   {{CONTAINER_NAME}} - Container name (default: app)
+#   {{JAVA_OPTS}}      - JVM options
+#   {{CPU_REQ}}        - CPU request
+#   {{CPU_LIM}}        - CPU limit
+#   {{MEM_REQ}}        - Memory request
+#   {{MEM_LIM}}        - Memory limit
+#   {{METRICS_PATH}}   - Metrics endpoint path (/q/metrics for Quarkus, /actuator/prometheus for Spring)
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{RUNTIME}}-{{SCENARIO}}
+  labels:
+    app: {{RUNTIME}}-{{SCENARIO}}
+    runtime: {{RUNTIME}}
+    scenario: {{SCENARIO}}
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+    name: http
+  selector:
+    app: {{RUNTIME}}-{{SCENARIO}}
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{RUNTIME}}-{{SCENARIO}}
+  labels:
+    app: {{RUNTIME}}-{{SCENARIO}}
+    runtime: {{RUNTIME}}
+    scenario: {{SCENARIO}}
+spec:
+  to:
+    kind: Service
+    name: {{RUNTIME}}-{{SCENARIO}}
+  port:
+    targetPort: http
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{RUNTIME}}-{{SCENARIO}}
+  labels:
+    app: {{RUNTIME}}-{{SCENARIO}}
+    runtime: {{RUNTIME}}
+    scenario: {{SCENARIO}}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{RUNTIME}}-{{SCENARIO}}
+  template:
+    metadata:
+      labels:
+        app: {{RUNTIME}}-{{SCENARIO}}
+        runtime: {{RUNTIME}}
+        scenario: {{SCENARIO}}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "{{METRICS_PATH}}"
+    spec:
+      containers:
+      - name: {{CONTAINER_NAME}}
+        image: {{IMAGE}}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        env:
+        - name: JAVA_OPTS
+          value: "{{JAVA_OPTS}}"
+        - name: QUARKUS_PROFILE
+          value: "prod"
+        - name: QUARKUS_DATASOURCE_JDBC_URL
+          value: "jdbc:postgresql://postgresql:5432/fruits"
+        - name: QUARKUS_DATASOURCE_USERNAME
+          value: "fruits"
+        - name: QUARKUS_DATASOURCE_PASSWORD
+          value: "fruits"
+        - name: SPRING_DATASOURCE_URL
+          value: "jdbc:postgresql://postgresql:5432/fruits"
+        - name: SPRING_DATASOURCE_USERNAME
+          value: "fruits"
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: "fruits"
+        resources:
+          requests:
+            memory: "{{MEM_REQ}}"
+            cpu: "{{CPU_REQ}}"
+          limits:
+            memory: "{{MEM_LIM}}"
+            cpu: "{{CPU_LIM}}"
+        livenessProbe:
+          httpGet:
+            path: /q/health/live
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /q/health/ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /q/health/started
+            port: 8080
+          initialDelaySeconds: 0
+          periodSeconds: 2
+          timeoutSeconds: 3
+          failureThreshold: 30
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{RUNTIME}}-{{SCENARIO}}
+  labels:
+    app: {{RUNTIME}}-{{SCENARIO}}
+    runtime: {{RUNTIME}}
+    scenario: {{SCENARIO}}
+spec:
+  selector:
+    matchLabels:
+      app: {{RUNTIME}}-{{SCENARIO}}
+  endpoints:
+  - port: http
+    path: {{METRICS_PATH}}
+    interval: 30s
+    scheme: http

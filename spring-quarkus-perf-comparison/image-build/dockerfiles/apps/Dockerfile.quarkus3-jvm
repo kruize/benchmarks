@@ -1,0 +1,23 @@
+# Dockerfile for Quarkus 3 with standard JVM
+FROM registry.access.redhat.com/ubi9/openjdk-21:latest
+
+LABEL maintainer="Kruize Performance Team"
+LABEL description="Quarkus 3.34.3 JVM mode for performance benchmarking"
+
+WORKDIR /deployments
+
+# Copy Quarkus application
+COPY target/quarkus-app/lib/ /deployments/lib/
+COPY target/quarkus-app/*.jar /deployments/
+COPY target/quarkus-app/app/ /deployments/app/
+COPY target/quarkus-app/quarkus/ /deployments/quarkus/
+
+EXPOSE 8080
+USER 185
+
+# Default JVM options (OOTB scenario)
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
+
+CMD ["sh", "-c", "java $JAVA_OPTS -jar /deployments/quarkus-run.jar"]
+
+# Made with Bob

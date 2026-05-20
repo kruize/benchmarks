@@ -1,0 +1,132 @@
+# =============================================================================
+# Hyperfoil 4-Hour Variable Load Test Configuration
+# =============================================================================
+#
+# This configuration creates a compressed variable load pattern over 4 hours
+# using the same approach as run-benchmark.sh (concurrent users/connections)
+#
+# Key Parameters:
+# - THREADS: Global thread count (applies to all phases)
+# - *_CONNECTIONS: Per-phase concurrent user count (varies load)
+#
+# Configurable Parameters:
+# ----------------------------------
+# PROTOCOL               - HTTP protocol (default: http)
+# HOST                   - Target hostname (default: localhost)
+# PORT                   - Target port (default: 8080)
+# PATH                   - Endpoint path (default: /fruits)
+# THREADS                - Global thread count (default: 4)
+#
+# Per-Phase Connection Parameters (4-hour cycle):
+# LOW_CONNECTIONS        - 0-1h: Low traffic (default: 50)
+# RAMP_UP_CONNECTIONS    - 1-1.5h: Ramp up (default: 200)
+# PEAK_CONNECTIONS       - 1.5-3h: High load (default: 500)
+# RAMP_DOWN_CONNECTIONS  - 3-3.5h: Ramp down (default: 200)
+# END_LOW_CONNECTIONS    - 3.5-4h: Low traffic (default: 100)
+#
+# =============================================================================
+
+name: variable-load-4h
+threads: !param THREADS 4
+http:
+  - protocol: !param PROTOCOL http
+    host: !param HOST localhost
+    port: !param PORT 8080
+    sharedConnections: 600
+    allowHttp2: false
+    useHttpCache: false
+ergonomics:
+  repeatCookies: false
+  userAgentFromSession: false
+
+phases:
+  # Low: 0-1h - Low traffic
+  - low:
+      always:
+        users: !param LOW_CONNECTIONS 50
+        duration: 1h
+        maxDuration: 1h10m
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Ramp up: 1-1.5h - Gradual increase
+  - ramp-up:
+      always:
+        users: !param RAMP_UP_CONNECTIONS 200
+        duration: 30m
+        maxDuration: 40m
+        startAfter: low
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Peak: 1.5-3h - High sustained load
+  - peak:
+      always:
+        users: !param PEAK_CONNECTIONS 500
+        duration: 1h30m
+        maxDuration: 1h40m
+        startAfter: ramp-up
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Ramp down: 3-3.5h - Gradual decrease
+  - ramp-down:
+      always:
+        users: !param RAMP_DOWN_CONNECTIONS 200
+        duration: 30m
+        maxDuration: 40m
+        startAfter: peak
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # End low: 3.5-4h - Low traffic
+  - end-low:
+      always:
+        users: !param END_LOW_CONNECTIONS 100
+        duration: 30m
+        maxDuration: 40m
+        startAfter: ramp-down
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+# Made with Bob

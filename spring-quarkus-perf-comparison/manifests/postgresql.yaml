@@ -1,0 +1,72 @@
+---
+# PostgreSQL deployment for OpenShift - Quarkus Benchmark
+# Based on kruize/benchmarks TechEmpower setup
+# Uses custom image with spring-quarkus-perf-comparison schema
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresql
+  labels:
+    app: postgresql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgresql
+  template:
+    metadata:
+      labels:
+        name: postgresql
+        app: postgresql
+        app.kubernetes.io/name: "postgresql"
+        version: v1
+    spec:
+      containers:
+      - name: postgresql
+        image: quay.io/kruizehub/quarkus-postgres:openshift
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: POSTGRESQL_USER
+            value: fruits
+          - name: POSTGRESQL_PASSWORD
+            value: fruits
+          - name: POSTGRESQL_DATABASE
+            value: fruits
+        lifecycle:
+          postStart:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 10 && psql -a fruits < /tmp/create-postgres-data.sql"]
+        ports:
+          - containerPort: 5432
+        resources:
+          requests:
+            cpu: 0.5
+            memory: "512Mi"
+          limits:
+            cpu: 2
+            memory: "1024Mi"
+        volumeMounts:
+        - name: postgresql-data
+          mountPath: /var/lib/pgsql/data
+      volumes:
+      - name: postgresql-data
+        emptyDir: {}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql
+  labels:
+    name: postgresql
+spec:
+  type: ClusterIP
+  selector:
+    app: postgresql
+  ports:
+    - protocol: TCP
+      port: 5432
+      targetPort: 5432
+
+# Made with Bob

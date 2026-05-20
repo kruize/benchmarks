@@ -1,0 +1,24 @@
+# Dockerfile for Quarkus 3 with Virtual Threads
+FROM registry.access.redhat.com/ubi9/openjdk-21:latest
+
+LABEL maintainer="Kruize Performance Team"
+LABEL description="Quarkus 3.34.3 with Virtual Threads for performance benchmarking"
+
+WORKDIR /deployments
+
+# Copy Quarkus application
+COPY target/quarkus-app/lib/ /deployments/lib/
+COPY target/quarkus-app/*.jar /deployments/
+COPY target/quarkus-app/app/ /deployments/app/
+COPY target/quarkus-app/quarkus/ /deployments/quarkus/
+
+EXPOSE 8080
+USER 185
+
+# Default JVM options with Virtual Threads enabled
+ENV JAVA_OPTS="-Xms256m -Xmx512m -XX:+UseG1GC"
+ENV QUARKUS_VIRTUAL_THREADS_ENABLED="true"
+
+CMD ["sh", "-c", "java $JAVA_OPTS -jar /deployments/quarkus-run.jar"]
+
+# Made with Bob

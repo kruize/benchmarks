@@ -1,0 +1,242 @@
+# =============================================================================
+# Hyperfoil 24-Hour Variable Load Test Configuration
+# =============================================================================
+#
+# This configuration creates a realistic variable load pattern over 24 hours
+# using the same approach as run-benchmark.sh (concurrent users/connections)
+#
+# Key Parameters:
+# - THREADS: Global thread count (applies to all phases)
+# - *_CONNECTIONS: Per-phase concurrent user count (varies load)
+#
+# Configurable Parameters:
+# ----------------------------------
+# PROTOCOL               - HTTP protocol (default: http)
+# HOST                   - Target hostname (default: localhost)
+# PORT                   - Target port (default: 8080)
+# PATH                   - Endpoint path (default: /fruits)
+# THREADS                - Global thread count (default: 4)
+#
+# Per-Phase Connection Parameters:
+# NIGHT_CONNECTIONS              - 0-6h: Low traffic (default: 50)
+# MORNING_RAMP_1_CONNECTIONS     - 6-7h: Ramp up (default: 100)
+# MORNING_RAMP_2_CONNECTIONS     - 7-8h: Ramp up (default: 200)
+# MORNING_RAMP_3_CONNECTIONS     - 8-9h: Ramp up (default: 300)
+# MORNING_PEAK_CONNECTIONS       - 9-12h: High load (default: 400)
+# LUNCH_CONNECTIONS              - 12-14h: Moderate (default: 250)
+# AFTERNOON_PEAK_CONNECTIONS     - 14-18h: Very high (default: 500)
+# EVENING_1_CONNECTIONS          - 18-19h: Decline (default: 400)
+# EVENING_2_CONNECTIONS          - 19-20h: Decline (default: 300)
+# EVENING_3_CONNECTIONS          - 20-21h: Decline (default: 200)
+# LATE_NIGHT_CONNECTIONS         - 21-24h: Low (default: 100)
+#
+# =============================================================================
+
+name: variable-load-24h
+threads: !param THREADS 4
+http:
+  - protocol: !param PROTOCOL http
+    host: !param HOST localhost
+    port: !param PORT 8080
+    sharedConnections: 600
+    allowHttp2: false
+    useHttpCache: false
+ergonomics:
+  repeatCookies: false
+  userAgentFromSession: false
+
+phases:
+  # Night: 0-6h (6 hours) - Low traffic
+  - night:
+      always:
+        users: !param NIGHT_CONNECTIONS 50
+        duration: 6h
+        maxDuration: 6h10m
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Morning ramp: 6-9h (3 hours) - Gradual increase
+  - morning-ramp-1:
+      always:
+        users: !param MORNING_RAMP_1_CONNECTIONS 100
+        duration: 1h
+        maxDuration: 1h10m
+        startAfter: night
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  - morning-ramp-2:
+      always:
+        users: !param MORNING_RAMP_2_CONNECTIONS 200
+        duration: 1h
+        maxDuration: 1h10m
+        startAfter: morning-ramp-1
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  - morning-ramp-3:
+      always:
+        users: !param MORNING_RAMP_3_CONNECTIONS 300
+        duration: 1h
+        maxDuration: 1h10m
+        startAfter: morning-ramp-2
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Morning peak: 9-12h (3 hours) - High sustained load
+  - morning-peak:
+      always:
+        users: !param MORNING_PEAK_CONNECTIONS 400
+        duration: 3h
+        maxDuration: 3h10m
+        startAfter: morning-ramp-3
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Lunch: 12-14h (2 hours) - Moderate sustained
+  - lunch:
+      always:
+        users: !param LUNCH_CONNECTIONS 250
+        duration: 2h
+        maxDuration: 2h10m
+        startAfter: morning-peak
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Afternoon peak: 14-18h (4 hours) - Very high sustained
+  - afternoon-peak:
+      always:
+        users: !param AFTERNOON_PEAK_CONNECTIONS 500
+        duration: 4h
+        maxDuration: 4h10m
+        startAfter: lunch
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Evening: 18-21h (3 hours) - Declining
+  - evening-decline-1:
+      always:
+        users: !param EVENING_1_CONNECTIONS 400
+        duration: 1h
+        maxDuration: 1h10m
+        startAfter: afternoon-peak
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  - evening-decline-2:
+      always:
+        users: !param EVENING_2_CONNECTIONS 300
+        duration: 1h
+        maxDuration: 1h10m
+        startAfter: evening-decline-1
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  - evening-decline-3:
+      always:
+        users: !param EVENING_3_CONNECTIONS 200
+        duration: 1h
+        maxDuration: 1h10m
+        startAfter: evening-decline-2
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+  # Late night: 21-24h (3 hours) - Low traffic
+  - late-night:
+      always:
+        users: !param LATE_NIGHT_CONNECTIONS 100
+        duration: 3h
+        maxDuration: 3h10m
+        startAfter: evening-decline-3
+        scenario:
+          maxRequests: 1
+          maxSequences: 1
+          orderedSequences:
+            - getFruits:
+                - httpRequest:
+                    GET: !param PATH /fruits
+                    timeout: 30s
+                    headers:
+                      accept: application/json
+
+# Made with Bob

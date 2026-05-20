@@ -1,0 +1,21 @@
+# Dockerfile for Spring Boot 3 with standard JVM
+FROM registry.access.redhat.com/ubi9/openjdk-21:latest
+
+# Set working directory
+WORKDIR /deployments
+
+# Copy the application JAR
+COPY target/*.jar /deployments/app.jar
+
+# Expose port
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+  CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Run the application with JAVA_OPTS support
+# JAVA_OPTS can be passed via environment variable at runtime
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -jar /deployments/app.jar"]
+
+# Made with Bob
